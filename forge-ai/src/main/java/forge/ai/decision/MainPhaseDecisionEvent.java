@@ -1,0 +1,30 @@
+package forge.ai.decision;
+
+public record MainPhaseDecisionEvent(
+        String decisionId,
+        String stateFingerprint,
+        String provider,
+        String model,
+        AiDecisionSource source,
+        String heuristicActionId,
+        String selectedActionId,
+        long providerLatencyMs,
+        long totalLatencyMs,
+        boolean providerAttempted,
+        boolean fallback,
+        AiDecisionFailureReason fallbackReason,
+        boolean staleOrRevalidationFailure,
+        int rawCandidateCount,
+        int evaluatedCandidateCount,
+        int acceptedCandidateCount,
+        int copiedGameCount,
+        long enumerationNanos,
+        int gameId,
+        Integer gameIndex,
+        Long runSeed,
+        String playerIdentity,
+        int playerSeat,
+        String deckIdentifier,
+        String actionCategory,
+        String sourceName) {
+}

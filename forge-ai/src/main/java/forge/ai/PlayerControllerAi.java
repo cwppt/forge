@@ -4,6 +4,17 @@ import com.google.common.collect.*;
 import forge.LobbyPlayer;
 import forge.StaticData;
 import forge.ai.ability.ProtectAi;
+import forge.ai.decision.AiDecision;
+import forge.ai.decision.AiDecisionFailureReason;
+import forge.ai.decision.AiDecisionMetrics;
+import forge.ai.decision.AiDecisionProvider;
+import forge.ai.decision.AiDecisionResult;
+import forge.ai.decision.AiDecisionSource;
+import forge.ai.decision.AiOptionView;
+import forge.ai.decision.MulliganAiState;
+import forge.ai.decision.MulliganDecisionContext;
+import forge.ai.decision.MulliganDecisionEvent;
+import forge.ai.decision.MulliganStateProjector;
 import forge.card.CardStateName;
 import forge.card.ColorSet;
 import forge.card.ICardFace;
@@ -57,13 +68,27 @@ import java.util.stream.Collectors;
  */
 public class PlayerControllerAi extends PlayerController {
     private final AiController brains;
+    private final AiDecisionProvider decisionProvider;
+    private final boolean externalMulliganEnabled;
 
     private boolean pilotsNonAggroDeck = false;
 
     public PlayerControllerAi(Game game, Player p, LobbyPlayer lp) {
+        this(game, p, lp, null, false, false, 3);
+    }
+
+    public PlayerControllerAi(Game game, Player p, LobbyPlayer lp, AiDecisionProvider decisionProvider) {
+        this(game, p, lp, decisionProvider, decisionProvider != null, false, 3);
+    }
+
+    public PlayerControllerAi(Game game, Player p, LobbyPlayer lp, AiDecisionProvider decisionProvider,
+            boolean externalMulliganEnabled, boolean externalMainPhaseEnabled, int mainPhaseMaxActions) {
         super(game, p, lp);
 
         brains = new AiController(p, game);
+        this.decisionProvider = decisionProvider;
+        this.externalMulliganEnabled = externalMulliganEnabled && decisionProvider != null;
+        brains.configureExternalMainPhase(decisionProvider, externalMainPhaseEnabled, mainPhaseMaxActions);
     }
 
     public boolean pilotsNonAggroDeck() {
@@ -771,7 +796,88 @@ public class PlayerControllerAi extends PlayerController {
 
     @Override
     public boolean mulliganKeepHand(Player firstPlayer, int cardsToReturn)  {
-        return !ComputerUtil.wantMulligan(player, cardsToReturn);
+        final boolean heuristicDecision = !ComputerUtil.wantMulligan(player, cardsToReturn);
+        final String decisionId = UUID.randomUUID().toString();
+        final MulliganAiState state = MulliganStateProjector.project(player, firstPlayer, cardsToReturn);
+        final MulliganDecisionContext context = new MulliganDecisionContext(
+                decisionId,
+                state,
+                List.of(
+                        new AiOptionView(MulliganDecisionContext.KEEP_OPTION_ID, "Keep hand"),
+                        new AiOptionView(MulliganDecisionContext.MULLIGAN_OPTION_ID, "Take mulligan")));
+        if (decisionProvider == null || !externalMulliganEnabled) {
+            recordMulliganDecision(context, heuristicDecision, heuristicDecision, null, false, false,
+                    AiDecisionFailureReason.DISABLED);
+            return heuristicDecision;
+        }
+        try {
+            final AiDecisionResult result = decisionProvider.chooseWithDiagnostics(context);
+            if (result == null || result.decision().isEmpty()) {
+                recordMulliganDecision(context, heuristicDecision, heuristicDecision, result, true, true,
+                        result == null ? AiDecisionFailureReason.PROVIDER_EXCEPTION : result.failureReason());
+                return heuristicDecision;
+            }
+            final AiDecision decision = result.decision().get();
+            if (decision == null || !decisionId.equals(decision.decisionId())) {
+                recordMulliganDecision(context, heuristicDecision, heuristicDecision, result, true, true,
+                        AiDecisionFailureReason.DECISION_ID_MISMATCH);
+                return heuristicDecision;
+            }
+            if (MulliganDecisionContext.KEEP_OPTION_ID.equals(decision.optionId())) {
+                recordMulliganDecision(context, heuristicDecision, true, result, true, false, null);
+                return true;
+            }
+            if (MulliganDecisionContext.MULLIGAN_OPTION_ID.equals(decision.optionId())) {
+                recordMulliganDecision(context, heuristicDecision, false, result, true, false, null);
+                return false;
+            }
+            recordMulliganDecision(context, heuristicDecision, heuristicDecision, result, true, true,
+                    AiDecisionFailureReason.INVALID_OPTION);
+        } catch (Exception e) {
+            recordMulliganDecision(context, heuristicDecision, heuristicDecision, null, true, true,
+                    AiDecisionFailureReason.PROVIDER_EXCEPTION);
+            return heuristicDecision;
+        }
+        return heuristicDecision;
+    }
+
+    private void recordMulliganDecision(
+            MulliganDecisionContext context,
+            boolean heuristicKeep,
+            boolean keep,
+            AiDecisionResult result,
+            boolean attempted,
+            boolean fallback,
+            AiDecisionFailureReason failureReason) {
+        final String heuristicOption = keepOption(heuristicKeep);
+        final String finalOption = keepOption(keep);
+        final int gameId = player.getGame().getId();
+        final int playerSeat = player.getGame().getRegisteredPlayers().indexOf(player);
+        final AiDecisionMetrics.GameRunMetadata runMetadata = AiDecisionMetrics.gameMetadata(gameId);
+        AiDecisionMetrics.record(new MulliganDecisionEvent(
+                context.decisionId(),
+                context.state().fingerprint(),
+                result == null ? null : result.provider(),
+                result == null ? null : result.model(),
+                fallback || !attempted ? AiDecisionSource.FORGE_HEURISTIC : AiDecisionSource.EXTERNAL_PROVIDER,
+                heuristicOption,
+                finalOption,
+                result == null ? 0 : result.latencyMs(),
+                attempted,
+                fallback,
+                failureReason,
+                context.state().cardsToReturn(),
+                context.state().openingHand().size(),
+                gameId,
+                runMetadata == null ? player.getGame().getMatch().getOutcomes().size() : runMetadata.gameIndex(),
+                runMetadata == null ? null : runMetadata.runSeed(),
+                player.getName(),
+                playerSeat,
+                player.getRegisteredPlayer().getDeck().getName()));
+    }
+
+    private static String keepOption(boolean keep) {
+        return keep ? MulliganDecisionContext.KEEP_OPTION_ID : MulliganDecisionContext.MULLIGAN_OPTION_ID;
     }
 
     @Override

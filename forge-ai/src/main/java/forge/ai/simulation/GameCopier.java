@@ -476,6 +476,14 @@ public class GameCopier {
         return null;
     }
 
+    /** Maps a card-owned ability into the copied game without exposing the copier's internal maps. */
+    public SpellAbility findSpellAbility(SpellAbility sa) {
+        if (sa == null || sa.getHostCard() == null) {
+            return null;
+        }
+        return findSAInCard(sa, find(sa.getHostCard()));
+    }
+
     private class CopiedGameObjectMap implements IEntityMap {
         private final Game copiedGame;
 

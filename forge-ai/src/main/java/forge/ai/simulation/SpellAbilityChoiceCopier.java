@@ -13,11 +13,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-final class SpellAbilityChoiceCopier {
+public final class SpellAbilityChoiceCopier {
     private SpellAbilityChoiceCopier() {
     }
 
-    static SpellAbility copyCastChoices(SpellAbility source, SpellAbility destination, Player player) {
+    public static SpellAbility copyCastChoices(SpellAbility source, SpellAbility destination, Player player) {
         if (source.hasParam("WithoutManaCost") && !destination.hasParam("WithoutManaCost")) {
             destination = destination.copyWithNoManaCost(player);
         }
@@ -34,7 +34,7 @@ final class SpellAbilityChoiceCopier {
         return copyChosenModes(source, destination) ? destination : null;
     }
 
-    static void copyTargets(SpellAbility source, SpellAbility destination,
+    public static void copyTargets(SpellAbility source, SpellAbility destination,
             Function<GameObject, GameObject> gameObjectMapper) {
         if (source == destination) {
             return;

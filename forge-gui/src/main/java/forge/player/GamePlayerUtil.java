@@ -70,7 +70,19 @@ public final class GamePlayerUtil {
         return createAiPlayer(name, avatarIndex, sleeveIndex, options, "");
     }
     public static LobbyPlayer createAiPlayer(final String name, final int avatarIndex, final int sleeveIndex, final Set<AIOption> options, final String profileOverride) {
-        final LobbyPlayerAi player = new LobbyPlayerAi(name, options);
+        final boolean externalMulligan = FModel.getPreferences()
+                .getPrefBoolean(FPref.AI_EXTERNAL_MULLIGAN_ENABLED);
+        final boolean externalMainPhase = FModel.getPreferences()
+                .getPrefBoolean(FPref.AI_EXTERNAL_MAIN_PHASE_ENABLED);
+        int maxActions;
+        try {
+            maxActions = Integer.parseInt(FModel.getPreferences().getPref(FPref.AI_EXTERNAL_MAIN_PHASE_MAX_ACTIONS));
+        } catch (NumberFormatException e) {
+            maxActions = 3;
+        }
+        final LobbyPlayerAi player = new LobbyPlayerAi(name, options,
+                AiDecisionProviderFactory.create(FModel.getPreferences()).orElse(null),
+                externalMulligan, externalMainPhase, Math.max(2, maxActions));
 
         // TODO: implement specific AI profiles for quest mode.
         String profile = "";

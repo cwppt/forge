@@ -23,8 +23,11 @@ import com.google.common.collect.Sets;
 import forge.ai.AiCardMemory.MemorySet;
 import forge.ai.ability.ChangeZoneAi;
 import forge.ai.ability.LearnAi;
+import forge.ai.decision.*;
 import forge.ai.simulation.GameStateEvaluator;
+import forge.ai.simulation.GameCopier;
 import forge.ai.simulation.OnePlaySafetyChecker;
+import forge.ai.simulation.SpellAbilityChoiceCopier;
 import forge.ai.simulation.SpellAbilityPicker;
 import forge.card.CardStateName;
 import forge.card.CardType;
@@ -67,6 +70,7 @@ import forge.util.*;
 
 import io.sentry.Breadcrumb;
 import io.sentry.Sentry;
+import org.tinylog.Logger;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -96,6 +100,9 @@ public class AiController {
     private int lastAttackAggression;
     private boolean useLivingEnd;
     private List<SpellAbility> skipped;
+    private AiDecisionProvider decisionProvider;
+    private boolean externalMainPhaseEnabled;
+    private int externalMainPhaseMaxActions = 3;
 
     public AiController(final Player computerPlayer, final Game game0) {
         player = computerPlayer;
@@ -132,6 +139,12 @@ public class AiController {
 
     public AiCardMemory getCardMemory() {
         return memory;
+    }
+
+    void configureExternalMainPhase(AiDecisionProvider provider, boolean enabled, int maxActions) {
+        decisionProvider = provider;
+        externalMainPhaseEnabled = enabled && provider != null;
+        externalMainPhaseMaxActions = Math.max(2, maxActions);
     }
 
     public Combat getPredictedCombat() {
@@ -1367,11 +1380,11 @@ public class AiController {
                 player.getCardsIn(ZoneType.Hand), CardPredicates.hasSVar("PlayBeforeLandDrop")
         );
         if (!playBeforeLand.isEmpty()) {
-            SpellAbility wantToPlayBeforeLand = chooseSpellAbilityToPlayFromList(
-                    ComputerUtilAbility.getSpellAbilities(playBeforeLand, player), false
+            PreparedAiAction wantToPlayBeforeLand = chooseSpellAbilityToPlayFromList(
+                    ComputerUtilAbility.getSpellAbilities(playBeforeLand, player), false, false
             );
             if (wantToPlayBeforeLand != null) {
-                return singleSpellAbilityList(wantToPlayBeforeLand);
+                return singleSpellAbilityList(wantToPlayBeforeLand.spellAbility());
             }
         }
 
@@ -1552,9 +1565,9 @@ public class AiController {
             SpellAbility counter = chooseCounterSpell(getPlayableCounters(cards));
             if (counter != null) return counter;
 
-            SpellAbility counterETB = chooseSpellAbilityToPlayFromList(getPossibleETBCounters(), false);
+            PreparedAiAction counterETB = chooseSpellAbilityToPlayFromList(getPossibleETBCounters(), false, false);
             if (counterETB != null)
-                return counterETB;
+                return counterETB.spellAbility();
         }
 
         if (saList.isEmpty()) {
@@ -1573,16 +1586,18 @@ public class AiController {
         //update LivingEndPlayer
         useLivingEnd = IterableUtil.any(player.getZone(ZoneType.Library), CardPredicates.nameEquals("Living End"));
 
-        SpellAbility chosenSa = chooseSpellAbilityToPlayFromList(saList, true);
+        PreparedAiAction chosenAction = chooseSpellAbilityToPlayFromList(saList, true, true);
 
-        if (topOwnedByAI && !mustRespond && chosenSa != ComputerUtilAbility.getFirstCopySASpell(saList)) {
+        if (topOwnedByAI && !mustRespond && (chosenAction == null
+                || chosenAction.originalAbility() != ComputerUtilAbility.getFirstCopySASpell(saList))) {
             return null; // not planning to copy the spell and not marked as something the AI would respond to
         }
 
-        return chosenSa;
+        return chosenAction == null ? null : chosenAction.spellAbility();
     }
 
-    private SpellAbility chooseSpellAbilityToPlayFromList(final List<SpellAbility> all, boolean skipCounter) {
+    private PreparedAiAction chooseSpellAbilityToPlayFromList(
+            final List<SpellAbility> all, boolean skipCounter, boolean allowExternalSelection) {
         if (all == null || all.isEmpty())
             return null;
 
@@ -1595,18 +1610,216 @@ public class AiController {
             Sentry.captureMessage(ex.getMessage() + "\nAssertionError [verifyTransitivity]: " + assertex);
         }
 
-        FutureTask<SpellAbility> future = new FutureTask<>(() -> {
-            //avoid ComputerUtil.aiLifeInDanger in loops as it slows down a lot.. call this outside loops will generally be fast...
-            boolean isLifeInDanger = useLivingEnd && ComputerUtil.aiLifeInDanger(player, true, 0);
-            for (final SpellAbility sa : ComputerUtilAbility.getOriginalAndAltCostAbilities(all, player)) {
-                if (Thread.currentThread().isInterrupted()) {
-                    break;
-                }
+        if (allowExternalSelection && shouldRouteExternalMainPhase()) {
+            PreparedAiAction externalChoice = chooseExternalMainPhaseAction(all, skipCounter);
+            if (externalChoice != null) {
+                return externalChoice;
+            }
+        }
 
-                // Don't add Counterspells to the "normal" playcard lookups
-                if (skipCounter && sa.getApi() == ApiType.Counter) {
-                    continue;
+        FutureTask<List<PreparedAiAction>> future = new FutureTask<>(() ->
+                prepareSpellAbilityActions(all, skipCounter));
+        Thread t = new Thread(future, "Game AI Eval");
+        t.setDaemon(true);
+        t.start();
+        try {
+            List<PreparedAiAction> prepared = future.get(game.getAITimeout(), TimeUnit.SECONDS);
+            return prepared.isEmpty() ? null : prepared.get(0);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            e.printStackTrace();
+            if (e instanceof TimeoutException) {
+                // log where the eval thread currently is - each timeout doubles as a
+                // profiler sample for diagnosing remaining AI slowdowns from user logs
+                StringBuilder sb = new StringBuilder("AI eval thread at timeout:");
+                StackTraceElement[] evalStack = t.getStackTrace();
+                for (int i = 0; i < Math.min(30, evalStack.length); i++) {
+                    sb.append("\n\tat ").append(evalStack[i]);
                 }
+                System.out.println(sb);
+            }
+            // ask the eval thread to exit at the next SpellAbility check first: a brutal
+            // Thread.stop() mid-evaluation can leave partially mutated shared state behind
+            future.cancel(true);
+            try {
+                t.join(2000); //2 seconds wait
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+            }
+            if (t.isAlive()) {
+                // last resort, see #8302: the eval thread may be stuck inside a single
+                // evaluation or an infinite loop and never reach the cooperative exit
+                try {
+                    t.stop();
+                } catch (UnsupportedOperationException | NoSuchMethodError ex) {
+                    // Stop support: dropped by Android and Java 20 / 26 removed it completely - so sadly thread will keep running
+                }
+            }
+            // TODO mark some as skipped to increase chance to find something playable next priority
+            return null;
+        }
+
+    }
+
+    private boolean shouldRouteExternalMainPhase() {
+        PhaseType phase = game.getPhaseHandler().getPhase();
+        return externalMainPhaseEnabled
+                && decisionProvider != null
+                && game.getStack().isEmpty()
+                && game.getPhaseHandler().getPlayerTurn() == player
+                && (phase == PhaseType.MAIN1 || phase == PhaseType.MAIN2);
+    }
+
+    private PreparedAiAction chooseExternalMainPhaseAction(List<SpellAbility> all, boolean skipCounter) {
+        long totalStarted = System.nanoTime();
+        PreparedAiActionSet set;
+        try {
+            set = prepareCandidateActions(all, skipCounter, externalMainPhaseMaxActions);
+        } catch (RuntimeException e) {
+            Logger.debug(e, "External AI candidate enumeration failed");
+            return null;
+        }
+        Logger.debug("External AI candidates raw={} evaluated={} accepted={} copiedGames={} enumerationMs={} bound={}",
+                set.rawCandidateCount(), set.evaluatedCandidateCount(), set.actions().size(), set.copiedGameCount(),
+                set.preparationNanos() / 1_000_000, externalMainPhaseMaxActions);
+        if (set.actions().size() < 2) {
+            return null;
+        }
+
+        String decisionId = UUID.randomUUID().toString();
+        MainPhaseDecisionContext context = MainPhaseStateProjector.project(player, decisionId, set.actions());
+        PreparedAiAction heuristic = set.actions().get(0);
+        AiDecisionResult result = null;
+        AiDecisionFailureReason failure = null;
+        PreparedAiAction selected = heuristic;
+        boolean fallback = true;
+        boolean staleOrInvalid = false;
+        try {
+            result = decisionProvider.chooseWithDiagnostics(context);
+            if (result == null || result.decision().isEmpty()) {
+                failure = result == null ? AiDecisionFailureReason.PROVIDER_EXCEPTION : result.failureReason();
+            } else {
+                AiDecision decision = result.decision().get();
+                if (!decisionId.equals(decision.decisionId())) {
+                    failure = AiDecisionFailureReason.DECISION_ID_MISMATCH;
+                } else if (decision.stateFingerprint() == null
+                        || !context.state().fingerprint().equals(decision.stateFingerprint())) {
+                    failure = AiDecisionFailureReason.FINGERPRINT_MISMATCH;
+                } else {
+                    selected = set.actions().stream()
+                            .filter(action -> action.actionId().equals(decision.optionId()))
+                            .findFirst().orElse(null);
+                    if (selected == null) {
+                        selected = heuristic;
+                        failure = AiDecisionFailureReason.ACTION_ID_MISMATCH;
+                    } else {
+                        fallback = false;
+                    }
+                }
+            }
+        } catch (RuntimeException e) {
+            failure = AiDecisionFailureReason.PROVIDER_EXCEPTION;
+        }
+
+        MainPhaseDecisionContext current = MainPhaseStateProjector.project(player, decisionId, set.actions());
+        if (!context.state().fingerprint().equals(current.state().fingerprint())) {
+            failure = AiDecisionFailureReason.STALE_ACTION_SET;
+            fallback = true;
+            staleOrInvalid = true;
+        } else if (!revalidatePreparedAction(selected)) {
+            failure = AiDecisionFailureReason.REVALIDATION_FAILED;
+            fallback = true;
+            staleOrInvalid = true;
+        }
+
+        if (staleOrInvalid) {
+            selected = heuristic;
+        }
+
+        recordMainPhaseDecision(context, set, heuristic, selected, result, fallback, failure,
+                staleOrInvalid, AiDecisionResult.elapsedMillis(totalStarted));
+        return staleOrInvalid ? null : selected;
+    }
+
+    private boolean revalidatePreparedAction(PreparedAiAction action) {
+        if (action == null || action.spellAbility() == null || action.sourceCard() == null
+                || action.spellAbility().getHostCard() != action.sourceCard()
+                || action.spellAbility().getActivatingPlayer() != player
+                || action.sourceCard().getGame() != game) {
+            return false;
+        }
+        SpellAbility sa = action.spellAbility();
+        if (!sa.checkRestrictions(sa.getHostCard(), player) || !sa.canPlay()
+                || !ComputerUtilCost.canPayCost(sa, player, sa.isTrigger())) {
+            return false;
+        }
+        for (SpellAbility current = sa; current != null; current = current.getSubAbility()) {
+            if (current.usesTargeting()) {
+                if (!current.isTargetNumberValid()) {
+                    return false;
+                }
+                for (GameObject target : current.getTargets()) {
+                    if (!current.canTarget(target, true)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private void recordMainPhaseDecision(MainPhaseDecisionContext context, PreparedAiActionSet set,
+            PreparedAiAction heuristic, PreparedAiAction selected, AiDecisionResult result, boolean fallback,
+            AiDecisionFailureReason failure, boolean staleOrInvalid, long totalLatencyMs) {
+        int gameId = game.getId();
+        AiDecisionMetrics.GameRunMetadata metadata = AiDecisionMetrics.gameMetadata(gameId);
+        AiDecisionMetrics.record(new MainPhaseDecisionEvent(context.decisionId(), context.state().fingerprint(),
+                result == null ? null : result.provider(), result == null ? null : result.model(),
+                fallback ? AiDecisionSource.FORGE_HEURISTIC : AiDecisionSource.EXTERNAL_PROVIDER,
+                heuristic.actionId(), selected == null ? heuristic.actionId() : selected.actionId(),
+                result == null ? 0 : result.latencyMs(), totalLatencyMs, true, fallback, failure,
+                staleOrInvalid, set.rawCandidateCount(), set.evaluatedCandidateCount(), set.actions().size(),
+                set.copiedGameCount(), set.preparationNanos(), gameId,
+                metadata == null ? game.getMatch().getOutcomes().size() : metadata.gameIndex(),
+                metadata == null ? null : metadata.runSeed(), player.getName(),
+                game.getRegisteredPlayers().indexOf(player), player.getRegisteredPlayer().getDeck().getName(),
+                (selected == null ? heuristic : selected).category().name(),
+                visibleSourceName((selected == null ? heuristic : selected).spellAbility())));
+    }
+
+    List<PreparedAiAction> prepareSpellAbilityActions(final List<SpellAbility> all, boolean skipCounter) {
+        return prepareExpandedSpellAbilityActions(
+                ComputerUtilAbility.getOriginalAndAltCostAbilities(all, player), skipCounter, 1);
+    }
+
+    private List<PreparedAiAction> prepareExpandedSpellAbilityActions(
+            final List<SpellAbility> expanded, boolean skipCounter, int maxActions) {
+        List<PreparedAiAction> prepared = Lists.newArrayList();
+        int candidateIndex = 0;
+        // Avoid ComputerUtil.aiLifeInDanger in loops as it slows down a lot.
+        boolean isLifeInDanger = useLivingEnd && ComputerUtil.aiLifeInDanger(player, true, 0);
+        // Preserve the old short-circuit: evaluating candidates after the first WillPlay would advance RNG and
+        // execute API-specific checks that the traditional heuristic never reached.
+        for (final SpellAbility original : expanded) {
+            final int originalCandidateIndex = candidateIndex++;
+            SpellAbility sa = original.copy(player);
+            if (sa == null) {
+                // A small number of special abilities cannot be copied. Preserve their legacy behavior while
+                // keeping the common path isolated.
+                sa = original;
+            }
+            final String sourceName = visibleSourceName(sa);
+            final String apiName = sa.getApi() == null ? "none" : sa.getApi().name();
+
+            if (Thread.currentThread().isInterrupted()) {
+                break;
+            }
+
+            // Don't add Counterspells to the "normal" playcard lookups
+            if (skipCounter && sa.getApi() == ApiType.Counter) {
+                Logger.debug("AI candidate rejected position={} source={} api={} reason=counter-filter",
+                        originalCandidateIndex, sourceName, apiName);
+                continue;
+            }
 
                 if (sa.getHostCard().hasKeyword(Keyword.STORM)
                         && sa.getApi() != ApiType.Counter // AI would suck at trying to deliberately proc a Storm counterspell
@@ -1669,52 +1882,135 @@ public class AiController {
                 // System.out.printf("Ai thinks '%s' of %s -> %s @ %s %s >>> \n", opinion, sa.getHostCard(), sa, Lang.getInstance().getPossesive(ph.getPlayerTurn().getName()), ph.getPhase());
 
                 if (opinion != AiPlayDecision.WillPlay) {
+                    Logger.debug("AI candidate rejected position={} source={} api={} reason={}",
+                            originalCandidateIndex, sourceName, apiName, opinion);
                     continue;
                 }
 
-                // TODO could continue to try find another with higher rating (weighted by priority ordering)
-                return sa;
+                String actionId = "ACTION_" + prepared.size();
+                PreparedAiAction action = new PreparedAiAction(actionId, sa, original, sa.getHostCard(),
+                        actionCategory(sa), originalCandidateIndex, sa.toString());
+                prepared.add(action);
+                Logger.debug("AI candidate prepared actionId={} position={} source={} api={} category={}",
+                        actionId, originalCandidateIndex, sourceName, apiName, action.category());
+                if (prepared.size() >= maxActions) {
+                    break;
+                }
+        }
+        return List.copyOf(prepared);
+    }
+
+    /**
+     * Explicit, bounded candidate enumeration. Every heuristic evaluation occurs in a fresh copied game and with
+     * an isolated deterministic RNG. Normal play does not call this method.
+     */
+    PreparedAiActionSet prepareCandidateActions(final List<SpellAbility> all, boolean skipCounter, int maxActions) {
+        long started = System.nanoTime();
+        if (all == null || all.isEmpty() || maxActions <= 0) {
+            return new PreparedAiActionSet(List.of(), 0, 0, 0, System.nanoTime() - started);
+        }
+
+        List<SpellAbility> liveTemplates = new ArrayList<>();
+        for (SpellAbility ability : all) {
+            SpellAbility copy = ability.copy(player);
+            if (copy == null) {
+                // An uncopyable ability cannot safely become an externally selectable prepared candidate.
+                continue;
+            }
+            liveTemplates.add(copy);
+        }
+        List<SpellAbility> liveExpanded = ComputerUtilAbility.getOriginalAndAltCostAbilities(liveTemplates, player);
+        List<PreparedAiAction> result = new ArrayList<>();
+        int evaluated = 0;
+        int copied = 0;
+
+        for (int candidateIndex = 0; candidateIndex < liveExpanded.size() && result.size() < maxActions; candidateIndex++) {
+            final int index = candidateIndex;
+            GameCopier copier = new GameCopier(game);
+            Game copiedGame;
+            try {
+                copiedGame = copier.makeCopy();
+                copied++;
+            } catch (RuntimeException ex) {
+                Logger.debug(ex, "AI candidate copy failed position={}", index);
+                continue;
+            }
+            Player copiedPlayer = copier.find(player);
+            AiController copiedAi = ((PlayerControllerAi) copiedPlayer.getController()).getAi();
+            copiedAi.useLivingEnd = IterableUtil.any(copiedPlayer.getZone(ZoneType.Library),
+                    CardPredicates.nameEquals("Living End"));
+            List<SpellAbility> copiedInputs = new ArrayList<>();
+            boolean mappingFailed = false;
+            for (SpellAbility ability : all) {
+                SpellAbility mapped = copier.findSpellAbility(ability);
+                if (mapped == null) {
+                    mappingFailed = true;
+                    break;
+                }
+                copiedInputs.add(mapped);
+            }
+            if (mappingFailed) {
+                continue;
+            }
+            List<SpellAbility> copiedExpanded = ComputerUtilAbility.getOriginalAndAltCostAbilities(copiedInputs, copiedPlayer);
+            if (index >= copiedExpanded.size()) {
+                continue;
+            }
+            evaluated++;
+            long seed = candidateEnumerationSeed(all, index);
+            List<PreparedAiAction> accepted = MyRandom.withRandom(new Random(seed), () ->
+                    copiedAi.prepareExpandedSpellAbilityActions(List.of(copiedExpanded.get(index)), skipCounter, 1));
+            if (accepted.isEmpty()) {
+                continue;
             }
 
-            return null;
-        });
-        Thread t = new Thread(future, "Game AI Eval");
-        t.setDaemon(true);
-        t.start();
-        try {
-            return future.get(game.getAITimeout(), TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            e.printStackTrace();
-            if (e instanceof TimeoutException) {
-                // log where the eval thread currently is - each timeout doubles as a
-                // profiler sample for diagnosing remaining AI slowdowns from user logs
-                StringBuilder sb = new StringBuilder("AI eval thread at timeout:");
-                StackTraceElement[] evalStack = t.getStackTrace();
-                for (int i = 0; i < Math.min(30, evalStack.length); i++) {
-                    sb.append("\n\tat ").append(evalStack[i]);
-                }
-                System.out.println(sb);
+            SpellAbility copiedPrepared = accepted.get(0).spellAbility();
+            SpellAbility livePrepared = SpellAbilityChoiceCopier.copyCastChoices(
+                    copiedPrepared, liveExpanded.get(index), player);
+            if (livePrepared == null) {
+                continue;
             }
-            // ask the eval thread to exit at the next SpellAbility check first: a brutal
-            // Thread.stop() mid-evaluation can leave partially mutated shared state behind
-            future.cancel(true);
             try {
-                t.join(2000); //2 seconds wait
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
+                SpellAbilityChoiceCopier.copyTargets(copiedPrepared, livePrepared, copier::reverseFind);
+            } catch (RuntimeException ex) {
+                Logger.debug(ex, "AI candidate target mapping failed position={}", index);
+                continue;
             }
-            if (t.isAlive()) {
-                // last resort, see #8302: the eval thread may be stuck inside a single
-                // evaluation or an infinite loop and never reach the cooperative exit
-                try {
-                    t.stop();
-                } catch (UnsupportedOperationException | NoSuchMethodError ex) {
-                    // Stop support: dropped by Android and Java 20 / 26 removed it completely - so sadly thread will keep running
-                }
-            }
-            // TODO mark some as skipped to increase chance to find something playable next priority
-            return null;
+            String actionId = "ACTION_" + result.size();
+            result.add(new PreparedAiAction(actionId, livePrepared, liveExpanded.get(index),
+                    livePrepared.getHostCard(), actionCategory(livePrepared), index, livePrepared.toString()));
         }
+        return new PreparedAiActionSet(result, liveExpanded.size(), evaluated, copied,
+                System.nanoTime() - started);
+    }
+
+    private long candidateEnumerationSeed(List<SpellAbility> abilities, int candidateIndex) {
+        long seed = 0xcbf29ce484222325L;
+        seed = (seed ^ player.getId()) * 0x100000001b3L;
+        seed = (seed ^ game.getPhaseHandler().getTurn()) * 0x100000001b3L;
+        seed = (seed ^ candidateIndex) * 0x100000001b3L;
+        for (SpellAbility ability : abilities) {
+            seed = (seed ^ Objects.toString(ability.getDescription(), "").hashCode()) * 0x100000001b3L;
+        }
+        return seed;
+    }
+
+    private PreparedAiAction.ActionCategory actionCategory(SpellAbility sa) {
+        if (sa.isSpell()) {
+            return PreparedAiAction.ActionCategory.SPELL;
+        }
+        if (sa.isActivatedAbility()) {
+            return PreparedAiAction.ActionCategory.ACTIVATED_ABILITY;
+        }
+        if (sa.isTrigger()) {
+            return PreparedAiAction.ActionCategory.TRIGGER;
+        }
+        return PreparedAiAction.ActionCategory.OTHER;
+    }
+
+    private String visibleSourceName(SpellAbility sa) {
+        Card source = sa.getHostCard();
+        return source != null && source.getView().canBeShownTo(player.getView()) ? source.getName() : "<hidden>";
     }
 
     public CardCollection chooseCardsToDelve(int genericCost, CardCollection grave) {

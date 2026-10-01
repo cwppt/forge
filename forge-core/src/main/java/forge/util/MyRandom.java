@@ -19,6 +19,7 @@ package forge.util;
 
 import java.security.SecureRandom;
 import java.util.Random;
+import java.util.function.Supplier;
 
 /**
  * <p>
@@ -32,6 +33,7 @@ import java.util.Random;
 public class MyRandom {
     /** Constant <code>random</code>. */
     private static Random random = new SecureRandom();
+    private static final ThreadLocal<Random> localRandom = new ThreadLocal<>();
 
     /**
      * <p>
@@ -52,7 +54,8 @@ public class MyRandom {
      * @return the random
      */
     public static Random getRandom() {
-        return MyRandom.random;
+        Random local = localRandom.get();
+        return local == null ? MyRandom.random : local;
     }
 
     /**
@@ -60,14 +63,36 @@ public class MyRandom {
      * @param random the random
      */
     public static void setRandom(Random random) {
-        MyRandom.random = random;
+        if (localRandom.get() == null) {
+            MyRandom.random = random;
+        } else {
+            localRandom.set(random);
+        }
+    }
+
+    /**
+     * Runs isolated work with a thread-local random provider. The process-wide random stream is neither replaced
+     * nor advanced. This is intended for copied-game evaluation, not live game play.
+     */
+    public static <T> T withRandom(Random random, Supplier<T> work) {
+        Random previous = localRandom.get();
+        localRandom.set(random);
+        try {
+            return work.get();
+        } finally {
+            if (previous == null) {
+                localRandom.remove();
+            } else {
+                localRandom.set(previous);
+            }
+        }
     }
 
     public static int[] splitIntoRandomGroups(final int value, final int numGroups) {
         int[] groups = new int[numGroups];
 
         for (int i = 0; i < value; i++) {
-            groups[random.nextInt(numGroups)]++;
+            groups[getRandom().nextInt(numGroups)]++;
         }
 
         return groups;

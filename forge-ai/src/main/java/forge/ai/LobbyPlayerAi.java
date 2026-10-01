@@ -3,6 +3,7 @@ package forge.ai;
 import java.util.Set;
 
 import forge.LobbyPlayer;
+import forge.ai.decision.AiDecisionProvider;
 import forge.game.Game;
 import forge.game.player.IGameEntitiesFactory;
 import forge.game.player.Player;
@@ -14,9 +15,26 @@ public class LobbyPlayerAi extends LobbyPlayer implements IGameEntitiesFactory {
     private String aiProfile = "";
     private boolean rotateProfileEachGame;
     private AIOption option;
+    private final AiDecisionProvider decisionProvider;
+    private final boolean externalMulliganEnabled;
+    private final boolean externalMainPhaseEnabled;
+    private final int externalMainPhaseMaxActions;
 
     public LobbyPlayerAi(String name, Set<AIOption> options) {
+        this(name, options, null, false, false, 3);
+    }
+
+    public LobbyPlayerAi(String name, Set<AIOption> options, AiDecisionProvider decisionProvider) {
+        this(name, options, decisionProvider, decisionProvider != null, false, 3);
+    }
+
+    public LobbyPlayerAi(String name, Set<AIOption> options, AiDecisionProvider decisionProvider,
+            boolean externalMulliganEnabled, boolean externalMainPhaseEnabled, int externalMainPhaseMaxActions) {
         super(name);
+        this.decisionProvider = decisionProvider;
+        this.externalMulliganEnabled = externalMulliganEnabled;
+        this.externalMainPhaseEnabled = externalMainPhaseEnabled;
+        this.externalMainPhaseMaxActions = externalMainPhaseMaxActions;
         if (options != null && !options.isEmpty()) {
             option = options.iterator().next();
         }
@@ -35,7 +53,8 @@ public class LobbyPlayerAi extends LobbyPlayer implements IGameEntitiesFactory {
     }
 
     private PlayerControllerAi createControllerFor(Player ai) {
-        PlayerControllerAi result = new PlayerControllerAi(ai.getGame(), ai, this);
+        PlayerControllerAi result = new PlayerControllerAi(ai.getGame(), ai, this, decisionProvider,
+                externalMulliganEnabled, externalMainPhaseEnabled, externalMainPhaseMaxActions);
         result.getAi().setUseSimulation(option);
         return result;
     }

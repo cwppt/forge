@@ -203,6 +203,13 @@ public class ForgePreferences extends AbstractPreferences<ForgePreferences.FPref
         MATCH_AI_SIDEBOARDING_MODE("Human For AI"),
         MATCH_AI_TIMEOUT("5"),
         UI_ENABLE_AI_CHEATS ("false"),
+        AI_EXTERNAL_MULLIGAN_ENABLED("false"),
+        AI_EXTERNAL_MULLIGAN_ENDPOINT("http://localhost:11434/v1/chat/completions"),
+        AI_EXTERNAL_MULLIGAN_MODEL(""),
+        AI_EXTERNAL_MULLIGAN_API_KEY(""),
+        AI_EXTERNAL_MULLIGAN_TIMEOUT_SECONDS("20"),
+        AI_EXTERNAL_MAIN_PHASE_ENABLED("false"),
+        AI_EXTERNAL_MAIN_PHASE_MAX_ACTIONS("3"),
         MATCH_EXPERIMENTAL_RESTORE("false"),
 
         ENFORCE_DECK_LEGALITY ("true"),

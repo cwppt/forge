@@ -1,6 +1,8 @@
 package forge.view;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -9,6 +11,7 @@ import org.apache.commons.lang3.time.StopWatch;
 
 import forge.LobbyPlayer;
 import forge.ai.AiProfileUtil;
+import forge.ai.decision.AiDecisionMetrics;
 import forge.deck.Deck;
 import forge.deck.DeckGroup;
 import forge.deck.io.DeckSerializer;
@@ -27,6 +30,7 @@ import forge.gamemodes.tournament.system.TournamentPlayer;
 import forge.gamemodes.tournament.system.TournamentRoundRobin;
 import forge.gamemodes.tournament.system.TournamentSwiss;
 import forge.localinstance.properties.ForgeConstants;
+import forge.localinstance.properties.ForgePreferences.FPref;
 import forge.model.FModel;
 import forge.player.GamePlayerUtil;
 import forge.util.Lang;
@@ -60,7 +64,7 @@ public class SimulateMatch {
                 }
 
                 options = new ArrayList<>();
-                params.put(a.substring(1), options);
+                params.put(a.replaceFirst("^-+", ""), options);
             } else if (options != null) {
                 options.add(a);
             } else {
@@ -68,6 +72,9 @@ public class SimulateMatch {
                 return;
             }
         }
+
+        configureExternalAi(params);
+        AiDecisionMetrics.reset();
 
         String deckDir = null;
         if (params.containsKey("D")) {
@@ -173,19 +180,22 @@ public class SimulateMatch {
         System.out.println(sb);
 
         Match mc = new Match(rules, pp, "Test");
+        List<GameSimulationResult> results = new ArrayList<>();
 
         if (matchSize != 0) {
             int iGame = 0;
             while (!mc.isMatchOver()) {
                 // play games until the match ends
-                simulateSingleMatch(mc, iGame, outputGamelog);
+                results.add(simulateSingleMatch(mc, iGame, outputGamelog, seed));
                 iGame++;
             }
         } else {
             for (int iGame = 0; iGame < nGames; iGame++) {
-                simulateSingleMatch(mc, iGame, outputGamelog);
+                results.add(simulateSingleMatch(mc, iGame, outputGamelog, seed));
             }
         }
+
+        outputEvaluation(params, results);
 
         System.out.flush();
     }
@@ -205,13 +215,27 @@ public class SimulateMatch {
         System.out.println("\tA - AI profile per player, in the same order as the decks (e.g. -a Default Experimental)");
         System.out.println("\tc - Clock flag. Set the maximum time in seconds before calling the match a draw, defaults to 120.");
         System.out.println("\tq - Quiet flag. Output just the game result, not the entire game log.");
+        System.out.println("\t--external-ai-enabled - legacy alias: enable external mulligan decisions");
+        System.out.println("\t--external-ai-mulligan-enabled - enable external mulligan decisions");
+        System.out.println("\t--external-ai-main-phase-enabled - enable prepared main-phase action selection");
+        System.out.println("\t--external-ai-main-phase-max-actions <N> - bounded prepared action count (default 3)");
+        System.out.println("\t--external-ai-endpoint <URL> - OpenAI-compatible chat/completions endpoint");
+        System.out.println("\t--external-ai-model <model> - external model name");
+        System.out.println("\t--external-ai-timeout <seconds> - positive request timeout");
+        System.out.println("\t--metrics-csv <file> - write mulligan and main-phase AI telemetry as CSV");
     }
 
-    public static void simulateSingleMatch(final Match mc, int iGame, boolean outputGamelog) {
+    public static GameSimulationResult simulateSingleMatch(final Match mc, int iGame, boolean outputGamelog) {
+        return simulateSingleMatch(mc, iGame, outputGamelog, null);
+    }
+
+    private static GameSimulationResult simulateSingleMatch(
+            final Match mc, int iGame, boolean outputGamelog, Long runSeed) {
         final StopWatch sw = new StopWatch();
         sw.start();
 
         final Game g1 = mc.createGame();
+        AiDecisionMetrics.registerGame(g1.getId(), iGame, runSeed);
         g1.setNoGUIUser();
         // will run match in the same thread
         try {
@@ -244,8 +268,57 @@ public class SimulateMatch {
         // If both players life totals to 0 in a single turn, the game should end in a draw
         if (g1.getOutcome().isDraw()) {
             System.out.printf("\nGame Result: Game %d ended in a Draw! Took %d ms.%n", 1 + iGame, sw.getTime());
+            return new GameSimulationResult(sw.getTime(), true, null);
         } else {
-            System.out.printf("\nGame Result: Game %d ended in %d ms. %s has won!\n%n", 1 + iGame, sw.getTime(), g1.getOutcome().getWinningLobbyPlayer().getName());
+            String winner = g1.getOutcome().getWinningLobbyPlayer().getName();
+            System.out.printf("\nGame Result: Game %d ended in %d ms. %s has won!\n%n",
+                    1 + iGame, sw.getTime(), winner);
+            return new GameSimulationResult(sw.getTime(), false, winner);
+        }
+    }
+
+    public record GameSimulationResult(long durationMs, boolean draw, String winner) {
+    }
+
+    private static void configureExternalAi(Map<String, List<String>> params) {
+        if (params.containsKey("external-ai-enabled")) {
+            FModel.getPreferences().setPref(FPref.AI_EXTERNAL_MULLIGAN_ENABLED, true);
+        }
+        if (params.containsKey("external-ai-mulligan-enabled")) {
+            FModel.getPreferences().setPref(FPref.AI_EXTERNAL_MULLIGAN_ENABLED, true);
+        }
+        if (params.containsKey("external-ai-main-phase-enabled")) {
+            FModel.getPreferences().setPref(FPref.AI_EXTERNAL_MAIN_PHASE_ENABLED, true);
+        }
+        setPreference(params, "external-ai-endpoint", FPref.AI_EXTERNAL_MULLIGAN_ENDPOINT);
+        setPreference(params, "external-ai-model", FPref.AI_EXTERNAL_MULLIGAN_MODEL);
+        setPreference(params, "external-ai-timeout", FPref.AI_EXTERNAL_MULLIGAN_TIMEOUT_SECONDS);
+        setPreference(params, "external-ai-main-phase-max-actions", FPref.AI_EXTERNAL_MAIN_PHASE_MAX_ACTIONS);
+    }
+
+    private static void setPreference(Map<String, List<String>> params, String option, FPref preference) {
+        List<String> values = params.get(option);
+        if (values != null && !values.isEmpty()) {
+            FModel.getPreferences().setPref(preference, values.get(0));
+        }
+    }
+
+    private static void outputEvaluation(Map<String, List<String>> params, List<GameSimulationResult> results) {
+        System.out.println("AI evaluation: " + AiDecisionMetrics.summary(results.size()));
+        long draws = results.stream().filter(GameSimulationResult::draw).count();
+        double averageDuration = results.stream().mapToLong(GameSimulationResult::durationMs).average().orElse(0);
+        Map<String, Long> wins = new TreeMap<>();
+        results.stream().filter(r -> !r.draw()).forEach(r -> wins.merge(r.winner(), 1L, Long::sum));
+        System.out.printf(Locale.ROOT, "gameResults games=%d draws=%d avgGameLengthMs=%.2f wins=%s%n",
+                results.size(), draws, averageDuration, wins);
+        List<String> output = params.get("metrics-csv");
+        if (output != null && !output.isEmpty()) {
+            try {
+                AiDecisionMetrics.writeCsv(Path.of(output.get(0)));
+                System.out.println("AI decision metrics CSV written to " + output.get(0));
+            } catch (IOException e) {
+                System.err.println("Unable to write mulligan metrics CSV: " + e.getMessage());
+            }
         }
     }
 
