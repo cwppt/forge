@@ -301,6 +301,7 @@ public class StackResponseExternalDecisionTest extends AITest {
     @Test
     public void auditJsonlContainsSanitizedStackAndPassOption() throws Exception {
         Path audit = Files.createTempFile("forge-stack-response-", ".jsonl");
+        Path csv = Files.createTempFile("forge-stack-response-", ".csv");
         try {
             AiDecisionMetrics.configureDecisionAudit(audit);
             Game game = initAndCreateGame();
@@ -319,9 +320,18 @@ public class StackResponseExternalDecisionTest extends AITest {
             Assert.assertTrue(json.contains("\"passAvailable\":true"));
             Assert.assertTrue(json.contains("\"stackItems\""));
             Assert.assertFalse(json.contains("forge.game"));
+            AiDecisionMetrics.writeCsv(csv);
+            List<String> csvLines = Files.readAllLines(csv);
+            Assert.assertEquals(csvLines.size(), 2);
+            // Count fields without splitting commas inside quoted CSV values.
+            String fieldSeparator = ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
+            Assert.assertEquals(csvLines.get(1).split(fieldSeparator, -1).length,
+                    csvLines.get(0).split(fieldSeparator, -1).length,
+                    "Stack-response telemetry must have the same field count as the CSV header");
         } finally {
             AiDecisionMetrics.reset();
             Files.deleteIfExists(audit);
+            Files.deleteIfExists(csv);
         }
     }
 

@@ -323,7 +323,7 @@ public final class AiDecisionMetrics {
                         + csv(e.deckIdentifier()) + "," + csv(e.heuristicResponseId()) + ","
                         + csv(e.selectedResponseId()) + ",STACK_RESPONSE," + e.responseActionCount()
                         + ",,,,," + e.totalLatencyMs() + "," + e.staleOrRevalidationFailure()
-                        + ",,,,,"));
+                        + ",,,,,,"));
         COMBAT_EVENTS.stream().sorted(Comparator.comparing(CombatAttackersDecisionEvent::decisionId)).forEach(e -> lines.add(
                 csv(e.decisionId()) + "," + csv(e.stateFingerprint()) + "," + csv(e.provider()) + "," + csv(e.model())
                         + "," + e.source() + "," + csv(e.selectedOptionId()) + "," + e.providerLatencyMs() + ","
