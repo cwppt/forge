@@ -9,12 +9,19 @@ public record OpenAiCompatibleProviderConfig(
         URI endpoint,
         String model,
         String apiKey,
-        Duration timeout) {
+        Duration timeout,
+        OpenAiResponseFormatMode responseFormatMode) {
+
+    public OpenAiCompatibleProviderConfig(boolean enabled, URI endpoint, String model, String apiKey,
+            Duration timeout) {
+        this(enabled, endpoint, model, apiKey, timeout, OpenAiResponseFormatMode.AUTO);
+    }
 
     public OpenAiCompatibleProviderConfig {
         Objects.requireNonNull(endpoint, "endpoint");
         Objects.requireNonNull(model, "model");
         Objects.requireNonNull(timeout, "timeout");
+        Objects.requireNonNull(responseFormatMode, "responseFormatMode");
         if (!"http".equalsIgnoreCase(endpoint.getScheme()) && !"https".equalsIgnoreCase(endpoint.getScheme())) {
             throw new IllegalArgumentException("endpoint must use HTTP or HTTPS");
         }
@@ -33,7 +40,8 @@ public record OpenAiCompatibleProviderConfig(
                 + ", endpoint=" + safeEndpoint(endpoint)
                 + ", model=" + model
                 + ", apiKey=" + (apiKey == null ? "<not configured>" : "<redacted>")
-                + ", timeout=" + timeout + "]";
+                + ", timeout=" + timeout
+                + ", responseFormatMode=" + responseFormatMode + "]";
     }
 
     private static String safeEndpoint(URI value) {

@@ -14,7 +14,8 @@ public record LegalActionView(
         List<String> targets,
         List<String> modes,
         Integer xValue,
-        int heuristicPosition) {
+        int heuristicPosition,
+        String forgeRecommendation) {
 
     public LegalActionView {
         targets = List.copyOf(targets);

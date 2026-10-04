@@ -14,7 +14,8 @@ record PreparedAiAction(
         Card sourceCard,
         ActionCategory category,
         int originalCandidateIndex,
-        String description) {
+        String description,
+        boolean forgeHeuristicAccepted) {
 
     enum ActionCategory {
         SPELL,

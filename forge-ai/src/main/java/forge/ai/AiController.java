@@ -103,6 +103,14 @@ public class AiController {
     private AiDecisionProvider decisionProvider;
     private boolean externalMainPhaseEnabled;
     private int externalMainPhaseMaxActions = 3;
+    private boolean externalMainPhaseIncludeRejected;
+    private int externalMainPhaseMaxRejectedActions = 1;
+    private boolean externalStackResponseEnabled;
+    private int externalStackResponseMaxActions = 3;
+    private boolean externalStackResponseRandomizeActionOrder;
+    private long externalStackResponseDecisionSequence;
+    private boolean externalCombatAttackersEnabled;
+    private int externalCombatAttackersMaxOptions = 4;
 
     public AiController(final Player computerPlayer, final Game game0) {
         player = computerPlayer;
@@ -142,9 +150,34 @@ public class AiController {
     }
 
     void configureExternalMainPhase(AiDecisionProvider provider, boolean enabled, int maxActions) {
+        configureExternalMainPhase(provider, enabled, maxActions, false, 1);
+    }
+
+    void configureExternalMainPhase(AiDecisionProvider provider, boolean enabled, int maxActions,
+            boolean includeRejected, int maxRejectedActions) {
         decisionProvider = provider;
         externalMainPhaseEnabled = enabled && provider != null;
         externalMainPhaseMaxActions = Math.max(2, maxActions);
+        externalMainPhaseIncludeRejected = includeRejected;
+        externalMainPhaseMaxRejectedActions = Math.max(0, maxRejectedActions);
+    }
+
+    void configureExternalStackResponses(AiDecisionProvider provider, boolean enabled, int maxActions) {
+        configureExternalStackResponses(provider, enabled, maxActions, false);
+    }
+
+    void configureExternalStackResponses(AiDecisionProvider provider, boolean enabled, int maxActions,
+            boolean randomizeActionOrder) {
+        decisionProvider = provider;
+        externalStackResponseEnabled = enabled && provider != null;
+        externalStackResponseMaxActions = Math.max(1, maxActions);
+        externalStackResponseRandomizeActionOrder = randomizeActionOrder;
+    }
+
+    void configureExternalCombatAttackers(AiDecisionProvider provider, boolean enabled, int maxOptions) {
+        decisionProvider = provider;
+        externalCombatAttackersEnabled = enabled && provider != null;
+        externalCombatAttackersMaxOptions = Math.min(ExternalCombatAttackers.HARD_MAX_OPTIONS, Math.max(1, maxOptions));
     }
 
     public Combat getPredictedCombat() {
@@ -1314,6 +1347,8 @@ public class AiController {
     }
 
     public void declareAttackers(Player attacker, Combat combat) {
+        boolean externallySelectable = externalCombatAttackersEnabled && attacker == player
+                && ExternalCombatAttackers.eligible(player, combat) && combat.getAttackers().isEmpty();
         // 12/2/10(sol) the decision making here has moved to getAttackers()
         AiAttackController aiAtk = new AiAttackController(attacker);
         lastAttackAggression = aiAtk.declareAttackers(combat);
@@ -1336,6 +1371,7 @@ public class AiController {
                 aiAtk.declareAttackers(combat);
             }
         }
+        if (externallySelectable) ExternalCombatAttackers.choose(player, combat, decisionProvider, externalCombatAttackersMaxOptions);
     }
 
     private void removeUnpayableAttackers(Combat combat) {
@@ -1561,13 +1597,17 @@ public class AiController {
             }
         }
 
+        SpellAbility legacyStackResponse = null;
         if (!game.getStack().isEmpty()) {
             SpellAbility counter = chooseCounterSpell(getPlayableCounters(cards));
-            if (counter != null) return counter;
-
-            PreparedAiAction counterETB = chooseSpellAbilityToPlayFromList(getPossibleETBCounters(), false, false);
-            if (counterETB != null)
-                return counterETB.spellAbility();
+            if (counter != null) {
+                legacyStackResponse = counter;
+            } else {
+                PreparedAiAction counterETB = chooseSpellAbilityToPlayFromList(getPossibleETBCounters(), false, false);
+                if (counterETB != null) {
+                    legacyStackResponse = counterETB.spellAbility();
+                }
+            }
         }
 
         if (saList.isEmpty()) {
@@ -1586,14 +1626,166 @@ public class AiController {
         //update LivingEndPlayer
         useLivingEnd = IterableUtil.any(player.getZone(ZoneType.Library), CardPredicates.nameEquals("Living End"));
 
-        PreparedAiAction chosenAction = chooseSpellAbilityToPlayFromList(saList, true, true);
+        PreparedAiAction chosenAction = legacyStackResponse == null
+                ? chooseSpellAbilityToPlayFromList(saList, true, true) : null;
+        if (legacyStackResponse == null && chosenAction != null) {
+            legacyStackResponse = chosenAction.spellAbility();
+        }
+
+        if (shouldRouteExternalStackResponse(top, topOwnedByAI, mustRespond)) {
+            List<SpellAbility> responseCandidates = new ArrayList<>(getPlayableCounters(cards));
+            responseCandidates.addAll(saList);
+            responseCandidates.addAll(getPossibleETBCounters());
+            Set<SpellAbility> seenResponses = Collections.newSetFromMap(new IdentityHashMap<>());
+            responseCandidates.removeIf(ability -> !seenResponses.add(ability));
+            responseCandidates.removeIf(this::unsupportedExternalStackResponse);
+            StackResponseChoice external = chooseExternalStackResponse(
+                    responseCandidates, legacyStackResponse);
+            if (external.handled()) {
+                return external.ability();
+            }
+        }
 
         if (topOwnedByAI && !mustRespond && (chosenAction == null
                 || chosenAction.originalAbility() != ComputerUtilAbility.getFirstCopySASpell(saList))) {
             return null; // not planning to copy the spell and not marked as something the AI would respond to
         }
 
-        return chosenAction == null ? null : chosenAction.spellAbility();
+        return legacyStackResponse;
+    }
+
+    private boolean shouldRouteExternalStackResponse(SpellAbility top, boolean topOwnedByAI,
+            boolean mustRespond) {
+        PhaseType phase = game.getPhaseHandler().getPhase();
+        return externalStackResponseEnabled && decisionProvider != null && !game.getStack().isEmpty()
+                && top != null && !topOwnedByAI && !mustRespond && !top.isTrigger()
+                && !top.isReplacementAbility() && !top.isManaAbility()
+                && phase != PhaseType.COMBAT_BEGIN && phase != PhaseType.COMBAT_DECLARE_ATTACKERS
+                && phase != PhaseType.COMBAT_DECLARE_BLOCKERS && phase != PhaseType.COMBAT_FIRST_STRIKE_DAMAGE
+                && phase != PhaseType.COMBAT_DAMAGE && phase != PhaseType.COMBAT_END;
+    }
+
+    private boolean unsupportedExternalStackResponse(SpellAbility ability) {
+        return ability == null || ability.isManaAbility() || ability.isTrigger()
+                || ability.isReplacementAbility() || ability.getHostCard() == null;
+    }
+
+    private StackResponseChoice chooseExternalStackResponse(List<SpellAbility> candidates,
+            SpellAbility legacyResponse) {
+        long started = System.nanoTime();
+        PreparedAiActionSet set;
+        try {
+            set = prepareStackResponseActions(candidates, externalStackResponseMaxActions);
+        } catch (RuntimeException ex) {
+            Logger.debug(ex, "External AI stack-response enumeration failed");
+            return new StackResponseChoice(false, legacyResponse);
+        }
+        if (set.actions().isEmpty()) {
+            return new StackResponseChoice(false, legacyResponse);
+        }
+        String decisionId = UUID.randomUUID().toString();
+        StackResponseDecisionContext context = MainPhaseStateProjector.projectStackResponseForOrdering(
+                player, decisionId, set.actions());
+        AiDecisionMetrics.GameRunMetadata run = AiDecisionMetrics.gameMetadata(game.getId());
+        StackResponseActionPresentation presentation = StackResponseActionPresentation.create(set.actions(),
+                externalStackResponseRandomizeActionOrder, run == null || run.runSeed() == null ? 0L : run.runSeed(),
+                run == null ? game.getMatch().getOutcomes().size() : run.gameIndex(),
+                game.getRegisteredPlayers().indexOf(player), externalStackResponseDecisionSequence++,
+                context.stateFingerprint());
+        context = MainPhaseStateProjector.projectStackResponse(player, decisionId, set.actions(),
+                externalStackResponseRandomizeActionOrder ? presentation.originalPositions() : null,
+                externalStackResponseRandomizeActionOrder);
+        presentation = presentation.withOptionIds(context.legalActions().stream().map(action -> action.actionId()).toList());
+        String heuristicId = presentation.presentedId(findPreparedActionId(set.actions(), legacyResponse));
+        AiDecisionResult result = null;
+        AiDecisionFailureReason failure = null;
+        PreparedAiAction selected = null;
+        boolean selectedPass = false;
+        boolean fallback = true;
+        boolean staleOrInvalid = false;
+        try {
+            result = decisionProvider.chooseWithDiagnostics(context);
+            if (result == null || result.decision().isEmpty()) {
+                failure = result == null ? AiDecisionFailureReason.PROVIDER_EXCEPTION : result.failureReason();
+            } else {
+                AiDecision decision = result.decision().get();
+                if (!decisionId.equals(decision.decisionId())) {
+                    failure = AiDecisionFailureReason.DECISION_ID_MISMATCH;
+                } else if (!context.stateFingerprint().equals(decision.stateFingerprint())) {
+                    failure = AiDecisionFailureReason.FINGERPRINT_MISMATCH;
+                } else if (StackResponseDecisionContext.PASS_OPTION_ID.equals(decision.optionId())) {
+                    selectedPass = true;
+                    fallback = false;
+                } else {
+                    selected = presentation.resolve(decision.optionId());
+                    if (selected == null) {
+                        failure = AiDecisionFailureReason.ACTION_ID_MISMATCH;
+                    } else {
+                        fallback = false;
+                    }
+                }
+            }
+        } catch (RuntimeException ex) {
+            failure = AiDecisionFailureReason.PROVIDER_EXCEPTION;
+        }
+        StackResponseDecisionContext current = MainPhaseStateProjector.projectStackResponse(
+                player, decisionId, set.actions(), externalStackResponseRandomizeActionOrder
+                        ? presentation.originalPositions() : null, externalStackResponseRandomizeActionOrder);
+        if (!context.stateFingerprint().equals(current.stateFingerprint())) {
+            fallback = true;
+            staleOrInvalid = true;
+            failure = AiDecisionFailureReason.STALE_ACTION_SET;
+        } else if (!fallback && !selectedPass && !revalidatePreparedAction(selected)) {
+            fallback = true;
+            staleOrInvalid = true;
+            failure = AiDecisionFailureReason.REVALIDATION_FAILED;
+        }
+        String selectedId = fallback ? heuristicId : selectedPass
+                ? StackResponseDecisionContext.PASS_OPTION_ID : presentation.presentedId(selected.actionId());
+        recordStackResponseDecision(context, set, result, heuristicId, selectedId, fallback,
+                failure, staleOrInvalid, AiDecisionResult.elapsedMillis(started));
+        return fallback ? new StackResponseChoice(true, legacyResponse)
+                : new StackResponseChoice(true, selectedPass ? null : selected.spellAbility());
+    }
+
+    private String findPreparedActionId(List<PreparedAiAction> actions, SpellAbility legacyResponse) {
+        if (legacyResponse == null) {
+            return StackResponseDecisionContext.PASS_OPTION_ID;
+        }
+        for (PreparedAiAction action : actions) {
+            if (action.originalAbility() == legacyResponse
+                    || (action.sourceCard() == legacyResponse.getHostCard()
+                    && Objects.equals(action.spellAbility().getDescription(), legacyResponse.getDescription()))) {
+                return action.actionId();
+            }
+        }
+        return "FORGE_LEGACY_RESPONSE";
+    }
+
+    private void recordStackResponseDecision(StackResponseDecisionContext context,
+            PreparedAiActionSet set, AiDecisionResult result, String heuristicId, String selectedId,
+            boolean fallback, AiDecisionFailureReason failure, boolean staleOrInvalid,
+            long totalLatencyMs) {
+        int gameId = game.getId();
+        AiDecisionMetrics.GameRunMetadata metadata = AiDecisionMetrics.gameMetadata(gameId);
+        AiDecision returned = result == null ? null : result.decision().orElse(null);
+        AiDecisionMetrics.record(new StackResponseDecisionEvent(context.decisionId(),
+                context.stateFingerprint(), result == null ? null : result.provider(),
+                result == null ? null : result.model(), fallback ? AiDecisionSource.FORGE_HEURISTIC
+                        : AiDecisionSource.EXTERNAL_PROVIDER,
+                heuristicId, selectedId, set.actions().size(), !fallback
+                        && StackResponseDecisionContext.PASS_OPTION_ID.equals(selectedId), true, fallback,
+                failure, staleOrInvalid, result == null ? 0 : result.latencyMs(), totalLatencyMs,
+                gameId, metadata == null ? game.getMatch().getOutcomes().size() : metadata.gameIndex(),
+                metadata == null ? null : metadata.runSeed(), player.getName(),
+                game.getRegisteredPlayers().indexOf(player), player.getRegisteredPlayer().getDeck().getName(),
+                game.getPhaseHandler().getTurn(), game.getPhaseHandler().getPhase().name(),
+                returned == null ? null : returned.decisionId(),
+                returned == null ? null : returned.stateFingerprint(),
+                returned == null ? null : returned.optionId(), !fallback), context);
+    }
+
+    private record StackResponseChoice(boolean handled, SpellAbility ability) {
     }
 
     private PreparedAiAction chooseSpellAbilityToPlayFromList(
@@ -1662,26 +1854,42 @@ public class AiController {
 
     private boolean shouldRouteExternalMainPhase() {
         PhaseType phase = game.getPhaseHandler().getPhase();
-        return externalMainPhaseEnabled
-                && decisionProvider != null
-                && game.getStack().isEmpty()
-                && game.getPhaseHandler().getPlayerTurn() == player
-                && (phase == PhaseType.MAIN1 || phase == PhaseType.MAIN2);
+        if (!externalMainPhaseEnabled || decisionProvider == null
+                || (phase != PhaseType.MAIN1 && phase != PhaseType.MAIN2)) {
+            return false;
+        }
+        AiDecisionMetrics.recordMainPhaseWindowConsidered();
+        if (game.getPhaseHandler().getPlayerTurn() != player) {
+            AiDecisionMetrics.recordMainPhaseNotActivePlayer();
+            return false;
+        }
+        if (!game.getStack().isEmpty()) {
+            AiDecisionMetrics.recordMainPhaseStackNonempty();
+            return false;
+        }
+        return true;
     }
 
     private PreparedAiAction chooseExternalMainPhaseAction(List<SpellAbility> all, boolean skipCounter) {
         long totalStarted = System.nanoTime();
         PreparedAiActionSet set;
         try {
-            set = prepareCandidateActions(all, skipCounter, externalMainPhaseMaxActions);
+            set = externalMainPhaseIncludeRejected
+                    ? prepareCandidateActions(all, skipCounter, externalMainPhaseMaxActions, true,
+                            externalMainPhaseMaxRejectedActions)
+                    : prepareCandidateActions(all, skipCounter, externalMainPhaseMaxActions);
         } catch (RuntimeException e) {
+            AiDecisionMetrics.recordMainPhaseEnumerationFailure();
             Logger.debug(e, "External AI candidate enumeration failed");
             return null;
         }
         Logger.debug("External AI candidates raw={} evaluated={} accepted={} copiedGames={} enumerationMs={} bound={}",
                 set.rawCandidateCount(), set.evaluatedCandidateCount(), set.actions().size(), set.copiedGameCount(),
                 set.preparationNanos() / 1_000_000, externalMainPhaseMaxActions);
-        if (set.actions().size() < 2) {
+        int accepted = set.actions().size();
+        AiDecisionMetrics.recordMainPhaseEnumeration(set.rawCandidateCount(), set.evaluatedCandidateCount(),
+                accepted, accepted >= 2 ? accepted : 0);
+        if (accepted < 2) {
             return null;
         }
 
@@ -1772,6 +1980,7 @@ public class AiController {
             AiDecisionFailureReason failure, boolean staleOrInvalid, long totalLatencyMs) {
         int gameId = game.getId();
         AiDecisionMetrics.GameRunMetadata metadata = AiDecisionMetrics.gameMetadata(gameId);
+        AiDecision returned = result == null ? null : result.decision().orElse(null);
         AiDecisionMetrics.record(new MainPhaseDecisionEvent(context.decisionId(), context.state().fingerprint(),
                 result == null ? null : result.provider(), result == null ? null : result.model(),
                 fallback ? AiDecisionSource.FORGE_HEURISTIC : AiDecisionSource.EXTERNAL_PROVIDER,
@@ -1783,7 +1992,18 @@ public class AiController {
                 metadata == null ? null : metadata.runSeed(), player.getName(),
                 game.getRegisteredPlayers().indexOf(player), player.getRegisteredPlayer().getDeck().getName(),
                 (selected == null ? heuristic : selected).category().name(),
-                visibleSourceName((selected == null ? heuristic : selected).spellAbility())));
+                visibleSourceName((selected == null ? heuristic : selected).spellAbility()),
+                context.state().turnNumber(), context.state().phase(), externalMainPhaseMaxActions,
+                set.rawCandidateCount() > set.evaluatedCandidateCount(),
+                returned == null ? null : returned.decisionId(),
+                returned == null ? null : returned.stateFingerprint(),
+                returned == null ? null : returned.optionId(), !fallback,
+                (int) set.actions().stream().filter(action -> !action.forgeHeuristicAccepted()).count(),
+                selected != null && !selected.forgeHeuristicAccepted(),
+                fallback && returned != null && set.actions().stream().anyMatch(action ->
+                        action.actionId().equals(returned.optionId()) && !action.forgeHeuristicAccepted()),
+                selected == null ? null : (selected.forgeHeuristicAccepted()
+                        ? ("ACTION_0".equals(selected.actionId()) ? "PREFERRED" : "ALTERNATIVE") : "REJECTED")), context);
     }
 
     List<PreparedAiAction> prepareSpellAbilityActions(final List<SpellAbility> all, boolean skipCounter) {
@@ -1793,6 +2013,12 @@ public class AiController {
 
     private List<PreparedAiAction> prepareExpandedSpellAbilityActions(
             final List<SpellAbility> expanded, boolean skipCounter, int maxActions) {
+        return prepareExpandedSpellAbilityActions(expanded, skipCounter, maxActions, false);
+    }
+
+    private List<PreparedAiAction> prepareExpandedSpellAbilityActions(
+            final List<SpellAbility> expanded, boolean skipCounter, int maxActions,
+            boolean alreadyIsolated) {
         List<PreparedAiAction> prepared = Lists.newArrayList();
         int candidateIndex = 0;
         // Avoid ComputerUtil.aiLifeInDanger in loops as it slows down a lot.
@@ -1801,7 +2027,7 @@ public class AiController {
         // execute API-specific checks that the traditional heuristic never reached.
         for (final SpellAbility original : expanded) {
             final int originalCandidateIndex = candidateIndex++;
-            SpellAbility sa = original.copy(player);
+            SpellAbility sa = alreadyIsolated ? original : original.copy(player);
             if (sa == null) {
                 // A small number of special abilities cannot be copied. Preserve their legacy behavior while
                 // keeping the common path isolated.
@@ -1889,7 +2115,7 @@ public class AiController {
 
                 String actionId = "ACTION_" + prepared.size();
                 PreparedAiAction action = new PreparedAiAction(actionId, sa, original, sa.getHostCard(),
-                        actionCategory(sa), originalCandidateIndex, sa.toString());
+                        actionCategory(sa), originalCandidateIndex, sa.toString(), true);
                 prepared.add(action);
                 Logger.debug("AI candidate prepared actionId={} position={} source={} api={} category={}",
                         actionId, originalCandidateIndex, sourceName, apiName, action.category());
@@ -1905,6 +2131,84 @@ public class AiController {
      * an isolated deterministic RNG. Normal play does not call this method.
      */
     PreparedAiActionSet prepareCandidateActions(final List<SpellAbility> all, boolean skipCounter, int maxActions) {
+        return prepareCandidateActions(all, skipCounter, maxActions, false, false);
+    }
+
+    private PreparedAiActionSet prepareStackResponseActions(final List<SpellAbility> all, int maxActions) {
+        long started = System.nanoTime();
+        List<PreparedAiAction> actions = new ArrayList<>();
+        int evaluated = 0;
+        int copied = 0;
+        for (int index = 0; index < all.size() && actions.size() < maxActions; index++) {
+            SpellAbility original = all.get(index);
+            if (original.getApi() != ApiType.Counter) {
+                continue;
+            }
+            GameCopier copier = new GameCopier(game, true);
+            try {
+                copier.makeCopy();
+                copied++;
+                Player copiedPlayer = copier.find(player);
+                SpellAbility mapped = copier.findSpellAbility(original);
+                if (mapped == null) {
+                    Card copiedHost = copier.find(original.getHostCard());
+                    if (copiedHost != null) {
+                        mapped = copiedHost.getSpellAbilities().stream()
+                                .filter(ability -> ability.getApi() == original.getApi())
+                                .findFirst().orElse(null);
+                    }
+                }
+                if (mapped == null) {
+                    continue;
+                }
+                evaluated++;
+                AiController copiedAi = ((PlayerControllerAi) copiedPlayer.getController()).getAi();
+                mapped.setActivatingPlayer(copiedPlayer);
+                mapped.resetTargets();
+                SpellAbility copiedTop = copier.getCopiedGame().getStack().peekAbility();
+                if (mapped.usesTargeting() && copiedTop != null && mapped.canTarget(copiedTop, true)) {
+                    mapped.getTargets().add(copiedTop);
+                }
+                PreparedAiAction copiedAction = new PreparedAiAction("COPIED", mapped, mapped,
+                        mapped.getHostCard(), copiedAi.actionCategory(mapped), index, mapped.toString(), true);
+                if (!copiedAi.revalidatePreparedAction(copiedAction)) {
+                    continue;
+                }
+                SpellAbility livePrepared = SpellAbilityChoiceCopier.copyCastChoices(
+                        mapped, original, player);
+                if (livePrepared == null) {
+                    continue;
+                }
+                SpellAbilityChoiceCopier.copyTargets(mapped, livePrepared, copier::reverseFind);
+                PreparedAiAction action = new PreparedAiAction("ACTION_" + actions.size(), livePrepared,
+                        original, livePrepared.getHostCard(), actionCategory(livePrepared), index,
+                        livePrepared.toString(), true);
+                if (revalidatePreparedAction(action)) {
+                    actions.add(action);
+                }
+            } catch (RuntimeException ex) {
+                Logger.debug(ex, "AI counter-response preparation failed position={}", index);
+            }
+        }
+        if (actions.size() < maxActions) {
+            List<SpellAbility> nonCounters = all.stream()
+                    .filter(ability -> ability.getApi() != ApiType.Counter).toList();
+            PreparedAiActionSet other = prepareCandidateActions(nonCounters, false,
+                    maxActions - actions.size(), true, true);
+            for (PreparedAiAction action : other.actions()) {
+                actions.add(new PreparedAiAction("ACTION_" + actions.size(), action.spellAbility(),
+                        action.originalAbility(), action.sourceCard(), action.category(),
+                        action.originalCandidateIndex(), action.description(), true));
+            }
+            evaluated += other.evaluatedCandidateCount();
+            copied += other.copiedGameCount();
+        }
+        return new PreparedAiActionSet(actions, all.size(), evaluated, copied,
+                System.nanoTime() - started);
+    }
+
+    private PreparedAiActionSet prepareCandidateActions(final List<SpellAbility> all, boolean skipCounter,
+            int maxActions, boolean evaluateIsolatedAbilityDirectly, boolean forceCopyStack) {
         long started = System.nanoTime();
         if (all == null || all.isEmpty() || maxActions <= 0) {
             return new PreparedAiActionSet(List.of(), 0, 0, 0, System.nanoTime() - started);
@@ -1926,7 +2230,7 @@ public class AiController {
 
         for (int candidateIndex = 0; candidateIndex < liveExpanded.size() && result.size() < maxActions; candidateIndex++) {
             final int index = candidateIndex;
-            GameCopier copier = new GameCopier(game);
+            GameCopier copier = new GameCopier(game, forceCopyStack);
             Game copiedGame;
             try {
                 copiedGame = copier.makeCopy();
@@ -1959,7 +2263,8 @@ public class AiController {
             evaluated++;
             long seed = candidateEnumerationSeed(all, index);
             List<PreparedAiAction> accepted = MyRandom.withRandom(new Random(seed), () ->
-                    copiedAi.prepareExpandedSpellAbilityActions(List.of(copiedExpanded.get(index)), skipCounter, 1));
+                    copiedAi.prepareExpandedSpellAbilityActions(List.of(copiedExpanded.get(index)), skipCounter, 1,
+                            evaluateIsolatedAbilityDirectly));
             if (accepted.isEmpty()) {
                 continue;
             }
@@ -1978,10 +2283,131 @@ public class AiController {
             }
             String actionId = "ACTION_" + result.size();
             result.add(new PreparedAiAction(actionId, livePrepared, liveExpanded.get(index),
-                    livePrepared.getHostCard(), actionCategory(livePrepared), index, livePrepared.toString()));
+                    livePrepared.getHostCard(), actionCategory(livePrepared), index, livePrepared.toString(), true));
         }
         return new PreparedAiActionSet(result, liveExpanded.size(), evaluated, copied,
                 System.nanoTime() - started);
+    }
+
+    /**
+     * Experimental opt-in extension. The normal overload above deliberately remains the disabled-path implementation.
+     * Rejected actions are evaluated separately so they never displace, reorder, or consume accepted action slots.
+     */
+    PreparedAiActionSet prepareCandidateActions(final List<SpellAbility> all, boolean skipCounter, int maxActions,
+            boolean includeRejected, int maxRejectedActions) {
+        PreparedAiActionSet accepted = prepareCandidateActions(all, skipCounter, maxActions);
+        if (!includeRejected || maxRejectedActions <= 0 || accepted.actions().isEmpty() || all == null || all.isEmpty()) {
+            return accepted;
+        }
+        long started = System.nanoTime();
+        List<SpellAbility> templates = new ArrayList<>();
+        for (SpellAbility ability : all) {
+            SpellAbility copy = ability.copy(player);
+            if (copy != null) {
+                templates.add(copy);
+            }
+        }
+        List<SpellAbility> expanded = ComputerUtilAbility.getOriginalAndAltCostAbilities(templates, player);
+        List<PreparedAiAction> rejected = new ArrayList<>();
+        int evaluated = 0;
+        int copied = 0;
+        for (int index = 0; index < expanded.size() && rejected.size() < maxRejectedActions; index++) {
+            GameCopier copier = new GameCopier(game);
+            Game copiedGame;
+            try {
+                copiedGame = copier.makeCopy();
+                copied++;
+            } catch (RuntimeException ex) {
+                Logger.debug(ex, "AI rejected candidate copy failed position={}", index);
+                continue;
+            }
+            Player copiedPlayer = copier.find(player);
+            AiController copiedAi = ((PlayerControllerAi) copiedPlayer.getController()).getAi();
+            List<SpellAbility> copiedInputs = new ArrayList<>();
+            boolean mappingFailed = false;
+            for (SpellAbility ability : all) {
+                SpellAbility mapped = copier.findSpellAbility(ability);
+                if (mapped == null) {
+                    mappingFailed = true;
+                    break;
+                }
+                copiedInputs.add(mapped);
+            }
+            if (mappingFailed) {
+                continue;
+            }
+            List<SpellAbility> copiedExpanded = ComputerUtilAbility.getOriginalAndAltCostAbilities(copiedInputs, copiedPlayer);
+            if (index >= copiedExpanded.size()) {
+                continue;
+            }
+            evaluated++;
+            final int candidateIndex = index;
+            PreparedAiAction candidate = MyRandom.withRandom(new Random(candidateEnumerationSeed(all, index)), () ->
+                    copiedAi.prepareStrategicallyRejectedAction(copiedExpanded.get(candidateIndex), skipCounter,
+                            candidateIndex));
+            if (candidate == null) {
+                continue;
+            }
+            SpellAbility livePrepared = SpellAbilityChoiceCopier.copyCastChoices(candidate.spellAbility(),
+                    expanded.get(index), player);
+            if (livePrepared == null) {
+                continue;
+            }
+            try {
+                SpellAbilityChoiceCopier.copyTargets(candidate.spellAbility(), livePrepared, copier::reverseFind);
+            } catch (RuntimeException ex) {
+                Logger.debug(ex, "AI rejected candidate target mapping failed position={}", index);
+                continue;
+            }
+            PreparedAiAction liveCandidate = new PreparedAiAction("ACTION_" + (accepted.actions().size() + rejected.size()),
+                    livePrepared, expanded.get(index), livePrepared.getHostCard(), actionCategory(livePrepared), index,
+                    livePrepared.toString(), false);
+            if (revalidatePreparedAction(liveCandidate)) {
+                rejected.add(liveCandidate);
+            }
+        }
+        List<PreparedAiAction> actions = new ArrayList<>(accepted.actions());
+        actions.addAll(rejected);
+        return new PreparedAiActionSet(actions, accepted.rawCandidateCount(),
+                accepted.evaluatedCandidateCount() + evaluated, accepted.copiedGameCount() + copied,
+                accepted.preparationNanos() + System.nanoTime() - started);
+    }
+
+    private PreparedAiAction prepareStrategicallyRejectedAction(SpellAbility original, boolean skipCounter,
+            int originalCandidateIndex) {
+        SpellAbility sa = original.copy(player);
+        if (sa == null || (skipCounter && sa.getApi() == ApiType.Counter)) {
+            return null;
+        }
+        sa.setActivatingPlayer(player);
+        SpellAbility root = sa.getRootAbility();
+        if (root.isSpell() || root.isTrigger() || root.isReplacementAbility()) {
+            sa.setLastStateBattlefield(game.getLastStateBattlefield());
+            sa.setLastStateGraveyard(game.getLastStateGraveyard());
+        }
+        AiPlayDecision opinion;
+        try {
+            opinion = canPlayAndPayFor(sa);
+        } finally {
+            sa.clearLastState();
+        }
+        if (!isSafeStrategicRejection(opinion)) {
+            return null;
+        }
+        PreparedAiAction candidate = new PreparedAiAction("REJECTED", sa, original, sa.getHostCard(),
+                actionCategory(sa), originalCandidateIndex, sa.toString(), false);
+        return revalidatePreparedAction(candidate) ? candidate : null;
+    }
+
+    private static boolean isSafeStrategicRejection(AiPlayDecision decision) {
+        return switch (decision) {
+            case WaitForCombat, WaitForMain2, WaitForEndOfTurn, StackNotEmpty, AnotherTime,
+                    StopRunawayActivations, CostNotAcceptable, DoesntImpactCombat, DoesntImpactGame,
+                    NeedsToPlayCriteriaNotMet, ConditionsNotMet, IncreasesLifeInDanger, BadEtbEffects,
+                    CurseEffects, WouldBecomeZeroToughnessCreature, WouldDestroyLegend,
+                    WouldDestroyWorldEnchantment, HybridSimRejected -> true;
+            default -> false;
+        };
     }
 
     private long candidateEnumerationSeed(List<SpellAbility> abilities, int candidateIndex) {

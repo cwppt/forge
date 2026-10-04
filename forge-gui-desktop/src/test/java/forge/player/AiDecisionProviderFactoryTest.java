@@ -112,6 +112,22 @@ public class AiDecisionProviderFactoryTest extends SimulationTest {
         Assert.assertNotNull(createNormallyConfiguredController());
     }
 
+    @Test
+    public void stackOrderRandomizationDefaultsOffAndCliReachesController() throws Exception {
+        ForgePreferences preferences = FModel.getPreferences();
+        Assert.assertEquals(preferences.getPrefDefault(FPref.AI_EXTERNAL_STACK_RESPONSE_RANDOMIZE_ACTION_ORDER),
+                "false");
+        setPreference(preferences, FPref.AI_EXTERNAL_STACK_RESPONSE_RANDOMIZE_ACTION_ORDER, "false");
+        var flag = forge.ai.AiController.class.getDeclaredField("externalStackResponseRandomizeActionOrder");
+        flag.setAccessible(true);
+        Assert.assertFalse(flag.getBoolean(createNormallyConfiguredController().getAi()));
+        var configure = forge.view.SimulateMatch.class.getDeclaredMethod("configureExternalAi", Map.class);
+        configure.setAccessible(true);
+        configure.invoke(null, Map.of("external-ai-stack-response-randomize-action-order", List.of()));
+        Assert.assertTrue(preferences.getPrefBoolean(FPref.AI_EXTERNAL_STACK_RESPONSE_RANDOMIZE_ACTION_ORDER));
+        Assert.assertTrue(flag.getBoolean(createNormallyConfiguredController().getAi()));
+    }
+
     private PlayerControllerAi createNormallyConfiguredController() {
         LobbyPlayerAi opponent = new LobbyPlayerAi("opponent", null);
         LobbyPlayerAi configured = (LobbyPlayerAi) GamePlayerUtil.createAiPlayer("configured-ai");
@@ -125,6 +141,28 @@ public class AiDecisionProviderFactoryTest extends SimulationTest {
         return (PlayerControllerAi) game.getPlayers().get(1).getController();
     }
 
+    @Test
+    public void combatDefaultsAndCliReachNormallyConstructedController() throws Exception {
+        ForgePreferences preferences = FModel.getPreferences();
+        Assert.assertEquals(preferences.getPrefDefault(FPref.AI_EXTERNAL_COMBAT_ATTACKERS_ENABLED), "false");
+        Assert.assertEquals(preferences.getPrefDefault(FPref.AI_EXTERNAL_COMBAT_ATTACKERS_MAX_OPTIONS), "4");
+        configureRuntimeProvider(false, "http://localhost:11434/v1/chat/completions", "test-model", "", "20");
+        setPreference(preferences, FPref.AI_EXTERNAL_MAIN_PHASE_ENABLED, "false");
+        setPreference(preferences, FPref.AI_EXTERNAL_STACK_RESPONSE_ENABLED, "false");
+        setPreference(preferences, FPref.AI_EXTERNAL_COMBAT_ATTACKERS_ENABLED, "false");
+        setPreference(preferences, FPref.AI_EXTERNAL_COMBAT_ATTACKERS_MAX_OPTIONS, "4");
+        Assert.assertTrue(AiDecisionProviderFactory.create(preferences).isEmpty());
+        var configure = forge.view.SimulateMatch.class.getDeclaredMethod("configureExternalAi", Map.class);
+        configure.setAccessible(true);
+        configure.invoke(null, Map.of("external-ai-combat-attackers-enabled", List.of(),
+                "external-ai-combat-attackers-max-options", List.of("3")));
+        Assert.assertTrue(AiDecisionProviderFactory.create(preferences).isPresent());
+        var brains = createNormallyConfiguredController().getAi();
+        var flag = forge.ai.AiController.class.getDeclaredField("externalCombatAttackersEnabled"); flag.setAccessible(true);
+        var cap = forge.ai.AiController.class.getDeclaredField("externalCombatAttackersMaxOptions"); cap.setAccessible(true);
+        Assert.assertTrue(flag.getBoolean(brains)); Assert.assertEquals(cap.getInt(brains), 3);
+    }
+
     private void configureRuntimeProvider(
             boolean enabled, String endpoint, String model, String apiKey, String timeout) {
         ForgePreferences preferences = FModel.getPreferences();
@@ -133,6 +171,7 @@ public class AiDecisionProviderFactoryTest extends SimulationTest {
         setPreference(preferences, FPref.AI_EXTERNAL_MULLIGAN_MODEL, model);
         setPreference(preferences, FPref.AI_EXTERNAL_MULLIGAN_API_KEY, apiKey);
         setPreference(preferences, FPref.AI_EXTERNAL_MULLIGAN_TIMEOUT_SECONDS, timeout);
+        setPreference(preferences, FPref.AI_EXTERNAL_RESPONSE_FORMAT, "AUTO");
     }
 
     private void setPreference(ForgePreferences preferences, FPref preference, String value) {

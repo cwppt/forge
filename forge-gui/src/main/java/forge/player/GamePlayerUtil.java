@@ -75,14 +75,39 @@ public final class GamePlayerUtil {
         final boolean externalMainPhase = FModel.getPreferences()
                 .getPrefBoolean(FPref.AI_EXTERNAL_MAIN_PHASE_ENABLED);
         int maxActions;
+        int maxRejectedActions;
+        int maxStackResponseActions;
+        int maxCombatAttackerOptions;
         try {
             maxActions = Integer.parseInt(FModel.getPreferences().getPref(FPref.AI_EXTERNAL_MAIN_PHASE_MAX_ACTIONS));
         } catch (NumberFormatException e) {
             maxActions = 3;
         }
+        try {
+            maxRejectedActions = Integer.parseInt(FModel.getPreferences()
+                    .getPref(FPref.AI_EXTERNAL_MAIN_PHASE_MAX_REJECTED_ACTIONS));
+        } catch (NumberFormatException e) {
+            maxRejectedActions = 1;
+        }
+        try {
+            maxStackResponseActions = Integer.parseInt(FModel.getPreferences()
+                    .getPref(FPref.AI_EXTERNAL_STACK_RESPONSE_MAX_ACTIONS));
+        } catch (NumberFormatException e) {
+            maxStackResponseActions = 3;
+        }
+        try {
+            maxCombatAttackerOptions = Integer.parseInt(FModel.getPreferences().getPref(FPref.AI_EXTERNAL_COMBAT_ATTACKERS_MAX_OPTIONS));
+        } catch (NumberFormatException e) {
+            maxCombatAttackerOptions = 4;
+        }
         final LobbyPlayerAi player = new LobbyPlayerAi(name, options,
                 AiDecisionProviderFactory.create(FModel.getPreferences()).orElse(null),
-                externalMulligan, externalMainPhase, Math.max(2, maxActions));
+                externalMulligan, externalMainPhase, Math.max(2, maxActions), FModel.getPreferences()
+                        .getPrefBoolean(FPref.AI_EXTERNAL_MAIN_PHASE_INCLUDE_REJECTED), Math.max(0, maxRejectedActions),
+                FModel.getPreferences().getPrefBoolean(FPref.AI_EXTERNAL_STACK_RESPONSE_ENABLED),
+                Math.max(1, maxStackResponseActions), FModel.getPreferences()
+                        .getPrefBoolean(FPref.AI_EXTERNAL_STACK_RESPONSE_RANDOMIZE_ACTION_ORDER),
+                FModel.getPreferences().getPrefBoolean(FPref.AI_EXTERNAL_COMBAT_ATTACKERS_ENABLED), maxCombatAttackerOptions);
 
         // TODO: implement specific AI profiles for quest mode.
         String profile = "";

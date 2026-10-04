@@ -6,7 +6,7 @@ public record MainPhasePlayerState(
         AiPlayerView identity,
         int life,
         boolean self,
-        String manaPool,
+        MainPhaseManaView mana,
         List<MainPhaseCardView> hand,
         List<MainPhaseCardView> battlefield,
         List<MainPhaseCardView> graveyard,

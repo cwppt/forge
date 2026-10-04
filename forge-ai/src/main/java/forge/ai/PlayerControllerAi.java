@@ -83,12 +83,51 @@ public class PlayerControllerAi extends PlayerController {
 
     public PlayerControllerAi(Game game, Player p, LobbyPlayer lp, AiDecisionProvider decisionProvider,
             boolean externalMulliganEnabled, boolean externalMainPhaseEnabled, int mainPhaseMaxActions) {
+        this(game, p, lp, decisionProvider, externalMulliganEnabled, externalMainPhaseEnabled, mainPhaseMaxActions,
+                false, 1);
+    }
+
+    public PlayerControllerAi(Game game, Player p, LobbyPlayer lp, AiDecisionProvider decisionProvider,
+            boolean externalMulliganEnabled, boolean externalMainPhaseEnabled, int mainPhaseMaxActions,
+            boolean includeRejectedMainPhaseActions, int maxRejectedMainPhaseActions) {
+        this(game, p, lp, decisionProvider, externalMulliganEnabled, externalMainPhaseEnabled,
+                mainPhaseMaxActions, includeRejectedMainPhaseActions, maxRejectedMainPhaseActions,
+                false, 3);
+    }
+
+    public PlayerControllerAi(Game game, Player p, LobbyPlayer lp, AiDecisionProvider decisionProvider,
+            boolean externalMulliganEnabled, boolean externalMainPhaseEnabled, int mainPhaseMaxActions,
+            boolean includeRejectedMainPhaseActions, int maxRejectedMainPhaseActions,
+            boolean externalStackResponseEnabled, int stackResponseMaxActions) {
+        this(game, p, lp, decisionProvider, externalMulliganEnabled, externalMainPhaseEnabled,
+                mainPhaseMaxActions, includeRejectedMainPhaseActions, maxRejectedMainPhaseActions,
+                externalStackResponseEnabled, stackResponseMaxActions, false);
+    }
+
+    public PlayerControllerAi(Game game, Player p, LobbyPlayer lp, AiDecisionProvider decisionProvider,
+            boolean externalMulliganEnabled, boolean externalMainPhaseEnabled, int mainPhaseMaxActions,
+            boolean includeRejectedMainPhaseActions, int maxRejectedMainPhaseActions,
+            boolean externalStackResponseEnabled, int stackResponseMaxActions, boolean randomizeStackResponseOrder) {
+        this(game, p, lp, decisionProvider, externalMulliganEnabled, externalMainPhaseEnabled, mainPhaseMaxActions,
+                includeRejectedMainPhaseActions, maxRejectedMainPhaseActions, externalStackResponseEnabled,
+                stackResponseMaxActions, randomizeStackResponseOrder, false, 4);
+    }
+
+    public PlayerControllerAi(Game game, Player p, LobbyPlayer lp, AiDecisionProvider decisionProvider,
+            boolean externalMulliganEnabled, boolean externalMainPhaseEnabled, int mainPhaseMaxActions,
+            boolean includeRejectedMainPhaseActions, int maxRejectedMainPhaseActions,
+            boolean externalStackResponseEnabled, int stackResponseMaxActions, boolean randomizeStackResponseOrder,
+            boolean externalCombatAttackersEnabled, int combatAttackersMaxOptions) {
         super(game, p, lp);
 
         brains = new AiController(p, game);
         this.decisionProvider = decisionProvider;
         this.externalMulliganEnabled = externalMulliganEnabled && decisionProvider != null;
-        brains.configureExternalMainPhase(decisionProvider, externalMainPhaseEnabled, mainPhaseMaxActions);
+        brains.configureExternalMainPhase(decisionProvider, externalMainPhaseEnabled, mainPhaseMaxActions,
+                includeRejectedMainPhaseActions, maxRejectedMainPhaseActions);
+        brains.configureExternalStackResponses(decisionProvider, externalStackResponseEnabled,
+                stackResponseMaxActions, randomizeStackResponseOrder);
+        brains.configureExternalCombatAttackers(decisionProvider, externalCombatAttackersEnabled, combatAttackersMaxOptions);
     }
 
     public boolean pilotsNonAggroDeck() {

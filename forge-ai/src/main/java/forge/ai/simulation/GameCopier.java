@@ -49,9 +49,15 @@ public class GameCopier {
     private BiMap<Card, Card> cardMap = HashBiMap.create();
     private CopiedGameObjectMap gameObjectMap;
     private GameSnapshot snapshot = null;
+    private final boolean forceCopyStack;
 
     public GameCopier(Game origGame) {
+        this(origGame, false);
+    }
+
+    public GameCopier(Game origGame, boolean forceCopyStack) {
         this.origGame = origGame;
+        this.forceCopyStack = forceCopyStack;
         if (origGame.EXPERIMENTAL_RESTORE_SNAPSHOT) {
             this.snapshot = new GameSnapshot(origGame);
         }
@@ -175,8 +181,8 @@ public class GameCopier {
         newGame.getAction().checkStateEffects(true); //ensure state based effects and triggers are updated
         newGame.getTriggerHandler().resetActiveTriggers();
 
-        if (GameSimulator.COPY_STACK)
-            copyStack(origGame, newGame, gameObjectMap);
+        if (forceCopyStack || GameSimulator.COPY_STACK)
+            copyStack(origGame, newGame, gameObjectMap, forceCopyStack);
 
         // TODO update thisTurnCast
 
@@ -187,13 +193,14 @@ public class GameCopier {
         return newGame;
     }
 
-    private static void copyStack(Game origGame, Game newGame, IEntityMap map) {
+    private static void copyStack(Game origGame, Game newGame, IEntityMap map,
+            boolean includeNonSpellAbilities) {
         for (SpellAbilityStackInstance origEntry : origGame.getStack()) {
             SpellAbility origSa = origEntry.getSpellAbility();
             Card origHostCard = origSa.getHostCard();
             Card newCard = map.map(origHostCard);
             SpellAbility newSa = null;
-            if (origSa.isSpell()) {
+            if (origSa.isSpell() || includeNonSpellAbilities) {
                 newSa = findSAInCard(origSa, newCard);
             }
             if (newSa != null) {

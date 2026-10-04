@@ -75,6 +75,15 @@ public class SimulateMatch {
 
         configureExternalAi(params);
         AiDecisionMetrics.reset();
+        List<String> auditOutput = params.get("decision-audit-jsonl");
+        if (auditOutput != null && !auditOutput.isEmpty()) {
+            try {
+                AiDecisionMetrics.configureDecisionAudit(Path.of(auditOutput.get(0)));
+            } catch (IOException e) {
+                System.err.println("Unable to open decision audit JSONL: " + e.getMessage());
+                return;
+            }
+        }
 
         String deckDir = null;
         if (params.containsKey("D")) {
@@ -217,12 +226,22 @@ public class SimulateMatch {
         System.out.println("\tq - Quiet flag. Output just the game result, not the entire game log.");
         System.out.println("\t--external-ai-enabled - legacy alias: enable external mulligan decisions");
         System.out.println("\t--external-ai-mulligan-enabled - enable external mulligan decisions");
+        System.out.println("\t--external-ai-mulligan-disabled - disable external mulligan decisions for this run");
         System.out.println("\t--external-ai-main-phase-enabled - enable prepared main-phase action selection");
         System.out.println("\t--external-ai-main-phase-max-actions <N> - bounded prepared action count (default 3)");
+        System.out.println("\t--external-ai-main-phase-include-rejected - expose bounded safe heuristic-rejected actions");
+        System.out.println("\t--external-ai-main-phase-max-rejected-actions <N> - rejected action bound (default 1)");
+        System.out.println("\t--external-ai-stack-response-enabled - enable prepared stack-response selection");
+        System.out.println("\t--external-ai-stack-response-max-actions <N> - bounded response count (default 3)");
+        System.out.println("\t--external-ai-stack-response-randomize-action-order - shuffle presented responses (default false)");
+        System.out.println("\t--external-ai-combat-attackers-enabled - enable prepared attacker-set selection (default false)");
+        System.out.println("\t--external-ai-combat-attackers-max-options <N> - bounded attacker options (default 4, hard cap 8)");
         System.out.println("\t--external-ai-endpoint <URL> - OpenAI-compatible chat/completions endpoint");
         System.out.println("\t--external-ai-model <model> - external model name");
         System.out.println("\t--external-ai-timeout <seconds> - positive request timeout");
+        System.out.println("\t--external-ai-response-format <AUTO|JSON_SCHEMA|JSON_OBJECT> - structured response mode");
         System.out.println("\t--metrics-csv <file> - write mulligan and main-phase AI telemetry as CSV");
+        System.out.println("\t--decision-audit-jsonl <file> - write sanitized main-phase decision audits as JSONL");
     }
 
     public static GameSimulationResult simulateSingleMatch(final Match mc, int iGame, boolean outputGamelog) {
@@ -267,10 +286,14 @@ public class SimulateMatch {
 
         // If both players life totals to 0 in a single turn, the game should end in a draw
         if (g1.getOutcome().isDraw()) {
+            AiDecisionMetrics.completeGame(g1.getId(), null, true, sw.getTime(),
+                    g1.getPhaseHandler().getTurn());
             System.out.printf("\nGame Result: Game %d ended in a Draw! Took %d ms.%n", 1 + iGame, sw.getTime());
             return new GameSimulationResult(sw.getTime(), true, null);
         } else {
             String winner = g1.getOutcome().getWinningLobbyPlayer().getName();
+            AiDecisionMetrics.completeGame(g1.getId(), winner, false, sw.getTime(),
+                    g1.getPhaseHandler().getTurn());
             System.out.printf("\nGame Result: Game %d ended in %d ms. %s has won!\n%n",
                     1 + iGame, sw.getTime(), winner);
             return new GameSimulationResult(sw.getTime(), false, winner);
@@ -287,13 +310,34 @@ public class SimulateMatch {
         if (params.containsKey("external-ai-mulligan-enabled")) {
             FModel.getPreferences().setPref(FPref.AI_EXTERNAL_MULLIGAN_ENABLED, true);
         }
+        if (params.containsKey("external-ai-mulligan-disabled")) {
+            FModel.getPreferences().setPref(FPref.AI_EXTERNAL_MULLIGAN_ENABLED, false);
+        }
         if (params.containsKey("external-ai-main-phase-enabled")) {
             FModel.getPreferences().setPref(FPref.AI_EXTERNAL_MAIN_PHASE_ENABLED, true);
         }
+        if (params.containsKey("external-ai-main-phase-include-rejected")) {
+            FModel.getPreferences().setPref(FPref.AI_EXTERNAL_MAIN_PHASE_INCLUDE_REJECTED, true);
+        }
+        if (params.containsKey("external-ai-stack-response-enabled")) {
+            FModel.getPreferences().setPref(FPref.AI_EXTERNAL_STACK_RESPONSE_ENABLED, true);
+        }
+        if (params.containsKey("external-ai-stack-response-randomize-action-order")) {
+            FModel.getPreferences().setPref(FPref.AI_EXTERNAL_STACK_RESPONSE_RANDOMIZE_ACTION_ORDER, true);
+        }
+        if (params.containsKey("external-ai-combat-attackers-enabled")) {
+            FModel.getPreferences().setPref(FPref.AI_EXTERNAL_COMBAT_ATTACKERS_ENABLED, true);
+        }
+        setPreference(params, "external-ai-combat-attackers-max-options", FPref.AI_EXTERNAL_COMBAT_ATTACKERS_MAX_OPTIONS);
         setPreference(params, "external-ai-endpoint", FPref.AI_EXTERNAL_MULLIGAN_ENDPOINT);
         setPreference(params, "external-ai-model", FPref.AI_EXTERNAL_MULLIGAN_MODEL);
         setPreference(params, "external-ai-timeout", FPref.AI_EXTERNAL_MULLIGAN_TIMEOUT_SECONDS);
+        setPreference(params, "external-ai-response-format", FPref.AI_EXTERNAL_RESPONSE_FORMAT);
         setPreference(params, "external-ai-main-phase-max-actions", FPref.AI_EXTERNAL_MAIN_PHASE_MAX_ACTIONS);
+        setPreference(params, "external-ai-main-phase-max-rejected-actions",
+                FPref.AI_EXTERNAL_MAIN_PHASE_MAX_REJECTED_ACTIONS);
+        setPreference(params, "external-ai-stack-response-max-actions",
+                FPref.AI_EXTERNAL_STACK_RESPONSE_MAX_ACTIONS);
     }
 
     private static void setPreference(Map<String, List<String>> params, String option, FPref preference) {

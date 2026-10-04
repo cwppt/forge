@@ -26,5 +26,17 @@ public record MainPhaseDecisionEvent(
         int playerSeat,
         String deckIdentifier,
         String actionCategory,
-        String sourceName) {
+        String sourceName,
+        int turnNumber,
+        String phase,
+        int configuredMaxActions,
+        boolean candidateSetTruncated,
+        String returnedDecisionId,
+        String returnedFingerprint,
+        String returnedOptionId,
+        boolean responseAccepted,
+        int rejectedActionsExposed,
+        boolean selectedRejectedAction,
+        boolean fallbackAfterRejectedAction,
+        String selectedForgeRecommendation) {
 }

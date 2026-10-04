@@ -19,6 +19,13 @@ public class LobbyPlayerAi extends LobbyPlayer implements IGameEntitiesFactory {
     private final boolean externalMulliganEnabled;
     private final boolean externalMainPhaseEnabled;
     private final int externalMainPhaseMaxActions;
+    private final boolean externalMainPhaseIncludeRejected;
+    private final int externalMainPhaseMaxRejectedActions;
+    private final boolean externalStackResponseEnabled;
+    private final int externalStackResponseMaxActions;
+    private final boolean externalStackResponseRandomizeActionOrder;
+    private final boolean externalCombatAttackersEnabled;
+    private final int externalCombatAttackersMaxOptions;
 
     public LobbyPlayerAi(String name, Set<AIOption> options) {
         this(name, options, null, false, false, 3);
@@ -30,11 +37,53 @@ public class LobbyPlayerAi extends LobbyPlayer implements IGameEntitiesFactory {
 
     public LobbyPlayerAi(String name, Set<AIOption> options, AiDecisionProvider decisionProvider,
             boolean externalMulliganEnabled, boolean externalMainPhaseEnabled, int externalMainPhaseMaxActions) {
+        this(name, options, decisionProvider, externalMulliganEnabled, externalMainPhaseEnabled,
+                externalMainPhaseMaxActions, false, 1);
+    }
+
+    public LobbyPlayerAi(String name, Set<AIOption> options, AiDecisionProvider decisionProvider,
+            boolean externalMulliganEnabled, boolean externalMainPhaseEnabled, int externalMainPhaseMaxActions,
+            boolean externalMainPhaseIncludeRejected, int externalMainPhaseMaxRejectedActions) {
+        this(name, options, decisionProvider, externalMulliganEnabled, externalMainPhaseEnabled,
+                externalMainPhaseMaxActions, externalMainPhaseIncludeRejected,
+                externalMainPhaseMaxRejectedActions, false, 3);
+    }
+
+    public LobbyPlayerAi(String name, Set<AIOption> options, AiDecisionProvider decisionProvider,
+            boolean externalMulliganEnabled, boolean externalMainPhaseEnabled, int externalMainPhaseMaxActions,
+            boolean externalMainPhaseIncludeRejected, int externalMainPhaseMaxRejectedActions,
+            boolean externalStackResponseEnabled, int externalStackResponseMaxActions) {
+        this(name, options, decisionProvider, externalMulliganEnabled, externalMainPhaseEnabled,
+                externalMainPhaseMaxActions, externalMainPhaseIncludeRejected, externalMainPhaseMaxRejectedActions,
+                externalStackResponseEnabled, externalStackResponseMaxActions, false);
+    }
+
+    public LobbyPlayerAi(String name, Set<AIOption> options, AiDecisionProvider decisionProvider,
+            boolean externalMulliganEnabled, boolean externalMainPhaseEnabled, int externalMainPhaseMaxActions,
+            boolean externalMainPhaseIncludeRejected, int externalMainPhaseMaxRejectedActions,
+            boolean externalStackResponseEnabled, int externalStackResponseMaxActions, boolean randomizeStackResponseOrder) {
+        this(name, options, decisionProvider, externalMulliganEnabled, externalMainPhaseEnabled, externalMainPhaseMaxActions,
+                externalMainPhaseIncludeRejected, externalMainPhaseMaxRejectedActions, externalStackResponseEnabled,
+                externalStackResponseMaxActions, randomizeStackResponseOrder, false, 4);
+    }
+
+    public LobbyPlayerAi(String name, Set<AIOption> options, AiDecisionProvider decisionProvider,
+            boolean externalMulliganEnabled, boolean externalMainPhaseEnabled, int externalMainPhaseMaxActions,
+            boolean externalMainPhaseIncludeRejected, int externalMainPhaseMaxRejectedActions,
+            boolean externalStackResponseEnabled, int externalStackResponseMaxActions, boolean randomizeStackResponseOrder,
+            boolean externalCombatAttackersEnabled, int externalCombatAttackersMaxOptions) {
         super(name);
         this.decisionProvider = decisionProvider;
         this.externalMulliganEnabled = externalMulliganEnabled;
         this.externalMainPhaseEnabled = externalMainPhaseEnabled;
         this.externalMainPhaseMaxActions = externalMainPhaseMaxActions;
+        this.externalMainPhaseIncludeRejected = externalMainPhaseIncludeRejected;
+        this.externalMainPhaseMaxRejectedActions = externalMainPhaseMaxRejectedActions;
+        this.externalStackResponseEnabled = externalStackResponseEnabled;
+        this.externalStackResponseMaxActions = externalStackResponseMaxActions;
+        this.externalStackResponseRandomizeActionOrder = randomizeStackResponseOrder;
+        this.externalCombatAttackersEnabled = externalCombatAttackersEnabled;
+        this.externalCombatAttackersMaxOptions = externalCombatAttackersMaxOptions;
         if (options != null && !options.isEmpty()) {
             option = options.iterator().next();
         }
@@ -54,7 +103,10 @@ public class LobbyPlayerAi extends LobbyPlayer implements IGameEntitiesFactory {
 
     private PlayerControllerAi createControllerFor(Player ai) {
         PlayerControllerAi result = new PlayerControllerAi(ai.getGame(), ai, this, decisionProvider,
-                externalMulliganEnabled, externalMainPhaseEnabled, externalMainPhaseMaxActions);
+                externalMulliganEnabled, externalMainPhaseEnabled, externalMainPhaseMaxActions,
+                externalMainPhaseIncludeRejected, externalMainPhaseMaxRejectedActions,
+                externalStackResponseEnabled, externalStackResponseMaxActions, externalStackResponseRandomizeActionOrder,
+                externalCombatAttackersEnabled, externalCombatAttackersMaxOptions);
         result.getAi().setUseSimulation(option);
         return result;
     }
