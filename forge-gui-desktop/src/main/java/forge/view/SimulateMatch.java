@@ -2,6 +2,8 @@ package forge.view;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -241,7 +243,8 @@ public class SimulateMatch {
         System.out.println("\t--external-ai-timeout <seconds> - positive request timeout");
         System.out.println("\t--external-ai-response-format <AUTO|JSON_SCHEMA|JSON_OBJECT> - structured response mode");
         System.out.println("\t--metrics-csv <file> - write mulligan and main-phase AI telemetry as CSV");
-        System.out.println("\t--decision-audit-jsonl <file> - write sanitized main-phase decision audits as JSONL");
+        System.out.println("\t--decision-audit-jsonl <file> - write sanitized external-AI decision audits as JSONL");
+        System.out.println("\t--game-results-jsonl <file> - write one machine-readable game result per line");
     }
 
     public static GameSimulationResult simulateSingleMatch(final Match mc, int iGame, boolean outputGamelog) {
@@ -289,18 +292,27 @@ public class SimulateMatch {
             AiDecisionMetrics.completeGame(g1.getId(), null, true, sw.getTime(),
                     g1.getPhaseHandler().getTurn());
             System.out.printf("\nGame Result: Game %d ended in a Draw! Took %d ms.%n", 1 + iGame, sw.getTime());
-            return new GameSimulationResult(sw.getTime(), true, null);
+            return new GameSimulationResult(g1.getId(), iGame, runSeed, sw.getTime(),
+                    g1.getPhaseHandler().getTurn(), true, null);
         } else {
             String winner = g1.getOutcome().getWinningLobbyPlayer().getName();
             AiDecisionMetrics.completeGame(g1.getId(), winner, false, sw.getTime(),
                     g1.getPhaseHandler().getTurn());
             System.out.printf("\nGame Result: Game %d ended in %d ms. %s has won!\n%n",
                     1 + iGame, sw.getTime(), winner);
-            return new GameSimulationResult(sw.getTime(), false, winner);
+            return new GameSimulationResult(g1.getId(), iGame, runSeed, sw.getTime(),
+                    g1.getPhaseHandler().getTurn(), false, winner);
         }
     }
 
-    public record GameSimulationResult(long durationMs, boolean draw, String winner) {
+    public record GameSimulationResult(
+            int gameId,
+            int gameIndex,
+            Long runSeed,
+            long durationMs,
+            int finalTurnCount,
+            boolean draw,
+            String winner) {
     }
 
     private static void configureExternalAi(Map<String, List<String>> params) {
@@ -361,9 +373,45 @@ public class SimulateMatch {
                 AiDecisionMetrics.writeCsv(Path.of(output.get(0)));
                 System.out.println("AI decision metrics CSV written to " + output.get(0));
             } catch (IOException e) {
-                System.err.println("Unable to write mulligan metrics CSV: " + e.getMessage());
+                System.err.println("Unable to write AI decision metrics CSV: " + e.getMessage());
             }
         }
+
+        List<String> gameResultsOutput = params.get("game-results-jsonl");
+        if (gameResultsOutput != null && !gameResultsOutput.isEmpty()) {
+            try {
+                writeGameResultsJsonl(Path.of(gameResultsOutput.get(0)), results);
+                System.out.println("Game results JSONL written to " + gameResultsOutput.get(0));
+            } catch (IOException e) {
+                System.err.println("Unable to write game results JSONL: " + e.getMessage());
+            }
+        }
+    }
+
+    private static void writeGameResultsJsonl(Path path, List<GameSimulationResult> results) throws IOException {
+        Path parent = path.toAbsolutePath().getParent();
+        if (parent != null) {
+            Files.createDirectories(parent);
+        }
+        List<String> lines = new ArrayList<>(results.size());
+        for (GameSimulationResult result : results) {
+            lines.add(String.format(Locale.ROOT,
+                    "{\"gameId\":%d,\"gameIndex\":%d,\"runSeed\":%s,\"durationMs\":%d,"
+                            + "\"finalTurnCount\":%d,\"draw\":%s,\"winner\":%s}",
+                    result.gameId(), result.gameIndex(),
+                    result.runSeed() == null ? "null" : result.runSeed().toString(),
+                    result.durationMs(), result.finalTurnCount(), result.draw(),
+                    result.winner() == null ? "null" : "\"" + jsonEscape(result.winner()) + "\""));
+        }
+        Files.write(path, lines, StandardCharsets.UTF_8);
+    }
+
+    private static String jsonEscape(String value) {
+        return value.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\r", "\\r")
+                .replace("\n", "\\n")
+                .replace("\t", "\\t");
     }
 
     private static void simulateTournament(Map<String, List<String>> params, GameRules rules, boolean outputGamelog) {
