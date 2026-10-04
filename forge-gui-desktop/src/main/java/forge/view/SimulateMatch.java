@@ -197,12 +197,12 @@ public class SimulateMatch {
             int iGame = 0;
             while (!mc.isMatchOver()) {
                 // play games until the match ends
-                results.add(simulateSingleMatch(mc, iGame, outputGamelog, seed));
+                results.add(simulateSingleMatch(mc, iGame, outputGamelog, seed, params));
                 iGame++;
             }
         } else {
             for (int iGame = 0; iGame < nGames; iGame++) {
-                results.add(simulateSingleMatch(mc, iGame, outputGamelog, seed));
+                results.add(simulateSingleMatch(mc, iGame, outputGamelog, seed, params));
             }
         }
 
@@ -245,14 +245,16 @@ public class SimulateMatch {
         System.out.println("\t--metrics-csv <file> - write mulligan and main-phase AI telemetry as CSV");
         System.out.println("\t--decision-audit-jsonl <file> - write sanitized external-AI decision audits as JSONL");
         System.out.println("\t--game-results-jsonl <file> - write one machine-readable game result per line");
+        System.out.println("\t--game-log-jsonl <file> - write chronological game-log events as JSONL");
     }
 
     public static GameSimulationResult simulateSingleMatch(final Match mc, int iGame, boolean outputGamelog) {
-        return simulateSingleMatch(mc, iGame, outputGamelog, null);
+        return simulateSingleMatch(mc, iGame, outputGamelog, null, Collections.emptyMap());
     }
 
     private static GameSimulationResult simulateSingleMatch(
-            final Match mc, int iGame, boolean outputGamelog, Long runSeed) {
+            final Match mc, int iGame, boolean outputGamelog, Long runSeed,
+            Map<String, List<String>> params) {
         final StopWatch sw = new StopWatch();
         sw.start();
 
@@ -285,6 +287,16 @@ public class SimulateMatch {
         Collections.reverse(log);
         for (GameLogEntry l : log) {
             System.out.println(l);
+        }
+
+        List<String> gameLogOutput = params.get("game-log-jsonl");
+        if (gameLogOutput != null && !gameLogOutput.isEmpty()) {
+            try {
+                appendGameLogJsonl(Path.of(gameLogOutput.get(0)), g1.getId(), iGame, runSeed,
+                        g1.getGameLog().getLogEntries(null));
+            } catch (IOException e) {
+                System.err.println("Unable to write game log JSONL: " + e.getMessage());
+            }
         }
 
         // If both players life totals to 0 in a single turn, the game should end in a draw
@@ -386,6 +398,28 @@ public class SimulateMatch {
                 System.err.println("Unable to write game results JSONL: " + e.getMessage());
             }
         }
+    }
+
+    private static void appendGameLogJsonl(Path path, int gameId, int gameIndex, Long runSeed,
+            List<GameLogEntry> entries) throws IOException {
+        Path parent = path.toAbsolutePath().getParent();
+        if (parent != null) {
+            Files.createDirectories(parent);
+        }
+        List<String> lines = new ArrayList<>(entries.size());
+        for (int eventIndex = 0; eventIndex < entries.size(); eventIndex++) {
+            GameLogEntry entry = entries.get(eventIndex);
+            String sourceCard = entry.sourceCard() == null ? null : entry.sourceCard().getName();
+            lines.add(String.format(Locale.ROOT,
+                    "{\"gameId\":%d,\"gameIndex\":%d,\"runSeed\":%s,\"eventIndex\":%d,"
+                            + "\"type\":\"%s\",\"message\":\"%s\",\"sourceCard\":%s}",
+                    gameId, gameIndex, runSeed == null ? "null" : runSeed.toString(), eventIndex,
+                    jsonEscape(entry.type().name()), jsonEscape(entry.message()),
+                    sourceCard == null ? "null" : "\"" + jsonEscape(sourceCard) + "\""));
+        }
+        Files.write(path, lines, StandardCharsets.UTF_8,
+                java.nio.file.StandardOpenOption.CREATE,
+                java.nio.file.StandardOpenOption.APPEND);
     }
 
     private static void writeGameResultsJsonl(Path path, List<GameSimulationResult> results) throws IOException {
