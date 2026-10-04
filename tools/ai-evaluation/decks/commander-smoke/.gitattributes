@@ -1,0 +1,2 @@
+# Keep fixture bytes stable so manifest SHA-256 checks survive checkout on any OS.
+*.dck -text whitespace=cr-at-eol,-blank-at-eof

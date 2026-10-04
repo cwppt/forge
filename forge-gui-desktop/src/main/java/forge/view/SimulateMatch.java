@@ -261,6 +261,8 @@ public class SimulateMatch {
         final Game g1 = mc.createGame();
         AiDecisionMetrics.registerGame(g1.getId(), iGame, runSeed);
         g1.setNoGUIUser();
+        boolean timedOut = false;
+        String simulationError = null;
         // will run match in the same thread
         try {
             TimeLimitedCodeBlock.runWithTimeout(() -> {
@@ -268,8 +270,10 @@ public class SimulateMatch {
                 sw.stop();
             }, mc.getRules().getSimTimeout(), TimeUnit.SECONDS);
         } catch (TimeoutException e) {
-            System.out.println("Stopping slow match as draw");
+            timedOut = true;
+            System.out.println("Simulation timed out; exporting the game's recorded outcome");
         } catch (Exception | StackOverflowError e) {
+            simulationError = e.getClass().getName();
             e.printStackTrace();
         } finally {
             if (sw.isStarted()) {
@@ -293,7 +297,7 @@ public class SimulateMatch {
         if (gameLogOutput != null && !gameLogOutput.isEmpty()) {
             try {
                 appendGameLogJsonl(Path.of(gameLogOutput.get(0)), g1.getId(), iGame, runSeed,
-                        g1.getGameLog().getLogEntries(null));
+                        g1.getGameLog().getAllEntries());
             } catch (IOException e) {
                 System.err.println("Unable to write game log JSONL: " + e.getMessage());
             }
@@ -305,7 +309,7 @@ public class SimulateMatch {
                     g1.getPhaseHandler().getTurn());
             System.out.printf("\nGame Result: Game %d ended in a Draw! Took %d ms.%n", 1 + iGame, sw.getTime());
             return new GameSimulationResult(g1.getId(), iGame, runSeed, sw.getTime(),
-                    g1.getPhaseHandler().getTurn(), true, null);
+                    g1.getPhaseHandler().getTurn(), true, null, timedOut, simulationError);
         } else {
             String winner = g1.getOutcome().getWinningLobbyPlayer().getName();
             AiDecisionMetrics.completeGame(g1.getId(), winner, false, sw.getTime(),
@@ -313,7 +317,7 @@ public class SimulateMatch {
             System.out.printf("\nGame Result: Game %d ended in %d ms. %s has won!\n%n",
                     1 + iGame, sw.getTime(), winner);
             return new GameSimulationResult(g1.getId(), iGame, runSeed, sw.getTime(),
-                    g1.getPhaseHandler().getTurn(), false, winner);
+                    g1.getPhaseHandler().getTurn(), false, winner, timedOut, simulationError);
         }
     }
 
@@ -324,7 +328,13 @@ public class SimulateMatch {
             long durationMs,
             int finalTurnCount,
             boolean draw,
-            String winner) {
+            String winner,
+            boolean timedOut,
+            String simulationError) {
+        public GameSimulationResult(int gameId, int gameIndex, Long runSeed, long durationMs,
+                int finalTurnCount, boolean draw, String winner) {
+            this(gameId, gameIndex, runSeed, durationMs, finalTurnCount, draw, winner, false, null);
+        }
     }
 
     private static void configureExternalAi(Map<String, List<String>> params) {
@@ -422,7 +432,7 @@ public class SimulateMatch {
                 java.nio.file.StandardOpenOption.APPEND);
     }
 
-    private static void writeGameResultsJsonl(Path path, List<GameSimulationResult> results) throws IOException {
+    static void writeGameResultsJsonl(Path path, List<GameSimulationResult> results) throws IOException {
         Path parent = path.toAbsolutePath().getParent();
         if (parent != null) {
             Files.createDirectories(parent);
@@ -431,11 +441,14 @@ public class SimulateMatch {
         for (GameSimulationResult result : results) {
             lines.add(String.format(Locale.ROOT,
                     "{\"gameId\":%d,\"gameIndex\":%d,\"runSeed\":%s,\"durationMs\":%d,"
-                            + "\"finalTurnCount\":%d,\"draw\":%s,\"winner\":%s}",
+                            + "\"finalTurnCount\":%d,\"draw\":%s,\"winner\":%s,"
+                            + "\"timedOut\":%s,\"simulationError\":%s}",
                     result.gameId(), result.gameIndex(),
                     result.runSeed() == null ? "null" : result.runSeed().toString(),
                     result.durationMs(), result.finalTurnCount(), result.draw(),
-                    result.winner() == null ? "null" : "\"" + jsonEscape(result.winner()) + "\""));
+                    result.winner() == null ? "null" : "\"" + jsonEscape(result.winner()) + "\"",
+                    result.timedOut(), result.simulationError() == null ? "null"
+                            : "\"" + jsonEscape(result.simulationError()) + "\""));
         }
         Files.write(path, lines, StandardCharsets.UTF_8);
     }

@@ -1,0 +1,42 @@
+{
+  "forgeRevision": "9b6f8fca177",
+  "fixedOn": "2026-10-04",
+  "decks": [
+    {
+      "seat": 0,
+      "file": "Lathliss-V2.4.dck",
+      "commander": "Lathliss, Dragon Queen",
+      "source": "User-provided V2.4 list",
+      "sourceUrl": null,
+      "note": "Double-faced card serialized as Valakut Awakening, as required by Forge.",
+      "sha256": "86537fdb5cd2ea7c9c04091495803ddf7b2a64ce50dbc5069d3932cc42b58692"
+    },
+    {
+      "seat": 1,
+      "file": "Kaalia-Heavenly-Inferno.dck",
+      "commander": "Kaalia of the Vast",
+      "source": "Heavenly Inferno (2011)",
+      "sourceUrl": "https://magic.wizards.com/en/news/feature/magic-gathering-commander-decklists-2011-06-14",
+      "note": "Repo precon; card list unchanged.",
+      "sha256": "a304f630d18a3129bfcd5227e902d755ee2c8d09169fbfd9a1ef4077759bbdd5"
+    },
+    {
+      "seat": 2,
+      "file": "Brudiclad-Exquisite-Invention.dck",
+      "commander": "Brudiclad, Telchor Engineer",
+      "source": "Exquisite Invention (2018)",
+      "sourceUrl": "https://magic.wizards.com/en/news/feature/commander-2018-edition-decklists-and-tokens-2018-07-27",
+      "note": "Brudiclad moved to commander; Saheeli, the Gifted moved into main. Same 100 cards.",
+      "sha256": "a2ae390be936fbe076d5e0e45a9f282a2cafab13b374eb2902374138ae403e92"
+    },
+    {
+      "seat": 3,
+      "file": "Breena-Silverquill-Statement.dck",
+      "commander": "Breena, the Demagogue",
+      "source": "Silverquill Statement (2021)",
+      "sourceUrl": "https://magic.wizards.com/en/news/announcements/commander-2021-edition-decklists-2021-04-05",
+      "note": "Repo precon; foil marker removed from commander name; card list unchanged.",
+      "sha256": "cc953bf54ed3344bb673e9bbfe9ee90c76b3b1d5887d1fdf9ce3dedce602272a"
+    }
+  ]
+}
