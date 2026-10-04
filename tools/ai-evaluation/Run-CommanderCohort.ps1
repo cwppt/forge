@@ -42,7 +42,8 @@ function Invoke-CommanderCohort {
         "-q",
         "--metrics-csv", "$prefix.metrics.csv",
         "--decision-audit-jsonl", "$prefix.decisions.jsonl",
-        "--game-results-jsonl", "$prefix.games.jsonl"
+        "--game-results-jsonl", "$prefix.games.jsonl",
+        "--game-log-jsonl", "$prefix.gamelog.jsonl"
     )
 
     if (-not [string]::IsNullOrWhiteSpace($DeckDirectory)) {
