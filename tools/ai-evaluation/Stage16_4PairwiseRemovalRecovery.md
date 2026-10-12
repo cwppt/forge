@@ -62,3 +62,32 @@ powershell.exe -NoProfile -File .\tools\ai-evaluation\Run-Stage16_4PairwiseRemov
 ```
 
 The launcher defaults to the three seeds above, writes a fresh timestamped directory under `ai-eval/stage16_4/`, and uses hidden Start-Process execution with separate stdout/stderr files. It supports Model, Endpoint, Seeds and DryRun. No broader card recovery or routing fix is justified by these results. Natural-game frequency and whether the option improves play remain open evaluation questions.
+
+## Natural-game coverage pilot (12 October 2026)
+
+`Run-Stage16_4NaturalGames.ps1` reuses the Stage 14 process, quoting, redirection, watchdog and completion checks. Qwen 14B drafted the runner; review corrected an invalid strategic-memory flag, removed unrelated combat diagnostics, added seat validation and made the expected game count reflect selected parameters. Only MAIN_PHASE_ACTION is enabled for the designated external seat. Its existing three-action bound is retained; all other surfaces, integration flags and memory are explicitly disabled. No decks, production behavior, heuristics or provider prompts changed.
+
+Evidence: `ai-eval/stage16_4/natural-20261012-160344-b69e3200/`, including run configuration, per-game completion records, metrics, full-game audit, captured requests and `natural-verification-results.json`.
+
+The existing Burial precon contains two Dead Ringers. Eight games used unmodified Burial against verified existing Aurochs Stampede and Selesnya Surge precons, seeds 16411/16412, with paired Forge-only controls and external Burial seat 0.
+
+| Matchup | Seed | Control winner / turns | External winner / turns | External provider calls |
+| --- | ---: | --- | --- | ---: |
+| Burial vs Aurochs Stampede | 16411 | Aurochs / 14 | Aurochs / 14 | 0 |
+| Burial vs Aurochs Stampede | 16412 | Aurochs / 16 | Aurochs / 17 | 2 |
+| Burial vs Selesnya Surge | 16411 | Selesnya / 17 | Selesnya / 17 | 0 |
+| Burial vs Selesnya Surge | 16412 | Selesnya / 11 | Selesnya / 11 | 1 |
+
+All eight games completed: zero crashes, timeouts or draws. All three external calls were accepted, agreed with Forge and had zero fallbacks or stale/revalidation failures. Mean provider latency was **4,253 ms**, including the local model-loading/state-size conditions of this run. The selected sources were Phyrexian Reaper, Llanowar Dead and Phyrexian Reaper; all three calls occurred in MAIN2. Every captured request passed byte-hash, thinking-disabled, exact schema enum, response identity/fingerprint/option mapping, audit and hidden-opponent-hand checks. Summaries confirmed no provider calls from other surfaces or control games.
+
+The four external games considered 153 main-phase windows: 82 were not the AI's active turn, 56 yielded zero safe actions, 12 yielded one, and three yielded multiple actions. Those three requests exposed seven options in total. Dead Ringers appeared in neither the supplied options nor the AI's own hand in those three captured request states.
+
+**Interpretation:** this pilot demonstrates sparse ordinary decision coverage, not a Dead Ringers exposure defect. It does not establish whether Dead Ringers was drawn or safely preparable in unrecorded no-call windows; existing aggregate eligibility metrics do not capture their full hands or candidate rejection reasons. The earlier nine-position smoke remains positive proof of exact exposure and real selected execution. No implementation or strategic fix is justified by the natural pilot. Burial lost all four controls and all four external games; this tiny sample, with zero recovered offers, cannot estimate the strategic benefit of recovery or attribute those losses to it.
+
+The runner passed an eight-command isolation check and a dry run under Windows PowerShell 5.1. No Java change required rerunning the previous focused tests. Tracked and added-file whitespace checks passed. The game limit is ten minutes, with the existing watchdog allowing an additional two minutes for process shutdown. Repeat from the repository root after compiling the desktop classes:
+
+```powershell
+powershell.exe -NoProfile -File .\tools\ai-evaluation\Run-Stage16_4NaturalGames.ps1 -RequestDiagnostics -PassThru
+```
+
+The next useful coverage investigation, if needed, is a wider predeclared seed sample or temporary read-only observation of no-call recovery opportunities. Do not increase disagreements, relax safeguards or redesign targeting to manufacture positive results.
