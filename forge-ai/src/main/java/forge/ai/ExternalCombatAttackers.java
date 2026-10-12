@@ -50,7 +50,7 @@ final class ExternalCombatAttackers {
     record Prepared(List<PreparedOption> options, CombatAttackersDecisionContext context, String heuristicId) {
         Prepared { options = List.copyOf(options); }
     }
-    private record Projection(CombatAttackersDecisionContext.State state, Map<Card, String> cardIds,
+    record Projection(CombatAttackersDecisionContext.State state, Map<Card, String> cardIds,
             Map<GameEntity, String> defenderIds) { }
     private record FingerprintMaterial(String version, CombatAttackersDecisionContext.State state,
             List<CombatAttackOptionView> options) { }
@@ -86,6 +86,11 @@ final class ExternalCombatAttackers {
         int limit = Math.min(HARD_MAX_OPTIONS, Math.max(1, maxOptions));
         if (limit < 2) return null;
         Projection projection = project(player, combat);
+        List<GameEntity> orderedDefenders = new ArrayList<>(combat.getDefenders());
+        orderedDefenders.sort(Comparator.comparing(projection.defenderIds()::get));
+        List<Card> orderedAttackers = new ArrayList<>();
+        player.getCreaturesInPlay().forEach(orderedAttackers::add);
+        orderedAttackers.sort(Comparator.comparing(projection.cardIds()::get));
         List<Map<Card, GameEntity>> candidates = new ArrayList<>();
         addCandidate(player, combat, candidates, combat.getAttackersAndDefenders(), limit);
         if (candidates.isEmpty()) return null;
@@ -93,15 +98,15 @@ final class ExternalCombatAttackers {
         addCandidate(player, combat, candidates, Map.of(), limit);
         // One all-in declaration per visible defender, then single-creature alternatives.
         // Stop at the cap. No recursive subset generation or combat simulation occurs here.
-        for (GameEntity defender : combat.getDefenders()) {
+        for (GameEntity defender : orderedDefenders) {
             if (candidates.size() >= limit) break;
             Map<Card, GameEntity> all = new LinkedHashMap<>();
-            for (Card card : player.getCreaturesInPlay()) if (CombatUtil.canAttack(card, defender)) all.put(card, defender);
+            for (Card card : orderedAttackers) if (CombatUtil.canAttack(card, defender)) all.put(card, defender);
             addCandidate(player, combat, candidates, all, limit);
         }
-        for (Card card : player.getCreaturesInPlay()) {
+        for (Card card : orderedAttackers) {
             if (candidates.size() >= limit) break;
-            for (GameEntity defender : combat.getDefenders()) {
+            for (GameEntity defender : orderedDefenders) {
                 if (candidates.size() >= limit) break;
                 if (CombatUtil.canAttack(card, defender)) addCandidate(player, combat, candidates, Map.of(card, defender), limit);
             }
@@ -119,7 +124,7 @@ final class ExternalCombatAttackers {
             prepared.add(new PreparedOption(new CombatAttackOptionView(id, visible, power, assignments.size()), assignments));
         }
         List<CombatAttackOptionView> options = prepared.stream().map(PreparedOption::view).toList();
-        return new Prepared(prepared, context(decisionId, projection.state(), options),
+        return new Prepared(prepared, context(player,decisionId, projection.state(), options),
                 prepared.stream().filter(option -> option.assignments().equals(heuristic)).findFirst().orElseThrow().view().optionId());
     }
 
@@ -151,10 +156,12 @@ final class ExternalCombatAttackers {
                 && legal(player, currentConstraints, option.assignments());
     }
 
-    private static CombatAttackersDecisionContext context(String decisionId, CombatAttackersDecisionContext.State state,
+    private static CombatAttackersDecisionContext context(Player player,String decisionId, CombatAttackersDecisionContext.State state,
             List<CombatAttackOptionView> options) {
         String fingerprint = hash(CANONICAL.toJson(new FingerprintMaterial("COMBAT_ATTACKERS_V1", state, options)));
-        return new CombatAttackersDecisionContext(decisionId, fingerprint, state, options);
+        var memory=ExternalAiStrategicMemory.snapshot(player,AiDecisionType.COMBAT_ATTACKERS,
+                state.players().stream().filter(CombatAttackersDecisionContext.PlayerState::self).flatMap(p->p.battlefield().stream()).map(p->p.card().name()).toList());
+        return new CombatAttackersDecisionContext(decisionId, ExternalAiStrategicMemory.fingerprint(fingerprint,memory), state, options,memory);
     }
 
     static CombatAttackersDecisionContext refresh(Player player, Combat combat, Prepared prepared) {
@@ -162,7 +169,7 @@ final class ExternalCombatAttackers {
         List<CombatAttackOptionView> options = prepared.options().stream().map(option -> new CombatAttackOptionView(
                 option.view().optionId(), assignmentViews(option.assignments(), projection),
                 option.assignments().keySet().stream().mapToInt(Card::getNetPower).sum(), option.assignments().size())).toList();
-        return context(prepared.context().decisionId(), projection.state(), options);
+        return context(player,prepared.context().decisionId(), projection.state(), options);
     }
 
     private static List<CombatAttackOptionView.Assignment> assignmentViews(Map<Card, GameEntity> assignments, Projection projection) {
@@ -172,7 +179,7 @@ final class ExternalCombatAttackers {
                         .thenComparing(CombatAttackOptionView.Assignment::defenderId, Comparator.nullsFirst(String::compareTo))).toList();
     }
 
-    private static Projection project(Player self, Combat combat) {
+    static Projection project(Player self, Combat combat) {
         Map<Card, String> cardIds = new IdentityHashMap<>();
         List<CombatAttackersDecisionContext.PlayerState> players = new ArrayList<>();
         int seat = 0;
@@ -234,15 +241,25 @@ final class ExternalCombatAttackers {
         } catch (NoSuchAlgorithmException e) { throw new IllegalStateException("Unable to fingerprint combat", e); }
     }
 
+    static Prepared diagnosticIdentity(Player player, Prepared prepared) {
+        if (prepared == null) return null;
+        var original = prepared.context();
+        String id = ExternalCombatDiagnosticIds.next(player, AiDecisionType.COMBAT_ATTACKERS, original.stateFingerprint(), original.decisionId());
+        if (id.equals(original.decisionId())) return prepared;
+        return new Prepared(prepared.options(), new CombatAttackersDecisionContext(id,
+                original.stateFingerprint(), original.state(), original.options(),original.memorySnapshot()), prepared.heuristicId());
+    }
     static void choose(Player player, Combat combat, AiDecisionProvider provider, int maxOptions) {
         long started = System.nanoTime();
         Prepared prepared;
-        try { prepared = prepare(player, combat, UUID.randomUUID().toString(), maxOptions); }
+        try { prepared = diagnosticIdentity(player, prepare(player, combat, UUID.randomUUID().toString(), maxOptions)); }
         catch (RuntimeException ex) { return; }
         if (prepared == null) return;
+        var correlation = AiDecisionMetrics.combatCorrelation(player.getGame(), combat, AiDecisionType.COMBAT_ATTACKERS);
         AiDecisionResult result = null;
         AiDecisionFailureReason failure = null;
         PreparedOption selected = null;
+        String liveRevalidation = "NOT_RUN";
         try {
             result = provider.chooseWithDiagnostics(prepared.context());
             if (result == null || result.decision().isEmpty()) failure = result == null
@@ -257,9 +274,17 @@ final class ExternalCombatAttackers {
                     if (selected == null) failure = AiDecisionFailureReason.ACTION_ID_MISMATCH;
                 }
             }
-            if (!eligible(player, combat) || !prepared.context().stateFingerprint().equals(refresh(player, combat, prepared).stateFingerprint()))
-                failure = AiDecisionFailureReason.STALE_ACTION_SET;
-            else if (selected != null && !revalidate(player, combat, selected)) failure = AiDecisionFailureReason.REVALIDATION_FAILED;
+            // The immutable request is authoritative. Reprojection is not request validation:
+            // unrelated visible changes and aliases do not invalidate an original option.
+            if (failure == null && selected != null) {
+                if (!eligible(player, combat)) {
+                    failure = AiDecisionFailureReason.LIVE_STATE_CHANGED;
+                    liveRevalidation = "LIVE_STATE_CHANGED";
+                } else if (!revalidate(player, combat, selected)) {
+                    failure = AiDecisionFailureReason.REVALIDATION_FAILED;
+                    liveRevalidation = "LIVE_REVALIDATION_FAILED";
+                } else liveRevalidation = "PASSED";
+            }
         } catch (RuntimeException ex) { failure = AiDecisionFailureReason.PROVIDER_EXCEPTION; }
         boolean fallback = failure != null || selected == null;
         String selectedId = fallback ? prepared.heuristicId() : selected.view().optionId();
@@ -271,16 +296,19 @@ final class ExternalCombatAttackers {
             declaration.forEach(combat::addAttacker);
         }
         AiDecisionMetrics.GameRunMetadata run = AiDecisionMetrics.gameMetadata(player.getGame().getId());
-        AiDecision returned = result == null ? null : result.decision().orElse(null);
+        AiDecision returned = result == null ? null : result.decision().orElse(result.rejectedDecision());
         AiDecisionMetrics.record(new CombatAttackersDecisionEvent(prepared.context().decisionId(), prepared.context().stateFingerprint(),
                 player.getGame().getId(), run == null ? player.getGame().getMatch().getOutcomes().size() : run.gameIndex(),
                 run == null ? null : run.runSeed(), player.getName(), player.getGame().getRegisteredPlayers().indexOf(player),
                 player.getRegisteredPlayer().getDeck().getName(), prepared.heuristicId(), selectedId, prepared.options().size(),
                 !fallback && CombatAttackersDecisionContext.NO_ATTACK.equals(selectedId), true,
                 fallback ? AiDecisionSource.FORGE_HEURISTIC : AiDecisionSource.EXTERNAL_PROVIDER, fallback, failure,
-                failure == AiDecisionFailureReason.STALE_ACTION_SET || failure == AiDecisionFailureReason.REVALIDATION_FAILED,
+                failure == AiDecisionFailureReason.LIVE_STATE_CHANGED || failure == AiDecisionFailureReason.REVALIDATION_FAILED,
                 result == null ? null : result.provider(), result == null ? null : result.model(),
                 result == null ? 0 : result.latencyMs(), AiDecisionResult.elapsedMillis(started), returned == null ? null : returned.decisionId(),
-                returned == null ? null : returned.stateFingerprint(), returned == null ? null : returned.optionId(), !fallback), prepared.context());
+                returned == null ? null : returned.stateFingerprint(), returned == null ? null : returned.optionId(), !fallback,
+                liveRevalidation,
+                correlation.combatSequenceId(), correlation.turnNumber(), correlation.activePlayerSeat(),
+                correlation.defendingPlayerSeat(), AiDecisionType.COMBAT_ATTACKERS), prepared.context());
     }
 }

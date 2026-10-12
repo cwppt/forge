@@ -1,0 +1,506 @@
+﻿deck_source,parsed_copies,warned_names,warned_print_section_entries,warned_copies,affected_names,warning_cards,structural_impact
+forge-gui/res/quest/precons/Abzan Siege.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Adaptive Enchantment.dck,100,4,4,4,12,Creeping Renaissance; Dawn's Reflection; Fertile Ground; Wild Growth,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Aerodoom.dck,61,6,6,6,6,Ebon Stronghold; Leviathan; Skittering Horror; Skittering Skirge; Svyelunite Temple; Tolarian Winds,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Air Forces.dck,60,3,3,7,3,Debt of Loyalty; Ophidian; Vodalian Illusionist,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Air Razers.dck,60,5,5,8,6,Aven Windreader; Compulsion; Flash of Insight; Hapless Researcher; Worldgorger Dragon,Elevated exposure (>=4 warned copies); not a strength measurement
+"forge-gui/res/quest/precons/Ajani, Valiant Protector.dck",60,0,0,0,0,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Ajani, Wise Counselor.dck",60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Allied Fires.dck,75,4,4,9,8,"Devout Decree; Dovin, Hand of Control; Drawn from Dreams; Interplanar Beacon",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Angelic Fury.dck,60,2,2,3,4,Inner Struggle; Magmatic Chasm,Some exposure; severity unknown
+forge-gui/res/quest/precons/Angelic Might.dck,60,0,0,0,1,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Angrath, Minotaur Pirate.dck",60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Anthousas Army.dck,60,1,1,2,1,Warriors' Lesson,Some exposure; severity unknown
+forge-gui/res/quest/precons/Arcane Maelstrom.dck,100,8,8,8,16,Commune with Lava; Djinn Illuminatus; Dualcaster Mage; Evolution Charm; Hunter's Insight; Lavabrink Floodgates; Mossfire Valley; Surreal Memoir,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Arcane Tempo.dck,75,1,1,3,1,Entrancing Melody,Some exposure; severity unknown
+forge-gui/res/quest/precons/Arcane Wizardry.dck,100,11,11,11,18,"Corpse Augur; Decree of Pain; Havengul Lich; Izzet Chemister; Memory Plunder; Mirror of the Forebears; Polymorphist's Jest; Portal Mage; Rakdos Charm; Spelltwine; Taigam, Sidisi's Hand",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Arcanis's Guile.dck,40,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Arm for Battle.dck,100,7,7,7,12,Boros Signet; Brass Squire; Dualcaster Mage; Master Warcraft; Oreskos Explorer; Timely Ward; Wild Ricochet,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Armada.dck,40,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Army of Entropy.dck,60,0,0,0,3,,No poor-AI warning marker
+forge-gui/res/quest/precons/Army of Justice.dck,40,1,1,1,2,Righteousness,Some exposure; severity unknown
+"forge-gui/res/quest/precons/Ashiok, Sculptor of Fears.dck",60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Assassin.dck,60,1,1,2,4,Slinking Skirge,Some exposure; severity unknown
+forge-gui/res/quest/precons/Assemble Victory.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Aura Mastery.dck,60,4,4,6,4,Barrenton Medic; Niveous Wisps; Puresight Merrow; Repel Intruders,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Aura of Courage.dck,100,8,8,8,12,Fertile Ground; Greater Good; Kenrith's Transformation; Ride the Avalanche; Skycloud Expanse; Sungrass Prairie; Utopia Sprawl; Wild Growth,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Aurochs Stampede.dck,60,6,6,8,6,Bounty of the Hunt; Giant Trap Door Spider; Orcish Lumberjack; Rimehorn Aurochs; Stalking Yeti; Tinder Wall,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Azorius Advance.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Azorius Ascendant.dck,60,2,2,4,2,Steeling Stance; Tidewater Minion,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Azorius Guild Kit.dck,60,1,1,2,4,Azorius Signet,Some exposure; severity unknown
+forge-gui/res/quest/precons/Bait & Switch.dck,60,10,10,20,12,Crown of Suspicion; Endemic Plague; Imagecrafter; Mistform Dreamer; Mistform Mutant; Mistform Shrieker; Mistform Stalker; Mistform Wall; Peer Pressure; Trickery Charm,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Bait and Bludgeon.dck,60,0,0,0,4,,No poor-AI warning marker
+forge-gui/res/quest/precons/Bant Exalted.dck,41,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Bant on the March.dck,41,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Barrage.dck,60,6,6,9,7,Alpha Kavu; Fertile Ground; Kavu Recluse; Magma Burst; Nomadic Elf; Root Greevil,Elevated exposure (>=4 warned copies); not a strength measurement
+"forge-gui/res/quest/precons/Basri, Devoted Paladin.dck",60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Battalion.dck,60,1,1,1,2,Turtleshell Changeling,Some exposure; severity unknown
+forge-gui/res/quest/precons/Battle Blitz.dck,60,1,1,2,1,Niveous Wisps,Some exposure; severity unknown
+forge-gui/res/quest/precons/Battle Cries.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Battle Surge.dck,60,2,2,4,3,Curfew; Fatigue,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Bestial Strength.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Beyond the Grave.dck,60,2,2,4,4,Barbed Sextant; Orcish Bloodpainter,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Blades of Victory.dck,60,1,1,1,1,Vengeful Archon,Some exposure; severity unknown
+forge-gui/res/quest/precons/Blazing Beasts of Myth.dck,60,1,1,1,1,Satyr Piper,Some exposure; severity unknown
+forge-gui/res/quest/precons/Blinding Fury.dck,40,1,1,1,1,False Peace,Some exposure; severity unknown
+forge-gui/res/quest/precons/Blood And Fire.dck,60,1,1,1,1,Goblin Bangchuckers,Some exposure; severity unknown
+forge-gui/res/quest/precons/Blowout.dck,60,2,2,2,6,Mourning; Phyrexian Delver,Some exposure; severity unknown
+forge-gui/res/quest/precons/Boggart Feast.dck,60,2,2,4,9,Marsh Flitter; Shimmering Grotto,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Bomber.dck,40,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Boros Battalion.dck,60,2,2,2,3,Mark for Death; Shielded Passage,Some exposure; severity unknown
+forge-gui/res/quest/precons/Boros Guild Kit.dck,60,4,4,5,6,"Boros Signet; Brightflame; Master Warcraft; Razia, Boros Archangel",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Bound by Strength.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Brave the Battle.dck,60,1,1,1,1,Vine Snare,Some exposure; severity unknown
+forge-gui/res/quest/precons/Breakdown.dck,60,4,4,8,6,Ensnare; Saprazzan Skerry; War Tax; Waterfront Bouncer,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Breath of Fire.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Breed Lethality.dck,100,9,9,9,17,"Bane of the Living; Cauldron of Souls; Darkwater Catacombs; Dreadship Reef; Ghave, Guru of Spores; Golgari Signet; Orzhov Signet; Simic Signet; Sungrass Prairie",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Brute Force.dck,41,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Buckle Up.dck,100,7,7,7,12,Armed and Armored; Azorius Signet; Cataclysmic Gearhulk; Dance of the Manse; Dispatch; Mirage Mirror; Skycloud Expanse,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Built from Scratch.dck,100,9,9,9,18,"Arcane Lighthouse; Bosh, Iron Golem; Dualcaster Mage; Faithless Looting; Goblin Welder; Incite Rebellion; Phyrexia's Core; Scrap Mastery; Trading Post",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Burial.dck,60,5,5,12,8,Chromatic Sphere; Dead Ringers; Putrid Warrior; Quagmire Druid; Zombie Boa,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Burning Sky.dck,60,2,2,5,4,Meddle; Pyric Salamander,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Call of Blood.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Call of the Kor.dck,60,7,7,14,7,Flickering Ward; Lancers en-Kor; Nomads en-Kor; Shaman en-Kor; Smite; Spirit en-Kor; Warrior en-Kor,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Call the Spirits.dck,100,8,8,8,17,Corpse Augur; Dawnglare Invoker; Deadly Tempest; Marshal's Anthem; Oreskos Explorer; Orzhov Signet; Phyrexian Reclamation; Shielded by Faith,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Carnival of Blood.dck,60,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Cavalcade Charge.dck,75,1,1,1,1,Embercleave,Some exposure; severity unknown
+forge-gui/res/quest/precons/Celestial Assault.dck,60,4,4,4,8,Akroma's Blessing; Defensive Maneuvers; Dispersing Orb; Meddle,Elevated exposure (>=4 warned copies); not a strength measurement
+"forge-gui/res/quest/precons/Chandra, Bold Pyromancer.dck",60,0,0,0,0,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Chandra, Flames Catalyst.dck",60,0,0,0,0,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Chandra, Pyrogenius.dck",60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Charge of the Boros.dck,60,4,4,6,7,Bathe in Light; Cleansing Beam; Rally the Righteous; Terrarion,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Chargoyf.dck,41,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Cho-Manno's Resolve.dck,40,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Cinder Heart.dck,40,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Code of the Orzhov.dck,60,3,3,4,6,Festival of the Guildpact; Martyred Rusalka; Thoughtpicker Witch,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Comeback.dck,60,7,7,10,11,Ancient Spring; Guard Dogs; Mana Cylix; Sawtooth Loon; Sisay's Ingenuity; Tidal Visionary; Waterspout Elemental,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Concerted Effort.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Conquering Hordes.dck,75,0,0,0,4,,No poor-AI warning marker
+forge-gui/res/quest/precons/Core Set 2019 Welcome Deck BG.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Core Set 2019 Welcome Deck BR.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Core Set 2019 Welcome Deck GU.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Core Set 2019 Welcome Deck GW.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Core Set 2019 Welcome Deck RG.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Core Set 2019 Welcome Deck RW.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Core Set 2019 Welcome Deck UB.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Core Set 2019 Welcome Deck UR.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Core Set 2019 Welcome Deck WB.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Core Set 2019 Welcome Deck WU.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Counter Surge.dck,75,1,1,1,3,Dispossess,Some exposure; severity unknown
+forge-gui/res/quest/precons/Counterpunch.dck,100,8,8,8,11,"Acorn Catapult; Alliance of Arms; Footbottom Feast; Golgari Signet; Orzhov Signet; Selesnya Signet; Squallmonger; Vish Kal, Blood Arbiter",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Coven Counters.dck,100,3,3,3,10,"Beast Within; Odric, Master Tactician; Sungrass Prairie",Some exposure; severity unknown
+forge-gui/res/quest/precons/Critical Mass.dck,60,6,6,9,7,Barrel Down Sokenzan; Cruel Deceiver; Kagemaro's Clutch; Sink into Takenuma; Sokenzan Renegade; Thoughts of Ruin,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Cruel Plots.dck,60,2,2,2,3,Gravepurge; Profaner of the Dead,Some exposure; severity unknown
+forge-gui/res/quest/precons/Crusher.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Cunning Plan.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Custom Creatures.dck,40,0,0,0,3,,No poor-AI warning marker
+forge-gui/res/quest/precons/Dangerous Knowledge.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Dark Alliance.dck,60,3,3,3,5,Cuombajj Witches; Goblin Recruiter; Mogg Raider,Some exposure; severity unknown
+forge-gui/res/quest/precons/Dark Devotion.dck,60,2,2,3,8,Call for Blood; Overblaze,Some exposure; severity unknown
+forge-gui/res/quest/precons/Dark Sacrifice.dck,60,5,5,7,5,Demonmail Hauberk; Falkenrath Torturer; Gravepurge; Selfless Cathar; Skirsdag Flayer,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Dead Again.dck,40,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Dead Ahead.dck,41,1,1,1,1,Viashino Skeleton,Some exposure; severity unknown
+forge-gui/res/quest/precons/Dead and Alive.dck,60,6,6,7,7,Circling Vultures; Infernal Tribute; Morinfen; Shattered Crypt; Spinning Darkness; Strands of Night,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Deadly Discovery.dck,75,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Deadly Instinct.dck,40,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Deadspread.dck,60,2,2,2,3,Culling Dais; Twisted Image,Some exposure; severity unknown
+forge-gui/res/quest/precons/Death March.dck,60,0,0,0,3,,No poor-AI warning marker
+forge-gui/res/quest/precons/Death Reaper.dck,60,2,2,2,5,Barrage of Expendables; Vampire Warlord,Some exposure; severity unknown
+forge-gui/res/quest/precons/Death's Beginning.dck,60,3,3,3,3,Loathsome Catoblepas; Rescue from the Underworld; Satyr Piper,Some exposure; severity unknown
+forge-gui/res/quest/precons/Death's Minions.dck,41,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Deathfed.dck,75,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Deathly Dominion.dck,60,2,2,2,2,Brain Weevil; Demonmail Hauberk,Some exposure; severity unknown
+forge-gui/res/quest/precons/Deaths Encroach.dck,75,1,2,4,2,Crypt Creeper,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Decay.dck,40,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Deep Freeze.dck,60,3,3,4,3,Precognition; Puppet Strings; Repentance,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Deepwood Menace.dck,60,3,3,5,3,Kris Mage; Natural Affinity; Squallmonger,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Defenders of the Cause.dck,60,1,1,1,3,Sacred Mesa,Some exposure; severity unknown
+forge-gui/res/quest/precons/Demonic Deals.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Depths of Power.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Desperate Stand.dck,60,3,3,4,4,Dazzling Reflection; Malakir Soothsayer; Spawnbinder Mage,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Devastation.dck,60,1,1,1,3,Cryptic Gateway,Some exposure; severity unknown
+forge-gui/res/quest/precons/Devotion to Darkness.dck,60,1,1,1,2,Rescue from the Underworld,Some exposure; severity unknown
+forge-gui/res/quest/precons/Devour for Power.dck,100,10,10,10,15,"Dimir Signet; Dreadship Reef; Golgari Signet; Minds Aglow; Oblivion Stone; Patron of the Nezumi; Shared Trauma; Simic Signet; Svogthos, the Restless Tomb; Windfall",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Devouring Skies.dck,60,1,1,2,2,Brass Squire,Some exposure; severity unknown
+forge-gui/res/quest/precons/Dimir Dementia.dck,60,1,1,1,2,Whispering Madness,Some exposure; severity unknown
+forge-gui/res/quest/precons/Dimir Guild Kit.dck,60,4,4,5,5,Dimir Charm; Dimir Doppelganger; Dimir Signet; Mission Briefing,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Dimir Intrigues.dck,60,2,2,3,6,Dimir Signet; Sewerdreg,Some exposure; severity unknown
+forge-gui/res/quest/precons/Dismissal.dck,60,5,5,6,9,Dream Thrush; Nightscape Apprentice; Prohibit; Sulfur Vent; Tidal Visionary,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Disrupter.dck,60,2,2,2,4,Bog Witch; Silent Assassin,Some exposure; severity unknown
+forge-gui/res/quest/precons/Distress.dck,60,4,4,4,5,Agent of Shauku; Angelic Favor; Peat Bog; Shield Dancer,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Domain.dck,60,2,2,2,11,Kavu Recluse; Treva's Charm,Some exposure; severity unknown
+forge-gui/res/quest/precons/Dominator.dck,60,5,5,9,5,Dominating Licid; Fade Away; Forbid; Mind Games; Mirozel,Elevated exposure (>=4 warned copies); not a strength measurement
+"forge-gui/res/quest/precons/Domri, City Smasher.dck",60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Doom Inevitable.dck,60,1,1,2,1,Vivisection,Some exposure; severity unknown
+"forge-gui/res/quest/precons/Dovin, Architect of Law.dck",60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Draconic Domination.dck,100,2,2,2,12,Crucible of the Spirit Dragon; Mirror of the Forebears,Some exposure; severity unknown
+forge-gui/res/quest/precons/Draconic Rage.dck,100,4,4,4,11,Beast Within; Crucible of the Spirit Dragon; Gruul Signet; Mossfire Valley,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Dungeons of Death.dck,100,4,4,4,9,Cataclysmic Gearhulk; Darkwater Catacombs; Immovable Rod; Vanish into Memory,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Eldrazi Arisen.dck,41,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Eldrazi Assault.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Eldritch Onslaught.dck,60,1,1,1,3,Harvest Pyre,Some exposure; severity unknown
+forge-gui/res/quest/precons/Elementals Path.dck,60,5,5,9,9,Dawnfluke; Incandescent Soulstoke; Shimmering Grotto; Soulbright Flamekin; Springleaf Drum,Elevated exposure (>=4 warned copies); not a strength measurement
+"forge-gui/res/quest/precons/Elspeth, Undaunted Hero.dck",60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Elven Empire.dck,100,3,3,3,13,Nullmage Shepherd; Pact of the Serpent; Tergrid's Shadow,Some exposure; severity unknown
+forge-gui/res/quest/precons/Elvish Predation.dck,60,1,1,1,6,Lammastide Weave,Some exposure; severity unknown
+forge-gui/res/quest/precons/Elvish Rage.dck,60,1,1,1,4,Birchlore Rangers,Some exposure; severity unknown
+forge-gui/res/quest/precons/Enchanter.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Endless March.dck,60,1,1,2,3,Timecrafting,Some exposure; severity unknown
+forge-gui/res/quest/precons/Enhanced Evolution.dck,100,6,6,6,12,Beast Within; Darkwater Catacombs; Deadly Tempest; Gaze of Granite; Manascape Refractor; Profane Command,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Enlightened Mastery.dck,60,1,1,2,2,Zephyr Scribe,Some exposure; severity unknown
+forge-gui/res/quest/precons/Entangling Webs.dck,60,1,1,2,2,Hunter's Insight,Some exposure; severity unknown
+forge-gui/res/quest/precons/Entropic Uprising.dck,100,12,12,12,15,Aeon Chronicler; Cruel Entertainment; Past in Flames; Rakdos Charm; Rakdos Signet; Shadowblood Ridge; Simic Signet; Spelltwine; Treacherous Terrain; Whims of the Fates; Whispering Madness; Windfall,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Eruption.dck,60,5,5,5,5,Belbe's Armor; Kris Mage; Oracle's Attendants; Ramosian Rally; Sivvi's Ruse,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Esper Air Assault.dck,41,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Esper Artifice.dck,41,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Eternal Bargain.dck,100,8,8,8,16,Act of Authority; Darksteel Mutation; Order of Succession; Phyrexian Delver; Phyrexian Reclamation; Serene Master; Springjack Pasture; Toxic Deluge,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Eternal Siege.dck,41,1,1,1,3,Godtoucher,Some exposure; severity unknown
+forge-gui/res/quest/precons/Evasive Maneuvers.dck,100,10,10,10,18,Conjurer's Closet; Darksteel Mutation; Djinn of Infinite Deceits; Flickerform; Mirror Entity; Saltcrusted Steppe; Selesnya Signet; Simic Signet; Surveyor's Scope; Sword of the Paruns,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Evincar's Tyranny.dck,40,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Expulsion.dck,40,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Exquisite Invention.dck,100,4,4,4,11,"Bosh, Iron Golem; Izzet Signet; Prismatic Lens; Psychosis Crawler",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Faceless Menace.dck,100,10,10,10,18,Bane of the Living; Biomass Mutation; Chromeshell Crab; Darkwater Catacombs; Gift of Doom; Kheru Spellsnatcher; Strionic Resonator; Sudden Substitution; Thespian's Stage; Willbender,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Fangs of the Bloodchief.dck,41,1,1,1,3,Dead Reckoning,Some exposure; severity unknown
+forge-gui/res/quest/precons/Fate Blaster.dck,60,2,2,3,2,Fatal Attraction; Riddle of Lightning,Some exposure; severity unknown
+forge-gui/res/quest/precons/Fates Foreseen.dck,60,1,1,2,1,Riddle of Lightning,Some exposure; severity unknown
+forge-gui/res/quest/precons/Favors From Nyx.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Feast of Flesh.dck,60,2,2,3,3,Artillerize; Ichor Explosion,Some exposure; severity unknown
+forge-gui/res/quest/precons/Feline Ferocity.dck,100,4,4,4,11,Abundance; Divine Reckoning; Oreskos Explorer; Saltcrusted Steppe,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Fiendish Nature.dck,60,3,3,5,4,Heart Warden; Marker Beetles; Phyrexian Reclamation,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Fiery Dawn.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Fiery Fury.dck,60,2,2,2,2,Crystal Vein; Firestorm,Some exposure; severity unknown
+forge-gui/res/quest/precons/Final Adventure.dck,75,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Finkel.dck,62,1,1,2,3,Contagion,Some exposure; severity unknown
+forge-gui/res/quest/precons/Fire Surge.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Firebomber.dck,41,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Flames Of The Dragon.dck,60,0,0,0,4,,No poor-AI warning marker
+forge-gui/res/quest/precons/Flash of Ferocity.dck,75,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Flyover.dck,41,2,2,2,2,Marshal's Anthem; Righteousness,Some exposure; severity unknown
+forge-gui/res/quest/precons/Forged in Battle.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Forged in Stone.dck,100,6,6,6,13,Arcane Lighthouse; Assault Suit; Benevolent Offering; Brave the Elements; Marshal's Anthem; Sacred Mesa,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Fun with Fungus.dck,60,1,1,1,2,Claws of Gix,Some exposure; severity unknown
+forge-gui/res/quest/precons/Furious Forces.dck,60,1,1,1,2,Magmatic Chasm,Some exposure; severity unknown
+forge-gui/res/quest/precons/Garfield.dck,62,3,3,5,4,Barbed Sextant; Bounty of the Hunt; Giant Trap Door Spider,Elevated exposure (>=4 warned copies); not a strength measurement
+"forge-gui/res/quest/precons/Garruk, Savage Herald.dck",60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Gatecrasher.dck,60,2,2,3,3,Dragon Mask; Maraxus of Keld,Some exposure; severity unknown
+forge-gui/res/quest/precons/Ghostly Tide.dck,60,0,0,0,0,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Gideon, Martial Paragon.dck",60,0,0,0,1,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Gideon, the Oathsworn.dck",60,1,1,1,1,Command the Dreadhorde,Some exposure; severity unknown
+forge-gui/res/quest/precons/Gifts of the Gods.dck,60,1,1,2,2,Floodtide Serpent,Some exposure; severity unknown
+forge-gui/res/quest/precons/Gleeful Flames.dck,60,2,2,6,3,Artillerize; Faithless Looting,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Goblin Assault.dck,40,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Goblin Fire.dck,40,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Goblin Mob.dck,60,2,2,3,6,Skirk Volcanist; Wave of Indifference,Some exposure; severity unknown
+forge-gui/res/quest/precons/Going Rogue.dck,60,3,3,4,5,Familiar's Ruse; Marsh Flitter; Whirlpool Whelm,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Golgari Deathcreep.dck,60,2,2,2,5,"Svogthos, the Restless Tomb; Thoughtpicker Witch",Some exposure; severity unknown
+forge-gui/res/quest/precons/Golgari Growth.dck,60,1,1,2,2,Launch Party,Some exposure; severity unknown
+forge-gui/res/quest/precons/Golgari Guild Kit.dck,60,3,3,4,6,Drown in Filth; Gaze of Granite; Golgari Signet,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Grab for Power.dck,60,0,0,0,4,,No poor-AI warning marker
+forge-gui/res/quest/precons/Grave Advantage.dck,60,2,2,3,3,Dark Deal; Grim Contest,Some exposure; severity unknown
+forge-gui/res/quest/precons/Grave Danger.dck,60,8,8,13,11,Aquamoeba; Breakthrough; Cephalid Broker; Cephalid Illusionist; Compulsion; Crypt Creeper; Painbringer; Psychatog,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Grave Power.dck,60,1,1,1,1,Alluring Siren,Some exposure; severity unknown
+forge-gui/res/quest/precons/Grixis Shambling Army.dck,41,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Grixis Undead.dck,41,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Ground Pounder.dck,61,4,4,4,4,Dwarven Ruins; Havenwood Battleground; Segmented Wurm; Wild Growth,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Groundbreaker.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Gruul Goliaths.dck,60,1,1,1,2,Verdant Haven,Some exposure; severity unknown
+forge-gui/res/quest/precons/Gruul Guild Kit.dck,60,2,2,3,2,"Gruul Signet; Ruric Thar, the Unbowed",Some exposure; severity unknown
+forge-gui/res/quest/precons/Gruul Wilding.dck,60,1,1,1,3,Burning-Tree Bloodscale,Some exposure; severity unknown
+forge-gui/res/quest/precons/Guided by Nature.dck,100,6,6,6,14,Assault Suit; Crystal Vein; Fresh Meat; Havenwood Battleground; Sylvan Offering; Sylvan Safekeeper,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Hazoret Aggro.dck,75,0,0,0,1,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Heads I Win, Tails You Lose.dck",100,11,11,11,24,"Cascade Bluffs; Daretti, Scrap Savant; Embercleave; Fiery Gambit; Frenetic Sliver; Goblin Archaeologist; Izzet Signet; Karplusan Minotaur; Long-Term Plans; Reshape; Squee's Revenge",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Heavenly Inferno.dck,100,7,7,7,14,Bathe in Light; Boros Signet; Cleansing Beam; Master Warcraft; Molten Slagheap; Orzhov Signet; Rakdos Signet,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Heavy Duty.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Heavy Hitters.dck,40,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Hit The Ground Running.dck,60,2,2,3,4,Peel from Reality; Turn to Frog,Some exposure; severity unknown
+forge-gui/res/quest/precons/Hold the Line.dck,75,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Hopes Crusaders.dck,60,1,1,2,3,Outrider en-Kor,Some exposure; severity unknown
+forge-gui/res/quest/precons/Horrific Visions.dck,60,2,2,2,3,Liliana's Indignation; Merciless Resolve,Some exposure; severity unknown
+"forge-gui/res/quest/precons/Huatli, Dinosaur Knight.dck",60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Hunting Pack.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Impaler.dck,40,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Infect and Defile.dck,75,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Infernal Intervention.dck,60,1,1,2,1,Gargoyle Sentinel,Some exposure; severity unknown
+forge-gui/res/quest/precons/Infestation.dck,40,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Insanity.dck,60,5,5,9,5,Carrion Rats; Krosan Archer; Nantuko Cultivator; Narcissism; Putrid Imp,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Inspiration-Struck.dck,60,4,4,5,4,Curse of the Swine; Retraction Helix; Siren Song Lyre; Springleaf Drum,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Into the Breach.dck,75,2,2,4,5,Devastating Summons; Unstable Footing,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Inundation.dck,60,4,4,4,4,Embolden; Prismatic Strands; Selfless Exorcist; Shieldmage Advocate,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Invading Spawn.dck,41,1,1,1,1,Magmaw,Some exposure; severity unknown
+forge-gui/res/quest/precons/Invent Superiority.dck,100,5,5,5,15,"Daretti, Scrap Savant; Read the Runes; Slobad, Goblin Tinkerer; Trading Post; Trash for Treasure",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Ivory Doom.dck,60,2,2,2,6,Akroma's Blessing; Astral Slide,Some exposure; severity unknown
+forge-gui/res/quest/precons/Ixidors Legacy.dck,60,10,10,15,10,Aeon Chronicler; Coral Trickster; Crookclaw Transmuter; Dream Stalker; Erratic Mutation; Merfolk Thaumaturgist; Ovinomancer; Primal Plasma; Shaper Parasite; Willbender,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Izzet Gizmometry.dck,60,5,5,8,6,"Nivix, Aerie of the Firemind; Peel from Reality; Petrahydrox; Reroute; Thunderheads",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Izzet Guild Kit.dck,60,4,4,5,5,Cerebral Vortex; Djinn Illuminatus; Izzet Signet; Thunderheads,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Izzet Ingenuity.dck,60,1,1,1,2,Wild Guess,Some exposure; severity unknown
+"forge-gui/res/quest/precons/Jace, Arcane Strategist.dck",60,0,0,0,1,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Jace, Ingenious Mind-Mage.dck",60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Jeskai Monks.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Jiang Yanggu.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Jund Appetite for War.dck,41,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Jungle Jam.dck,60,2,2,3,2,Armor of Thorns; Ivory Charm,Some exposure; severity unknown
+forge-gui/res/quest/precons/Kamahl's Temper.dck,40,1,1,1,2,Phyrexian Vault,Some exposure; severity unknown
+forge-gui/res/quest/precons/Kami Reborn.dck,60,4,4,6,8,"Burr Grafter; Devouring Greed; Iname, Death Aspect; Scuttling Death",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Kithkin Militia.dck,60,1,1,1,4,Shields of Velis Vel,Some exposure; severity unknown
+forge-gui/res/quest/precons/Kjeldoran Cunning.dck,60,1,1,1,1,Kjeldoran Pride,Some exposure; severity unknown
+forge-gui/res/quest/precons/Kor Armory.dck,41,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Land's Wrath.dck,100,2,2,2,7,Abundance; Treacherous Terrain,Some exposure; severity unknown
+forge-gui/res/quest/precons/Landslide Charge.dck,75,1,1,2,3,Mogis's Warhound,Some exposure; severity unknown
+forge-gui/res/quest/precons/Legion Aloft.dck,41,2,2,3,3,Arsenal Thresher; Aven Mimeomancer,Some exposure; severity unknown
+forge-gui/res/quest/precons/Legion of Glory.dck,60,6,6,9,7,Jamuraan Lion; Remedy; Resistance Fighter; Vigilant Martyr; Ward of Lights; Zhalfirin Crusader,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Levelers' Glory.dck,41,2,2,2,3,Alluring Siren; See Beyond,Some exposure; severity unknown
+forge-gui/res/quest/precons/Levelers' Scorn.dck,41,2,2,2,3,See Beyond; Telepathy,Some exposure; severity unknown
+forge-gui/res/quest/precons/Life Boost.dck,40,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Life Drain.dck,60,2,2,2,4,Batwing Brume; Endure,Some exposure; severity unknown
+forge-gui/res/quest/precons/Liftoff.dck,57,7,7,10,8,Aven Windreader; Cephalid Broker; Embolden; Peek; Puppeteer; Skycloud Egg; Think Tank,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Lightforce.dck,60,1,1,2,3,Brave the Elements,Some exposure; severity unknown
+forge-gui/res/quest/precons/Lightning Aggro.dck,75,0,0,0,0,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Liliana, Death Mage.dck",60,0,0,0,0,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Liliana, Death Wielder.dck",60,0,0,0,0,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Liliana, the Necromancer.dck",60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Little Bashers.dck,60,3,3,5,4,Auriok Transfixer; Roar of the Kha; Soldier Replica,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Lofty Heights.dck,40,3,3,3,4,Aven Windreader; Puppeteer; Telepathy,Some exposure; severity unknown
+forge-gui/res/quest/precons/Lorehold Legacies.dck,100,6,6,6,14,"Bosh, Iron Golem; Daretti, Scrap Savant; Darksteel Mutation; Dispatch; Faithless Looting; Phyrexia's Core",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Manipulative Monstrosities.dck,60,1,1,1,1,Curse of the Swine,Some exposure; severity unknown
+forge-gui/res/quest/precons/Mardu Raiders.dck,60,0,0,0,3,,No poor-AI warning marker
+forge-gui/res/quest/precons/Martial Law.dck,40,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Massed Ranks.dck,60,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Master Blaster.dck,60,3,3,6,6,Grab the Reins; Krark-Clan Stoker; Talon of Pain,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Max Attax.dck,60,1,1,2,2,Chill Haunting,Some exposure; severity unknown
+forge-gui/res/quest/precons/Mercenaries.dck,60,4,4,7,12,Dark Triumph; Haunted Crossroads; Mind Swords; Parallax Dementia,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Merciless Rage.dck,100,9,9,9,12,"Aeon Engine; Chainer, Nightmare Adept; Champion of Stray Souls; Grimoire of the Dead; Magus of the Wheel; Nightmare Unmaking; Nightshade Assassin; Sanctum of Eternity; Zombie Infestation",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Merrow Riverways.dck,60,4,4,7,8,Springleaf Drum; Stonybrook Angler; Tideshaper Mystic; Whirlpool Whelm,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Metalcraft.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Migraine.dck,60,0,0,0,3,,No poor-AI warning marker
+forge-gui/res/quest/precons/Mind Seize.dck,100,11,11,11,18,Curse of Chaos; Decree of Pain; Eye of Doom; Grixis Charm; Illusionist's Gambit; Jace's Archivist; Molten Slagheap; Skyscribing; Strategic Planning; Sudden Spoiling; Wild Ricochet,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Mind Swarm.dck,60,1,1,1,2,Nim Replica,Some exposure; severity unknown
+forge-gui/res/quest/precons/Mirromancy.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Mirror Mastery.dck,100,10,10,10,13,Collective Voyage; Disaster Radius; Firespout; Fungal Reaches; Gruul Signet; Hull Breach; Izzet Signet; Prophetic Prism; Simic Signet; Trench Gorger,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Mob Rule.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Molimo's Might.dck,40,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Monstrous Surprise.dck,60,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Morph Mayhem.dck,60,9,9,12,10,Akroma's Blessing; Chromeshell Crab; Deftblade Elite; Imagecrafter; Master of the Veil; Mistform Mutant; Voidmage Apprentice; Weaver of Lies; Willbender,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Mortal Coil.dck,60,4,4,7,4,Fate Transfer; Inkfathom Witch; Leech Bonder; River's Grasp,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Mortals of Myth.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/MTGA Arcane Inventions.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/MTGA Auras of Majesty.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/MTGA Chaos and Mayhem.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/MTGA Dragons Fire.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/MTGA Eternal Thirst.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/MTGA Forests Might.dck,60,1,1,1,1,Verdant Rebirth,Some exposure; severity unknown
+forge-gui/res/quest/precons/MTGA Graveyard Bash.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/MTGA Jungle Secrets.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/MTGA Primal Fury.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/MTGA Saproling Swarm.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/MTGA Strength in Numbers.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/MTGA Tactical Assault.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/MTGA Walk the Plank.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/MTGA Wing and Claw.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/MTGA Wrath of Mages.dck,60,1,1,1,1,Entrancing Melody,Some exposure; severity unknown
+forge-gui/res/quest/precons/Mu Yanling.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Myr of Mirrodin.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Mysterious Realms.dck,41,3,3,4,3,Calcite Snapper; Telepathy; Tideforce Elemental,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Mystic Intellect.dck,100,4,4,4,17,Divine Reckoning; Faithless Looting; Mandate of Peace; Prismatic Strands,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Mystical Might.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Nature of the Beast.dck,100,4,4,4,11,Curse of Chaos; Darksteel Mutation; Hull Breach; Mystic Barrier,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Nature's Assault.dck,40,1,1,1,1,Alluring Scent,Some exposure; severity unknown
+forge-gui/res/quest/precons/Nature's Vengeance.dck,100,2,2,2,6,Gaze of Granite; Moonlight Bargain,Some exposure; severity unknown
+forge-gui/res/quest/precons/Naya Behemoths.dck,41,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Naya Domain.dck,41,1,1,1,6,Kaleidostone,Some exposure; severity unknown
+"forge-gui/res/quest/precons/Nicol Bolas, the Deceiver.dck",60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Night Terrors.dck,60,3,3,5,3,Phyrexian Vault; Ravenous Vampire; Urborg Panther,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Nightstalkers.dck,40,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Ninjutsu.dck,60,4,4,6,8,"Minamo Sightbender; Soratami Cloudskater; Teardrop Kami; Tomorrow, Azami's Familiar",Elevated exposure (>=4 warned copies); not a strength measurement
+"forge-gui/res/quest/precons/Nissa, Genesis Mage.dck",60,0,0,0,0,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Nissa, Nature's Artisan.dck",60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Nuts and Bolts.dck,60,2,2,4,6,Auriok Windwalker; Chromatic Sphere,Elevated exposure (>=4 warned copies); not a strength measurement
+"forge-gui/res/quest/precons/Oko, the Trickster.dck",60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/One-Two Punch.dck,59,2,2,2,2,Krosan Archer; Nantuko Mentor,Some exposure; severity unknown
+forge-gui/res/quest/precons/Open Hostility.dck,100,6,6,6,14,Breath of Fury; Dauntless Escort; Grab the Reins; Gruul Signet; Mirror Entity; Treacherous Terrain,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Orzhov Guild Kit.dck,60,4,4,5,6,Martyred Rusalka; Orzhov Charm; Orzhov Pontiff; Orzhov Signet,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Orzhov Oppression.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Overkill.dck,60,3,3,7,4,Elsewhere Flask; Fossil Find; Illuminated Folio,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Painflow.dck,60,1,1,1,1,Krosan Archer,Some exposure; severity unknown
+forge-gui/res/quest/precons/Pandemonium.dck,60,4,4,5,9,Captain's Maneuver; Fertile Ground; Helionaut; Nomadic Elf,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Pantheon's Power.dck,60,1,1,2,1,Odunos River Trawler,Some exposure; severity unknown
+forge-gui/res/quest/precons/Path of Blight.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Peer Through Time.dck,100,8,8,8,16,Assault Suit; Crown of Doom; Domineering Will; Dulcet Sirens; Intellectual Offering; Shaper Parasite; Turn to Frog; Willbender,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Phantom Premonition.dck,100,6,6,6,12,Azorius Signet; Curse of the Swine; Ghostly Flicker; Marshal's Anthem; Synthetic Destiny; Windfall,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Phyrexian Assault.dck,60,3,3,3,5,Phyrexian Plaguelord; Phyrexian Reclamation; Treacherous Link,Some exposure; severity unknown
+forge-gui/res/quest/precons/Phyrexian Poison.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Planar Portal.dck,100,7,7,7,12,Commune with Lava; Hellish Rebuke; Izzet Chemister; Rakdos Charm; Rakdos Signet; Shadowblood Ridge; Throes of Chaos,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Plunder the Graves.dck,100,6,6,6,9,Barter in Blood; Champion of Stray Souls; Corpse Augur; Eater of Hope; Golgari Signet; Phyrexian Plaguelord,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Political Puppets.dck,100,8,8,8,14,Chromeshell Crab; Goblin Cadets; Prophetic Prism; Reins of Power; Skyscribing; Vedalken Plotter; Whirlpool Whelm; Wild Ricochet,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Power Hungry.dck,100,13,13,13,22,"Blood Rites; Carnage Altar; Curse of Chaos; Goblin Bombardment; Hua Tuo, Honored Physician; Jar of Eyeballs; Jund Charm; Night Soil; Plague Boiler; Quagmire Druid; Stronghold Assassin; Sudden Demise; Viscera Seer",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Power of Prophecy.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Presence of Mind.dck,41,1,1,1,1,Telepathy,Some exposure; severity unknown
+forge-gui/res/quest/precons/Pressure Cooker.dck,59,5,5,7,7,Crypt Creeper; Famished Ghoul; Innocent Blood; Liquid Fire; Shadowblood Egg,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Price Of Glory.dck,60,1,1,2,3,Wall of Limbs,Some exposure; severity unknown
+forge-gui/res/quest/precons/Primal Genesis.dck,100,6,6,6,13,"Beast Within; Fresh Meat; Momentous Fall; Selesnya Eulogist; Sungrass Prairie; Tahngarth, First Mate",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Primordial Jund.dck,41,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Prismari Performance.dck,100,4,4,4,13,Dualcaster Mage; Epic Experiment; Faithless Looting; Izzet Signet,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Psychic Labyrinth.dck,60,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Pulverize.dck,60,5,5,8,7,Dispersal Shield; Goblin Machinist; Mischievous Quanar; Mistform Warchief; Parallel Thoughts,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Pummel.dck,60,1,1,1,2,Spitting Spider,Some exposure; severity unknown
+forge-gui/res/quest/precons/Pumped Up.dck,41,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Quantum Quandrix.dck,100,5,5,5,12,"Beast Within; Biomass Mutation; Curse of the Swine; Esix, Fractal Bloom; Simic Signet",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Radiant's Revenge.dck,60,1,1,1,1,Ring of Gix,Some exposure; severity unknown
+forge-gui/res/quest/precons/Rakdos Bloodsport.dck,60,6,6,10,7,"Ignorant Bliss; Lyzolda, the Blood Witch; Nihilistic Glee; Ragamuffyn; Rakdos Signet; Torpid Moloch",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Rakdos Guild Kit.dck,60,3,3,4,5,"Lyzolda, the Blood Witch; Rakdos Charm; Rakdos Signet",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Rakdos Raid.dck,60,0,0,0,1,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Ral, Caller of Storms.dck",60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Rallying Cry.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Rapid Fire.dck,41,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Rat's Nest.dck,60,1,1,1,4,Patron of the Nezumi,Some exposure; severity unknown
+forge-gui/res/quest/precons/Ravaging Swarm.dck,60,1,1,1,4,Plaguemaw Beast,Some exposure; severity unknown
+forge-gui/res/quest/precons/Reality Fracture.dck,60,3,3,5,4,Claws of Gix; Dreadship Reef; Giant Oyster,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Reap the Tides.dck,100,3,3,3,6,Beast Within; Peel from Reality; Simic Signet,Some exposure; severity unknown
+forge-gui/res/quest/precons/Rebel's Call.dck,60,2,2,4,2,Charm Peddler; Ramosian Rally,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Rebels Unite.dck,60,4,4,7,5,Angel of Salvation; Outrider en-Kor; Putrid Cyclops; Samite Censer-Bearer,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Reign of Vampirism.dck,60,1,1,3,2,Viscera Seer,Some exposure; severity unknown
+forge-gui/res/quest/precons/Relentless Dead.dck,60,2,2,2,4,Corpse Lunge; Zombie Infestation,Some exposure; severity unknown
+forge-gui/res/quest/precons/Relentless Rush.dck,60,1,1,1,2,Foul-Tongue Shriek,Some exposure; severity unknown
+forge-gui/res/quest/precons/Relic Breaker.dck,60,0,0,0,3,,No poor-AI warning marker
+forge-gui/res/quest/precons/Repeat Performance.dck,75,1,1,1,3,Brutalizer Exarch,Some exposure; severity unknown
+forge-gui/res/quest/precons/Repel the Dark.dck,60,2,2,3,2,Selfless Cathar; Spare from Evil,Some exposure; severity unknown
+forge-gui/res/quest/precons/Replicator.dck,60,4,4,4,5,Bog Witch; Saproling Burst; Saproling Cluster; Squallmonger,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Ride Like the Wind.dck,60,3,3,6,3,Aleatory; Searing Spear Askari; Vigilant Martyr,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Rise of the Vampires.dck,41,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Rituals of Rebirth.dck,60,2,2,5,3,Evolution Charm; Greenseeker,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Rivals.dck,112,2,2,2,5,Glasses of Urza; Twiddle,Some exposure; severity unknown
+forge-gui/res/quest/precons/Rot from Within.dck,75,0,0,0,0,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Rowan, Fearless Sparkmage.dck",60,1,1,2,1,Weapon Rack,Some exposure; severity unknown
+forge-gui/res/quest/precons/Rumbler.dck,41,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Ruthless Regiment.dck,100,8,8,8,15,"Boros Signet; Call the Coppercoats; Disciple of Bolas; Magus of the Wheel; Odric, Master Tactician; Orzhov Signet; Rakdos Signet; Shadowblood Ridge",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Sacred Assault.dck,60,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Sacrificial Bam.dck,60,1,1,3,6,Nim Replica,Some exposure; severity unknown
+forge-gui/res/quest/precons/Sacrilege.dck,60,4,4,6,6,Crypt Creeper; Hypochondria; Malevolent Awakening; Putrid Imp,Elevated exposure (>=4 warned copies); not a strength measurement
+"forge-gui/res/quest/precons/Sarkhan, Dragonsoul.dck",60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Savage Stompdown.dck,60,2,2,3,2,Emerald Charm; Giant Caterpillar,Some exposure; severity unknown
+forge-gui/res/quest/precons/Scout.dck,60,9,9,10,10,Aurora Griffin; Fertile Ground; Geothermal Crevice; Irrigation Ditch; Magma Burst; Mirrorwood Treefolk; Nomadic Elf; Pollen Remedy; Radiant Kavu,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Second Sun Control.dck,75,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Seize Control.dck,100,11,11,11,16,Aethersnatch; Dominate; Epic Experiment; Faithless Looting; Izzet Signet; Jace's Archivist; Mizzix's Mastery; Mystic Confluence; Psychosis Crawler; Reins of Power; Windfall,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Selesnya Guild Kit.dck,60,2,2,3,2,Glare of Subdual; Selesnya Signet,Some exposure; severity unknown
+forge-gui/res/quest/precons/Selesnya Surge.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Selesnya United.dck,60,5,5,8,5,Caregiver; Dryad's Caress; Nullmage Shepherd; Overwhelm; Sandsower,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Shallow Graves.dck,60,1,1,1,2,Liliana's Indignation,Some exposure; severity unknown
+forge-gui/res/quest/precons/Shamanism.dck,60,0,0,0,3,,No poor-AI warning marker
+forge-gui/res/quest/precons/Shu Kingdom.dck,40,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Sidestep.dck,60,2,2,2,2,Crag Puca; Inside Out,Some exposure; severity unknown
+forge-gui/res/quest/precons/Silverquill Statement.dck,100,6,6,6,14,"Gideon, Champion of Justice; Infernal Offering; Oreskos Explorer; Orzhov Signet; Spectral Searchlight; Tragic Arrogance",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Simic Guild Kit.dck,60,3,3,4,3,Experiment Kraj; Omnibian; Simic Signet,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Simic Synthesis.dck,60,2,2,3,3,Bioshift; Tower Defense,Some exposure; severity unknown
+forge-gui/res/quest/precons/Sky Slam.dck,40,1,1,1,1,Puppeteer,Some exposure; severity unknown
+forge-gui/res/quest/precons/Slaughterhouse.dck,60,2,2,3,6,Barter in Blood; Bloodflow Connoisseur,Some exposure; severity unknown
+forge-gui/res/quest/precons/Sleeper.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Slither.dck,60,5,5,7,6,"Chimeric Idol; Flameshot; Latulla, Keldon Overseer; Rhystic Lightning; Squallmonger",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Sliver Evolution.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Sliver Shivers.dck,60,4,4,8,4,Akroma's Blessing; Crown of Vigor; Mistform Dreamer; Tribal Unity,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Snakes Path.dck,60,3,3,6,4,Hankyu; Junkyo Bell; Orochi Leafcaller,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Sneak Attack.dck,100,2,2,2,11,Dimir Signet; Marsh Flitter,Some exposure; severity unknown
+forge-gui/res/quest/precons/Snowscape.dck,60,4,4,7,12,Browse; Essence Flare; Iceberg; Rimewind Taskmage,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Sole Domination.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Solitary Fiends.dck,60,5,5,9,7,Alchemist's Apprentice; Corpse Traders; Crypt Creeper; Fettergeist; Peel from Reality,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Soratamis Wisdom.dck,60,9,9,13,12,"Charge Across the Araba; Floodbringer; Freed from the Real; Hankyu; Moonbow Illusionist; Oboro Envoy; Plow Through Reito; Soramaro, First to Dream; Soratami Cloudskater",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Special Delivery.dck,60,1,1,3,3,Wild Dogs,Some exposure; severity unknown
+forge-gui/res/quest/precons/Special Forces.dck,60,3,3,4,3,Myr Quadropod; Plunge into Darkness; Wizard Replica,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Spectral Legions.dck,60,1,1,1,1,Ghostly Possession,Some exposure; severity unknown
+forge-gui/res/quest/precons/Spectral Slam.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Spectrum.dck,60,2,2,4,5,Fertile Ground; Nomadic Elf,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Speed Scorch.dck,40,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Spellweaver.dck,40,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Spiraling Doom.dck,60,2,2,2,4,Brutalizer Exarch; Hex Parasite,Some exposure; severity unknown
+forge-gui/res/quest/precons/Spirit Flames.dck,60,3,3,4,9,Burr Grafter; Devouring Rage; Shinen of Life's Roar,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Spirit Gale.dck,40,2,2,2,2,Curfew; Windfall,Some exposure; severity unknown
+forge-gui/res/quest/precons/Spirit Squadron.dck,100,5,5,5,15,Azorius Signet; Benevolent Offering; Darksteel Mutation; Mirror Entity; Skycloud Expanse,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Spiritbane.dck,60,2,2,5,2,Akki Avalanchers; Sideswipe,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Spiritcraft.dck,60,1,1,1,8,Roar of Jukai,Some exposure; severity unknown
+forge-gui/res/quest/precons/Stalwart Unity.dck,100,12,12,12,16,"Assault Suit; Beast Within; Collective Voyage; Minds Aglow; Psychosis Crawler; Reins of Power; Reverse the Sands; Selvala, Explorer Returned; Swan Song; Treacherous Terrain; Wave of Reckoning; Zedruu the Greathearted",Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Stampede of Beasts.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Stampede.dck,60,4,4,4,6,Cosmic Larva; Goblin Cannon; Grab the Reins; Rain of Rust,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Stampeding Hordes.dck,60,1,1,1,4,Dragonrage,Some exposure; severity unknown
+forge-gui/res/quest/precons/Storm Surge.dck,60,5,5,7,6,Aven Liberator; Deftblade Elite; Spy Network; Willbender; Zealous Inquisitor,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Subjective Reality.dck,100,8,8,8,12,Aethermage's Touch; Azorius Signet; Dimir Signet; Djinn of Wishes; Orzhov Signet; Phyrexian Delver; Predict; Primordial Mist,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Sultai Schemers.dck,60,1,1,2,2,Taigam's Scheming,Some exposure; severity unknown
+forge-gui/res/quest/precons/Sunburst.dck,60,6,6,9,10,Chromatic Sphere; Dawn's Reflection; Energy Chamber; Infused Arrows; Journey of Discovery; Viridian Acolyte,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Superabundance.dck,60,4,4,6,4,Cerulean Wisps; Grazing Kelpie; Invert the Skies; Snakeform,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Surge of Resistance.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Surprise Attack.dck,60,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Suspended Sentence.dck,60,2,2,4,4,Dream Stalker; Timebender,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Swarm and Slam.dck,60,3,3,5,3,Pteron Ghost; Spawning Pit; Stir the Pride,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Swarming Instinct.dck,60,1,1,1,2,Titan's Presence,Some exposure; severity unknown
+forge-gui/res/quest/precons/Sweet Revenge.dck,75,2,2,8,6,Faithless Looting; Fettergeist,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Swell the Host.dck,100,4,4,4,9,Command Beacon; Simic Signet; Snakeform; Synthetic Destiny,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Swift Justice.dck,60,2,2,3,2,Nightbird's Clutches; Wrack with Madness,Some exposure; severity unknown
+forge-gui/res/quest/precons/Swoop.dck,60,4,4,5,4,Chromatic Sphere; Fertile Ground; Rainbow Crow; Tidal Visionary,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Sworn to Darkness.dck,100,13,13,13,19,Abyssal Persecutor; Arcane Lighthouse; Black Sun's Zenith; Crypt of Agadeem; Disciple of Bolas; Dregs of Sorrow; Ghoulcaller Gisa; Infernal Offering; Profane Command; Promise of Power; Skeletal Scrying; Sudden Spoiling; Wake the Dead,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Symbiotic Swarm.dck,100,6,6,6,10,Archon of Valor's Reach; Cataclysmic Gearhulk; Nesting Grounds; Netherborn Altar; Nyx Weaver; Sungrass Prairie,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Take to the Sky.dck,60,1,1,1,2,Turn to Frog,Some exposure; severity unknown
+"forge-gui/res/quest/precons/Teferi, Timebender.dck",60,0,0,0,0,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Teferi, Timeless Voyager.dck",60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Temur Avalanche.dck,60,0,0,0,1,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Tezzeret, Cruel Machinist.dck",60,0,0,0,0,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Tezzeret, Master of Metal.dck",60,0,0,0,3,,No poor-AI warning marker
+forge-gui/res/quest/precons/The Adventurers.dck,41,0,0,0,4,,No poor-AI warning marker
+forge-gui/res/quest/precons/The Deluge.dck,39,2,2,2,3,Fertile Ground; Sanctum Guardian,Some exposure; severity unknown
+forge-gui/res/quest/precons/The Flames of Rath.dck,60,4,4,4,6,Goblin Bombardment; Magmasaur; Soltari Guerrillas; Tahngarth's Rage,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/The Plague.dck,60,5,5,6,5,Blood Vassal; Flesh Reaver; Opal Acrolith; Rune of Protection: Black; Sanctum Guardian,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/The Slivers.dck,60,2,2,2,2,Ertai's Meddling; Essence Bottle,Some exposure; severity unknown
+forge-gui/res/quest/precons/The Sparkler.dck,60,3,3,3,4,Mind Games; Ransack; Reins of Power,Some exposure; severity unknown
+forge-gui/res/quest/precons/The Spikes.dck,60,2,2,5,4,Skyshroud Elf; Tempting Licid,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/The Swarm.dck,60,1,1,3,3,Skyshroud Elf,Some exposure; severity unknown
+forge-gui/res/quest/precons/The Wilds and the Deep.dck,60,4,4,5,4,Hubris; Kiora's Follower; Market Festival; Thassa's Ire,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Tidal Mastery.dck,60,3,3,3,6,Customs Depot; Ramosian Rally; War Tax,Some exposure; severity unknown
+forge-gui/res/quest/precons/Time Curse.dck,40,1,1,1,1,Ransack,Some exposure; severity unknown
+forge-gui/res/quest/precons/Time Drain.dck,60,2,2,2,3,Anthroplasm; Walking Sponge,Some exposure; severity unknown
+forge-gui/res/quest/precons/Timeless Wisdom.dck,100,8,8,8,16,Azorius Signet; Boros Signet; Izzet Signet; Portal Mage; Psychosis Crawler; Skycloud Expanse; Vizier of Tumbling Sands; Windfall,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Tombstone.dck,60,2,2,2,2,Turnabout; Wizard Mentor,Some exposure; severity unknown
+forge-gui/res/quest/precons/Totem Power.dck,41,1,1,1,1,Righteousness,Some exposure; severity unknown
+forge-gui/res/quest/precons/Transference.dck,60,2,2,2,5,Reshape; Spincrusher,Some exposure; severity unknown
+forge-gui/res/quest/precons/Trounce-O-Matic.dck,60,2,2,4,2,Peek; Predict,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Truth Seekers.dck,60,1,1,1,4,Shinen of Life's Roar,Some exposure; severity unknown
+forge-gui/res/quest/precons/Turnabout.dck,60,4,4,7,6,Barrenton Medic; Devoted Druid; Pale Wayfarer; Pili-Pala,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Turnaround.dck,60,5,5,8,6,Mageta the Lion; Rhystic Circle; Rhystic Shield; Shield Dancer; Waterfront Bouncer,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Twisted Reality.dck,60,1,1,1,2,Titan's Presence,Some exposure; severity unknown
+forge-gui/res/quest/precons/Ultimate Sacrifice.dck,75,3,3,5,5,Corpseweft; Cranial Archive; Evolutionary Leap,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Undead Unleashed.dck,100,4,4,4,14,Corpse Augur; Darkwater Catacombs; Eater of Hope; Hour of Eternity,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Unearthed Secrets.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Unflinching Assault.dck,60,1,1,1,3,Cruel Sadist,Some exposure; severity unknown
+forge-gui/res/quest/precons/United Assault.dck,75,1,1,4,2,Adanto Vanguard,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Unlikely Alliances.dck,60,2,2,3,2,Repel the Abominable; Ruthless Disposal,Some exposure; severity unknown
+forge-gui/res/quest/precons/Unnatural Forces.dck,60,5,5,7,5,Coral Fighters; Flooded Shoreline; Kukemssa Serpent; Sealed Fate; Vision Charm,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Unnatural Schemes.dck,41,1,1,1,1,Fatestitcher,Some exposure; severity unknown
+forge-gui/res/quest/precons/Unraveling Mind.dck,60,3,3,7,3,Kor Dirge; Mindlash Sliver; Nightshade Assassin,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Unstable Terrain.dck,41,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Untamed Wild.dck,60,2,2,2,3,Mad Prophet; Magmatic Chasm,Some exposure; severity unknown
+forge-gui/res/quest/precons/Upgrades Unleashed.dck,100,3,3,4,6,Beast Within; Hunter's Insight; Mossfire Valley,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Vampire Onslaught.dck,75,2,2,8,3,Vampire Lacerator; Viscera Seer,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Vampiric Bloodline.dck,100,3,3,3,13,Rakdos Charm; Rakdos Signet; Shadowblood Ridge,Some exposure; severity unknown
+forge-gui/res/quest/precons/Vampiric Bloodlust.dck,100,4,4,4,14,Boros Signet; Orzhov Signet; Rakdos Signet; Skeletal Scrying,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Vampiric Thirst.dck,60,1,1,1,2,Mad Prophet,Some exposure; severity unknown
+forge-gui/res/quest/precons/Vehicle Rush.dck,75,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Vicious Cycle.dck,60,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Vivien of the Arkbow.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Voracious Rage.dck,60,1,1,1,1,Rollick of Abandon,Some exposure; severity unknown
+"forge-gui/res/quest/precons/Vraska, Regal Gorgon.dck",60,0,0,0,0,,No poor-AI warning marker
+"forge-gui/res/quest/precons/Vraska, Scheming Gorgon.dck",60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Wade into Battle.dck,100,7,7,7,17,Boros Signet; Dawnglare Invoker; Desolation Giant; Disaster Radius; Magma Giant; Magus of the Wheel; Oreskos Explorer,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Waking Nightmares.dck,60,2,2,3,4,Malevolent Awakening; Pyromania,Some exposure; severity unknown
+forge-gui/res/quest/precons/War of Attrition.dck,75,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Warrior's Code.dck,60,1,1,1,4,Roar of the Crowd,Some exposure; severity unknown
+forge-gui/res/quest/precons/Way of the Warrior.dck,60,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Way Wild.dck,40,1,1,1,1,Wild Growth,Some exposure; severity unknown
+forge-gui/res/quest/precons/Weapons and Wards.dck,60,0,0,0,1,,No poor-AI warning marker
+forge-gui/res/quest/precons/Wei Kingdom.dck,40,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Whirlpool.dck,60,5,5,6,7,Bloodfire Infusion; Chromatic Sphere; Metathran Transport; Rainbow Crow; Whirlpool Warrior,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/White Heat.dck,60,3,3,3,3,Goblin Bombardment; Limited Resources; Reconnaissance,Some exposure; severity unknown
+forge-gui/res/quest/precons/Wicked Big.dck,60,2,2,3,2,Bloodscent; Journey of Discovery,Some exposure; severity unknown
+forge-gui/res/quest/precons/Widowmaker.dck,60,2,2,3,4,Forbid; Oath of Scholars,Some exposure; severity unknown
+forge-gui/res/quest/precons/Wild Rush.dck,60,0,0,0,2,,No poor-AI warning marker
+forge-gui/res/quest/precons/Wild-Eyed Frenzy.dck,60,3,3,5,4,Goblin Recruiter; Song of Blood; Unerring Sling,Elevated exposure (>=4 warned copies); not a strength measurement
+forge-gui/res/quest/precons/Will Of The Masses.dck,60,2,2,3,3,Overwhelm; Selfless Cathar,Some exposure; severity unknown
+forge-gui/res/quest/precons/Witherbloom Witchcraft.dck,100,3,3,3,10,Deadly Tempest; Gaze of Granite; Suffer the Past,Some exposure; severity unknown
+forge-gui/res/quest/precons/World Aflame.dck,40,0,0,0,4,,No poor-AI warning marker
+forge-gui/res/quest/precons/Wu Kingdom.dck,40,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Zendikar's Rage.dck,60,0,0,0,0,,No poor-AI warning marker
+forge-gui/res/quest/precons/Zombies Unleashed.dck,60,2,2,4,6,Deathmark Prelate; Embalmed Brawler,Elevated exposure (>=4 warned copies); not a strength measurement

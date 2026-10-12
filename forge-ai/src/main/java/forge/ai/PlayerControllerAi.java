@@ -70,6 +70,8 @@ public class PlayerControllerAi extends PlayerController {
     private final AiController brains;
     private final AiDecisionProvider decisionProvider;
     private final boolean externalMulliganEnabled;
+    private final boolean externalCombatDamageOrderEnabled;
+    private final int externalCombatDamageOrderMaxOptions;
 
     private boolean pilotsNonAggroDeck = false;
 
@@ -118,6 +120,30 @@ public class PlayerControllerAi extends PlayerController {
             boolean includeRejectedMainPhaseActions, int maxRejectedMainPhaseActions,
             boolean externalStackResponseEnabled, int stackResponseMaxActions, boolean randomizeStackResponseOrder,
             boolean externalCombatAttackersEnabled, int combatAttackersMaxOptions) {
+        this(game, p, lp, decisionProvider, externalMulliganEnabled, externalMainPhaseEnabled, mainPhaseMaxActions,
+                includeRejectedMainPhaseActions, maxRejectedMainPhaseActions, externalStackResponseEnabled, stackResponseMaxActions,
+                randomizeStackResponseOrder, externalCombatAttackersEnabled, combatAttackersMaxOptions, false, 4);
+    }
+
+    public PlayerControllerAi(Game game, Player p, LobbyPlayer lp, AiDecisionProvider decisionProvider,
+            boolean externalMulliganEnabled, boolean externalMainPhaseEnabled, int mainPhaseMaxActions,
+            boolean includeRejectedMainPhaseActions, int maxRejectedMainPhaseActions,
+            boolean externalStackResponseEnabled, int stackResponseMaxActions, boolean randomizeStackResponseOrder,
+            boolean externalCombatAttackersEnabled, int combatAttackersMaxOptions,
+            boolean externalCombatBlockersEnabled, int combatBlockersMaxOptions) {
+        this(game, p, lp, decisionProvider, externalMulliganEnabled, externalMainPhaseEnabled, mainPhaseMaxActions,
+                includeRejectedMainPhaseActions, maxRejectedMainPhaseActions, externalStackResponseEnabled,
+                stackResponseMaxActions, randomizeStackResponseOrder, externalCombatAttackersEnabled,
+                combatAttackersMaxOptions, externalCombatBlockersEnabled, combatBlockersMaxOptions, false, 6);
+    }
+
+    public PlayerControllerAi(Game game, Player p, LobbyPlayer lp, AiDecisionProvider decisionProvider,
+            boolean externalMulliganEnabled, boolean externalMainPhaseEnabled, int mainPhaseMaxActions,
+            boolean includeRejectedMainPhaseActions, int maxRejectedMainPhaseActions,
+            boolean externalStackResponseEnabled, int stackResponseMaxActions, boolean randomizeStackResponseOrder,
+            boolean externalCombatAttackersEnabled, int combatAttackersMaxOptions,
+            boolean externalCombatBlockersEnabled, int combatBlockersMaxOptions,
+            boolean externalCombatDamageOrderEnabled, int combatDamageOrderMaxOptions) {
         super(game, p, lp);
 
         brains = new AiController(p, game);
@@ -128,6 +154,9 @@ public class PlayerControllerAi extends PlayerController {
         brains.configureExternalStackResponses(decisionProvider, externalStackResponseEnabled,
                 stackResponseMaxActions, randomizeStackResponseOrder);
         brains.configureExternalCombatAttackers(decisionProvider, externalCombatAttackersEnabled, combatAttackersMaxOptions);
+        this.externalCombatDamageOrderEnabled = externalCombatDamageOrderEnabled && decisionProvider != null;
+        this.externalCombatDamageOrderMaxOptions = Math.min(12, Math.max(1, combatDamageOrderMaxOptions));
+        brains.configureExternalCombatBlockers(decisionProvider, externalCombatBlockersEnabled, combatBlockersMaxOptions);
     }
 
     public boolean pilotsNonAggroDeck() {
@@ -547,7 +576,9 @@ public class PlayerControllerAi extends PlayerController {
 
     @Override
     public CardCollection orderBlockers(Card attacker, CardCollection blockers) {
-        return AiBlockController.orderBlockers(attacker, blockers);
+        CardCollection heuristic = AiBlockController.orderBlockers(attacker, blockers);
+        return externalCombatDamageOrderEnabled ? ExternalCombatDamageOrder.choose(player, attacker, heuristic, true,
+                decisionProvider, externalCombatDamageOrderMaxOptions) : heuristic;
     }
 
     @Override
@@ -557,11 +588,14 @@ public class PlayerControllerAi extends PlayerController {
 
     @Override
     public CardCollection orderAttackers(Card blocker, CardCollection attackers) {
-        return AiBlockController.orderAttackers(blocker, attackers);
+        CardCollection heuristic = AiBlockController.orderAttackers(blocker, attackers);
+        return externalCombatDamageOrderEnabled ? ExternalCombatDamageOrder.choose(player, blocker, heuristic, false,
+                decisionProvider, externalCombatDamageOrderMaxOptions) : heuristic;
     }
 
     @Override
     public void reveal(CardCollectionView cards, ZoneType zone, Player owner, String messagePrefix, boolean addSuffix) {
+        ExternalAiStrategicMemory.revealed(player,cards.stream().map(Card::getView).toList(),zone);
         for (Card c : cards) {
             AiCardMemory.rememberCard(player, c, AiCardMemory.MemorySet.REVEALED_CARDS);
         }
@@ -569,6 +603,7 @@ public class PlayerControllerAi extends PlayerController {
 
     @Override
     public void reveal(List<CardView> cards, ZoneType zone, PlayerView owner, String messagePrefix, boolean addSuffix) {
+        ExternalAiStrategicMemory.revealed(player,cards,zone);
         for (CardView cv : cards) {
             AiCardMemory.rememberCard(player, player.getGame().findByView(cv), AiCardMemory.MemorySet.REVEALED_CARDS);
         }
@@ -985,7 +1020,8 @@ public class PlayerControllerAi extends PlayerController {
                 sa.resolve();
             }
         } else {
-            ComputerUtil.handlePlayingSpellAbility(player, sa, getDeferredTargetingPlayerAction(sa));
+            ComputerUtil.handlePlayingSpellAbility(player, sa, getDeferredTargetingPlayerAction(sa),
+                    brains.consumePreparedCombatAction(sa));
         }
         return true;
     }

@@ -1,0 +1,2626 @@
+[
+  {
+    "Case": "first-strike-life20",
+    "Order": "NoBlockFirst",
+    "GradeType": "Material preservation preference; not a forced strategic optimum",
+    "ExpectedOptionId": "NO_BLOCK",
+    "Payload": {
+      "decisionId": "probe-first-strike-life20",
+      "decisionType": "COMBAT_BLOCKERS",
+      "stateFingerprint": "73356A8C8CB2F7AC6F29277EE258A824870C29E71BC596D88F0EB505C948DE4B",
+      "state": {
+        "turn": 8,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Defender",
+            "life": 20,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_B",
+                "card": {
+                  "name": "Defending creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": false,
+                  "controller": "Defender",
+                  "power": 2,
+                  "toughness": 2,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Attacker",
+            "life": 20,
+            "self": false,
+            "mana": null,
+            "battlefield": [
+              {
+                "permanentId": "PERM_A",
+                "card": {
+                  "name": "Attacking creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "first strike",
+                  "tapped": true,
+                  "controller": "Attacker",
+                  "power": 7,
+                  "toughness": 7,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": [
+                  "first strike"
+                ]
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_A",
+              "card": {
+                "name": "Attacking creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "first strike",
+                "tapped": true,
+                "controller": "Attacker",
+                "power": 7,
+                "toughness": 7,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": [
+                "first strike"
+              ]
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_B",
+              "card": {
+                "name": "Defending creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": false,
+                "controller": "Defender",
+                "power": 2,
+                "toughness": 2,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        },
+        {
+          "optionId": "OPT_8F3AC501BD920A73C42F1006",
+          "assignments": [
+            {
+              "blockerId": "PERM_B",
+              "attackerId": "PERM_A"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        }
+      ]
+    },
+    "ExpectedOutcomes": [
+      {
+        "optionId": "NO_BLOCK",
+        "defenderDamage": 7,
+        "attackerDies": false,
+        "blockerDies": false,
+        "defenderLoses": false
+      },
+      {
+        "optionId": "OPT_8F3AC501BD920A73C42F1006",
+        "defenderDamage": 0,
+        "attackerDies": false,
+        "blockerDies": true,
+        "defenderLoses": false
+      }
+    ]
+  },
+  {
+    "Case": "first-strike-life20",
+    "Order": "BlockFirst",
+    "GradeType": "Material preservation preference; not a forced strategic optimum",
+    "ExpectedOptionId": "NO_BLOCK",
+    "Payload": {
+      "decisionId": "probe-first-strike-life20",
+      "decisionType": "COMBAT_BLOCKERS",
+      "stateFingerprint": "73356A8C8CB2F7AC6F29277EE258A824870C29E71BC596D88F0EB505C948DE4B",
+      "state": {
+        "turn": 8,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Defender",
+            "life": 20,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_B",
+                "card": {
+                  "name": "Defending creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": false,
+                  "controller": "Defender",
+                  "power": 2,
+                  "toughness": 2,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Attacker",
+            "life": 20,
+            "self": false,
+            "mana": null,
+            "battlefield": [
+              {
+                "permanentId": "PERM_A",
+                "card": {
+                  "name": "Attacking creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "first strike",
+                  "tapped": true,
+                  "controller": "Attacker",
+                  "power": 7,
+                  "toughness": 7,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": [
+                  "first strike"
+                ]
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_A",
+              "card": {
+                "name": "Attacking creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "first strike",
+                "tapped": true,
+                "controller": "Attacker",
+                "power": 7,
+                "toughness": 7,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": [
+                "first strike"
+              ]
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_B",
+              "card": {
+                "name": "Defending creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": false,
+                "controller": "Defender",
+                "power": 2,
+                "toughness": 2,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "OPT_8F3AC501BD920A73C42F1006",
+          "assignments": [
+            {
+              "blockerId": "PERM_B",
+              "attackerId": "PERM_A"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        },
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        }
+      ]
+    },
+    "ExpectedOutcomes": [
+      {
+        "optionId": "NO_BLOCK",
+        "defenderDamage": 7,
+        "attackerDies": false,
+        "blockerDies": false,
+        "defenderLoses": false
+      },
+      {
+        "optionId": "OPT_8F3AC501BD920A73C42F1006",
+        "defenderDamage": 0,
+        "attackerDies": false,
+        "blockerDies": true,
+        "defenderLoses": false
+      }
+    ]
+  },
+  {
+    "Case": "first-strike-life7",
+    "Order": "NoBlockFirst",
+    "GradeType": "Immediate lethal defense",
+    "ExpectedOptionId": "OPT_8F3AC501BD920A73C42F1006",
+    "Payload": {
+      "decisionId": "probe-first-strike-life7",
+      "decisionType": "COMBAT_BLOCKERS",
+      "stateFingerprint": "5BD20BB6B2F6D18A41AB09ED91B06D9A5C9DB5B5BF23CCDDA37C907B90362FDF",
+      "state": {
+        "turn": 8,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Defender",
+            "life": 7,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_B",
+                "card": {
+                  "name": "Defending creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": false,
+                  "controller": "Defender",
+                  "power": 2,
+                  "toughness": 2,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Attacker",
+            "life": 20,
+            "self": false,
+            "mana": null,
+            "battlefield": [
+              {
+                "permanentId": "PERM_A",
+                "card": {
+                  "name": "Attacking creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "first strike",
+                  "tapped": true,
+                  "controller": "Attacker",
+                  "power": 7,
+                  "toughness": 7,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": [
+                  "first strike"
+                ]
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_A",
+              "card": {
+                "name": "Attacking creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "first strike",
+                "tapped": true,
+                "controller": "Attacker",
+                "power": 7,
+                "toughness": 7,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": [
+                "first strike"
+              ]
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_B",
+              "card": {
+                "name": "Defending creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": false,
+                "controller": "Defender",
+                "power": 2,
+                "toughness": 2,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        },
+        {
+          "optionId": "OPT_8F3AC501BD920A73C42F1006",
+          "assignments": [
+            {
+              "blockerId": "PERM_B",
+              "attackerId": "PERM_A"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        }
+      ]
+    },
+    "ExpectedOutcomes": [
+      {
+        "optionId": "NO_BLOCK",
+        "defenderDamage": 7,
+        "attackerDies": false,
+        "blockerDies": false,
+        "defenderLoses": true
+      },
+      {
+        "optionId": "OPT_8F3AC501BD920A73C42F1006",
+        "defenderDamage": 0,
+        "attackerDies": false,
+        "blockerDies": true,
+        "defenderLoses": false
+      }
+    ]
+  },
+  {
+    "Case": "first-strike-life7",
+    "Order": "BlockFirst",
+    "GradeType": "Immediate lethal defense",
+    "ExpectedOptionId": "OPT_8F3AC501BD920A73C42F1006",
+    "Payload": {
+      "decisionId": "probe-first-strike-life7",
+      "decisionType": "COMBAT_BLOCKERS",
+      "stateFingerprint": "5BD20BB6B2F6D18A41AB09ED91B06D9A5C9DB5B5BF23CCDDA37C907B90362FDF",
+      "state": {
+        "turn": 8,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Defender",
+            "life": 7,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_B",
+                "card": {
+                  "name": "Defending creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": false,
+                  "controller": "Defender",
+                  "power": 2,
+                  "toughness": 2,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Attacker",
+            "life": 20,
+            "self": false,
+            "mana": null,
+            "battlefield": [
+              {
+                "permanentId": "PERM_A",
+                "card": {
+                  "name": "Attacking creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "first strike",
+                  "tapped": true,
+                  "controller": "Attacker",
+                  "power": 7,
+                  "toughness": 7,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": [
+                  "first strike"
+                ]
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_A",
+              "card": {
+                "name": "Attacking creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "first strike",
+                "tapped": true,
+                "controller": "Attacker",
+                "power": 7,
+                "toughness": 7,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": [
+                "first strike"
+              ]
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_B",
+              "card": {
+                "name": "Defending creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": false,
+                "controller": "Defender",
+                "power": 2,
+                "toughness": 2,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "OPT_8F3AC501BD920A73C42F1006",
+          "assignments": [
+            {
+              "blockerId": "PERM_B",
+              "attackerId": "PERM_A"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        },
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        }
+      ]
+    },
+    "ExpectedOutcomes": [
+      {
+        "optionId": "NO_BLOCK",
+        "defenderDamage": 7,
+        "attackerDies": false,
+        "blockerDies": false,
+        "defenderLoses": true
+      },
+      {
+        "optionId": "OPT_8F3AC501BD920A73C42F1006",
+        "defenderDamage": 0,
+        "attackerDies": false,
+        "blockerDies": true,
+        "defenderLoses": false
+      }
+    ]
+  },
+  {
+    "Case": "deathtouch-life20",
+    "Order": "NoBlockFirst",
+    "GradeType": "Material preservation preference; not a forced strategic optimum",
+    "ExpectedOptionId": "NO_BLOCK",
+    "Payload": {
+      "decisionId": "probe-deathtouch-life20",
+      "decisionType": "COMBAT_BLOCKERS",
+      "stateFingerprint": "180D8D3974F5BCE22AFD9B0CBBE142A22F3E61AD78CDB2401851F4E88388055D",
+      "state": {
+        "turn": 8,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Defender",
+            "life": 20,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_B",
+                "card": {
+                  "name": "Defending creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": false,
+                  "controller": "Defender",
+                  "power": 6,
+                  "toughness": 6,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Attacker",
+            "life": 20,
+            "self": false,
+            "mana": null,
+            "battlefield": [
+              {
+                "permanentId": "PERM_A",
+                "card": {
+                  "name": "Attacking creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "deathtouch",
+                  "tapped": true,
+                  "controller": "Attacker",
+                  "power": 1,
+                  "toughness": 1,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": [
+                  "deathtouch"
+                ]
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_A",
+              "card": {
+                "name": "Attacking creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "deathtouch",
+                "tapped": true,
+                "controller": "Attacker",
+                "power": 1,
+                "toughness": 1,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": [
+                "deathtouch"
+              ]
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_B",
+              "card": {
+                "name": "Defending creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": false,
+                "controller": "Defender",
+                "power": 6,
+                "toughness": 6,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        },
+        {
+          "optionId": "OPT_8F3AC501BD920A73C42F1006",
+          "assignments": [
+            {
+              "blockerId": "PERM_B",
+              "attackerId": "PERM_A"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        }
+      ]
+    },
+    "ExpectedOutcomes": [
+      {
+        "optionId": "NO_BLOCK",
+        "defenderDamage": 1,
+        "attackerDies": false,
+        "blockerDies": false,
+        "defenderLoses": false
+      },
+      {
+        "optionId": "OPT_8F3AC501BD920A73C42F1006",
+        "defenderDamage": 0,
+        "attackerDies": true,
+        "blockerDies": true,
+        "defenderLoses": false
+      }
+    ]
+  },
+  {
+    "Case": "deathtouch-life20",
+    "Order": "BlockFirst",
+    "GradeType": "Material preservation preference; not a forced strategic optimum",
+    "ExpectedOptionId": "NO_BLOCK",
+    "Payload": {
+      "decisionId": "probe-deathtouch-life20",
+      "decisionType": "COMBAT_BLOCKERS",
+      "stateFingerprint": "180D8D3974F5BCE22AFD9B0CBBE142A22F3E61AD78CDB2401851F4E88388055D",
+      "state": {
+        "turn": 8,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Defender",
+            "life": 20,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_B",
+                "card": {
+                  "name": "Defending creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": false,
+                  "controller": "Defender",
+                  "power": 6,
+                  "toughness": 6,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Attacker",
+            "life": 20,
+            "self": false,
+            "mana": null,
+            "battlefield": [
+              {
+                "permanentId": "PERM_A",
+                "card": {
+                  "name": "Attacking creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "deathtouch",
+                  "tapped": true,
+                  "controller": "Attacker",
+                  "power": 1,
+                  "toughness": 1,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": [
+                  "deathtouch"
+                ]
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_A",
+              "card": {
+                "name": "Attacking creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "deathtouch",
+                "tapped": true,
+                "controller": "Attacker",
+                "power": 1,
+                "toughness": 1,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": [
+                "deathtouch"
+              ]
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_B",
+              "card": {
+                "name": "Defending creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": false,
+                "controller": "Defender",
+                "power": 6,
+                "toughness": 6,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "OPT_8F3AC501BD920A73C42F1006",
+          "assignments": [
+            {
+              "blockerId": "PERM_B",
+              "attackerId": "PERM_A"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        },
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        }
+      ]
+    },
+    "ExpectedOutcomes": [
+      {
+        "optionId": "NO_BLOCK",
+        "defenderDamage": 1,
+        "attackerDies": false,
+        "blockerDies": false,
+        "defenderLoses": false
+      },
+      {
+        "optionId": "OPT_8F3AC501BD920A73C42F1006",
+        "defenderDamage": 0,
+        "attackerDies": true,
+        "blockerDies": true,
+        "defenderLoses": false
+      }
+    ]
+  },
+  {
+    "Case": "deathtouch-life1",
+    "Order": "NoBlockFirst",
+    "GradeType": "Immediate lethal defense",
+    "ExpectedOptionId": "OPT_8F3AC501BD920A73C42F1006",
+    "Payload": {
+      "decisionId": "probe-deathtouch-life1",
+      "decisionType": "COMBAT_BLOCKERS",
+      "stateFingerprint": "8CE470CD5E38A684EC8EBA44AB61FB7EAA3C1A705504F768BF578079CE862B7F",
+      "state": {
+        "turn": 8,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Defender",
+            "life": 1,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_B",
+                "card": {
+                  "name": "Defending creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": false,
+                  "controller": "Defender",
+                  "power": 6,
+                  "toughness": 6,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Attacker",
+            "life": 20,
+            "self": false,
+            "mana": null,
+            "battlefield": [
+              {
+                "permanentId": "PERM_A",
+                "card": {
+                  "name": "Attacking creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "deathtouch",
+                  "tapped": true,
+                  "controller": "Attacker",
+                  "power": 1,
+                  "toughness": 1,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": [
+                  "deathtouch"
+                ]
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_A",
+              "card": {
+                "name": "Attacking creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "deathtouch",
+                "tapped": true,
+                "controller": "Attacker",
+                "power": 1,
+                "toughness": 1,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": [
+                "deathtouch"
+              ]
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_B",
+              "card": {
+                "name": "Defending creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": false,
+                "controller": "Defender",
+                "power": 6,
+                "toughness": 6,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        },
+        {
+          "optionId": "OPT_8F3AC501BD920A73C42F1006",
+          "assignments": [
+            {
+              "blockerId": "PERM_B",
+              "attackerId": "PERM_A"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        }
+      ]
+    },
+    "ExpectedOutcomes": [
+      {
+        "optionId": "NO_BLOCK",
+        "defenderDamage": 1,
+        "attackerDies": false,
+        "blockerDies": false,
+        "defenderLoses": true
+      },
+      {
+        "optionId": "OPT_8F3AC501BD920A73C42F1006",
+        "defenderDamage": 0,
+        "attackerDies": true,
+        "blockerDies": true,
+        "defenderLoses": false
+      }
+    ]
+  },
+  {
+    "Case": "deathtouch-life1",
+    "Order": "BlockFirst",
+    "GradeType": "Immediate lethal defense",
+    "ExpectedOptionId": "OPT_8F3AC501BD920A73C42F1006",
+    "Payload": {
+      "decisionId": "probe-deathtouch-life1",
+      "decisionType": "COMBAT_BLOCKERS",
+      "stateFingerprint": "8CE470CD5E38A684EC8EBA44AB61FB7EAA3C1A705504F768BF578079CE862B7F",
+      "state": {
+        "turn": 8,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Defender",
+            "life": 1,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_B",
+                "card": {
+                  "name": "Defending creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": false,
+                  "controller": "Defender",
+                  "power": 6,
+                  "toughness": 6,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Attacker",
+            "life": 20,
+            "self": false,
+            "mana": null,
+            "battlefield": [
+              {
+                "permanentId": "PERM_A",
+                "card": {
+                  "name": "Attacking creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "deathtouch",
+                  "tapped": true,
+                  "controller": "Attacker",
+                  "power": 1,
+                  "toughness": 1,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": [
+                  "deathtouch"
+                ]
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_A",
+              "card": {
+                "name": "Attacking creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "deathtouch",
+                "tapped": true,
+                "controller": "Attacker",
+                "power": 1,
+                "toughness": 1,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": [
+                "deathtouch"
+              ]
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_B",
+              "card": {
+                "name": "Defending creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": false,
+                "controller": "Defender",
+                "power": 6,
+                "toughness": 6,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "OPT_8F3AC501BD920A73C42F1006",
+          "assignments": [
+            {
+              "blockerId": "PERM_B",
+              "attackerId": "PERM_A"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        },
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        }
+      ]
+    },
+    "ExpectedOutcomes": [
+      {
+        "optionId": "NO_BLOCK",
+        "defenderDamage": 1,
+        "attackerDies": false,
+        "blockerDies": false,
+        "defenderLoses": true
+      },
+      {
+        "optionId": "OPT_8F3AC501BD920A73C42F1006",
+        "defenderDamage": 0,
+        "attackerDies": true,
+        "blockerDies": true,
+        "defenderLoses": false
+      }
+    ]
+  },
+  {
+    "Case": "trample-life20",
+    "Order": "NoBlockFirst",
+    "GradeType": "Material preservation preference; not a forced strategic optimum",
+    "ExpectedOptionId": "NO_BLOCK",
+    "Payload": {
+      "decisionId": "probe-trample-life20",
+      "decisionType": "COMBAT_BLOCKERS",
+      "stateFingerprint": "2893FA23FCC8DD18BC77933E9D50DBD50666000248F705BF9C338F99312EFCC4",
+      "state": {
+        "turn": 8,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Defender",
+            "life": 20,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_B",
+                "card": {
+                  "name": "Defending creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": false,
+                  "controller": "Defender",
+                  "power": 4,
+                  "toughness": 4,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Attacker",
+            "life": 20,
+            "self": false,
+            "mana": null,
+            "battlefield": [
+              {
+                "permanentId": "PERM_A",
+                "card": {
+                  "name": "Attacking creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "trample",
+                  "tapped": true,
+                  "controller": "Attacker",
+                  "power": 6,
+                  "toughness": 6,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": [
+                  "trample"
+                ]
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_A",
+              "card": {
+                "name": "Attacking creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "trample",
+                "tapped": true,
+                "controller": "Attacker",
+                "power": 6,
+                "toughness": 6,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": [
+                "trample"
+              ]
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_B",
+              "card": {
+                "name": "Defending creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": false,
+                "controller": "Defender",
+                "power": 4,
+                "toughness": 4,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        },
+        {
+          "optionId": "OPT_8F3AC501BD920A73C42F1006",
+          "assignments": [
+            {
+              "blockerId": "PERM_B",
+              "attackerId": "PERM_A"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        }
+      ]
+    },
+    "ExpectedOutcomes": [
+      {
+        "optionId": "NO_BLOCK",
+        "defenderDamage": 6,
+        "attackerDies": false,
+        "blockerDies": false,
+        "defenderLoses": false
+      },
+      {
+        "optionId": "OPT_8F3AC501BD920A73C42F1006",
+        "defenderDamage": 2,
+        "attackerDies": false,
+        "blockerDies": true,
+        "defenderLoses": false
+      }
+    ]
+  },
+  {
+    "Case": "trample-life20",
+    "Order": "BlockFirst",
+    "GradeType": "Material preservation preference; not a forced strategic optimum",
+    "ExpectedOptionId": "NO_BLOCK",
+    "Payload": {
+      "decisionId": "probe-trample-life20",
+      "decisionType": "COMBAT_BLOCKERS",
+      "stateFingerprint": "2893FA23FCC8DD18BC77933E9D50DBD50666000248F705BF9C338F99312EFCC4",
+      "state": {
+        "turn": 8,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Defender",
+            "life": 20,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_B",
+                "card": {
+                  "name": "Defending creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": false,
+                  "controller": "Defender",
+                  "power": 4,
+                  "toughness": 4,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Attacker",
+            "life": 20,
+            "self": false,
+            "mana": null,
+            "battlefield": [
+              {
+                "permanentId": "PERM_A",
+                "card": {
+                  "name": "Attacking creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "trample",
+                  "tapped": true,
+                  "controller": "Attacker",
+                  "power": 6,
+                  "toughness": 6,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": [
+                  "trample"
+                ]
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_A",
+              "card": {
+                "name": "Attacking creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "trample",
+                "tapped": true,
+                "controller": "Attacker",
+                "power": 6,
+                "toughness": 6,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": [
+                "trample"
+              ]
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_B",
+              "card": {
+                "name": "Defending creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": false,
+                "controller": "Defender",
+                "power": 4,
+                "toughness": 4,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "OPT_8F3AC501BD920A73C42F1006",
+          "assignments": [
+            {
+              "blockerId": "PERM_B",
+              "attackerId": "PERM_A"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        },
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        }
+      ]
+    },
+    "ExpectedOutcomes": [
+      {
+        "optionId": "NO_BLOCK",
+        "defenderDamage": 6,
+        "attackerDies": false,
+        "blockerDies": false,
+        "defenderLoses": false
+      },
+      {
+        "optionId": "OPT_8F3AC501BD920A73C42F1006",
+        "defenderDamage": 2,
+        "attackerDies": false,
+        "blockerDies": true,
+        "defenderLoses": false
+      }
+    ]
+  },
+  {
+    "Case": "trample-life3",
+    "Order": "NoBlockFirst",
+    "GradeType": "Immediate lethal defense",
+    "ExpectedOptionId": "OPT_8F3AC501BD920A73C42F1006",
+    "Payload": {
+      "decisionId": "probe-trample-life3",
+      "decisionType": "COMBAT_BLOCKERS",
+      "stateFingerprint": "BB954C5C765794D32E204A49FD3C3540CCD2288AE1FA3C4AFF903DC39C59DFCE",
+      "state": {
+        "turn": 8,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Defender",
+            "life": 3,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_B",
+                "card": {
+                  "name": "Defending creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": false,
+                  "controller": "Defender",
+                  "power": 4,
+                  "toughness": 4,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Attacker",
+            "life": 20,
+            "self": false,
+            "mana": null,
+            "battlefield": [
+              {
+                "permanentId": "PERM_A",
+                "card": {
+                  "name": "Attacking creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "trample",
+                  "tapped": true,
+                  "controller": "Attacker",
+                  "power": 6,
+                  "toughness": 6,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": [
+                  "trample"
+                ]
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_A",
+              "card": {
+                "name": "Attacking creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "trample",
+                "tapped": true,
+                "controller": "Attacker",
+                "power": 6,
+                "toughness": 6,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": [
+                "trample"
+              ]
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_B",
+              "card": {
+                "name": "Defending creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": false,
+                "controller": "Defender",
+                "power": 4,
+                "toughness": 4,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        },
+        {
+          "optionId": "OPT_8F3AC501BD920A73C42F1006",
+          "assignments": [
+            {
+              "blockerId": "PERM_B",
+              "attackerId": "PERM_A"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        }
+      ]
+    },
+    "ExpectedOutcomes": [
+      {
+        "optionId": "NO_BLOCK",
+        "defenderDamage": 6,
+        "attackerDies": false,
+        "blockerDies": false,
+        "defenderLoses": true
+      },
+      {
+        "optionId": "OPT_8F3AC501BD920A73C42F1006",
+        "defenderDamage": 2,
+        "attackerDies": false,
+        "blockerDies": true,
+        "defenderLoses": false
+      }
+    ]
+  },
+  {
+    "Case": "trample-life3",
+    "Order": "BlockFirst",
+    "GradeType": "Immediate lethal defense",
+    "ExpectedOptionId": "OPT_8F3AC501BD920A73C42F1006",
+    "Payload": {
+      "decisionId": "probe-trample-life3",
+      "decisionType": "COMBAT_BLOCKERS",
+      "stateFingerprint": "BB954C5C765794D32E204A49FD3C3540CCD2288AE1FA3C4AFF903DC39C59DFCE",
+      "state": {
+        "turn": 8,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Defender",
+            "life": 3,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_B",
+                "card": {
+                  "name": "Defending creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": false,
+                  "controller": "Defender",
+                  "power": 4,
+                  "toughness": 4,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Attacker",
+            "life": 20,
+            "self": false,
+            "mana": null,
+            "battlefield": [
+              {
+                "permanentId": "PERM_A",
+                "card": {
+                  "name": "Attacking creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "trample",
+                  "tapped": true,
+                  "controller": "Attacker",
+                  "power": 6,
+                  "toughness": 6,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": [
+                  "trample"
+                ]
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_A",
+              "card": {
+                "name": "Attacking creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "trample",
+                "tapped": true,
+                "controller": "Attacker",
+                "power": 6,
+                "toughness": 6,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": [
+                "trample"
+              ]
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_B",
+              "card": {
+                "name": "Defending creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": false,
+                "controller": "Defender",
+                "power": 4,
+                "toughness": 4,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "OPT_8F3AC501BD920A73C42F1006",
+          "assignments": [
+            {
+              "blockerId": "PERM_B",
+              "attackerId": "PERM_A"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        },
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        }
+      ]
+    },
+    "ExpectedOutcomes": [
+      {
+        "optionId": "NO_BLOCK",
+        "defenderDamage": 6,
+        "attackerDies": false,
+        "blockerDies": false,
+        "defenderLoses": true
+      },
+      {
+        "optionId": "OPT_8F3AC501BD920A73C42F1006",
+        "defenderDamage": 2,
+        "attackerDies": false,
+        "blockerDies": true,
+        "defenderLoses": false
+      }
+    ]
+  },
+  {
+    "Case": "profitable-block-life20",
+    "Order": "NoBlockFirst",
+    "GradeType": "Kill attacker without losing blocker",
+    "ExpectedOptionId": "OPT_8F3AC501BD920A73C42F1006",
+    "Payload": {
+      "decisionId": "probe-profitable-block-life20",
+      "decisionType": "COMBAT_BLOCKERS",
+      "stateFingerprint": "4AD9710B4B84178629D3E49565B01818FA9B48B62A8F3BB4EA9732084B2BDDAB",
+      "state": {
+        "turn": 8,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Defender",
+            "life": 20,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_B",
+                "card": {
+                  "name": "Defending creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": false,
+                  "controller": "Defender",
+                  "power": 4,
+                  "toughness": 4,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Attacker",
+            "life": 20,
+            "self": false,
+            "mana": null,
+            "battlefield": [
+              {
+                "permanentId": "PERM_A",
+                "card": {
+                  "name": "Attacking creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": true,
+                  "controller": "Attacker",
+                  "power": 2,
+                  "toughness": 2,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_A",
+              "card": {
+                "name": "Attacking creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": true,
+                "controller": "Attacker",
+                "power": 2,
+                "toughness": 2,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_B",
+              "card": {
+                "name": "Defending creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": false,
+                "controller": "Defender",
+                "power": 4,
+                "toughness": 4,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        },
+        {
+          "optionId": "OPT_8F3AC501BD920A73C42F1006",
+          "assignments": [
+            {
+              "blockerId": "PERM_B",
+              "attackerId": "PERM_A"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        }
+      ]
+    },
+    "ExpectedOutcomes": [
+      {
+        "optionId": "NO_BLOCK",
+        "defenderDamage": 2,
+        "attackerDies": false,
+        "blockerDies": false,
+        "defenderLoses": false
+      },
+      {
+        "optionId": "OPT_8F3AC501BD920A73C42F1006",
+        "defenderDamage": 0,
+        "attackerDies": true,
+        "blockerDies": false,
+        "defenderLoses": false
+      }
+    ]
+  },
+  {
+    "Case": "profitable-block-life20",
+    "Order": "BlockFirst",
+    "GradeType": "Kill attacker without losing blocker",
+    "ExpectedOptionId": "OPT_8F3AC501BD920A73C42F1006",
+    "Payload": {
+      "decisionId": "probe-profitable-block-life20",
+      "decisionType": "COMBAT_BLOCKERS",
+      "stateFingerprint": "4AD9710B4B84178629D3E49565B01818FA9B48B62A8F3BB4EA9732084B2BDDAB",
+      "state": {
+        "turn": 8,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Defender",
+            "life": 20,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_B",
+                "card": {
+                  "name": "Defending creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": false,
+                  "controller": "Defender",
+                  "power": 4,
+                  "toughness": 4,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Attacker",
+            "life": 20,
+            "self": false,
+            "mana": null,
+            "battlefield": [
+              {
+                "permanentId": "PERM_A",
+                "card": {
+                  "name": "Attacking creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": true,
+                  "controller": "Attacker",
+                  "power": 2,
+                  "toughness": 2,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_A",
+              "card": {
+                "name": "Attacking creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": true,
+                "controller": "Attacker",
+                "power": 2,
+                "toughness": 2,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_B",
+              "card": {
+                "name": "Defending creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": false,
+                "controller": "Defender",
+                "power": 4,
+                "toughness": 4,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "OPT_8F3AC501BD920A73C42F1006",
+          "assignments": [
+            {
+              "blockerId": "PERM_B",
+              "attackerId": "PERM_A"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        },
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        }
+      ]
+    },
+    "ExpectedOutcomes": [
+      {
+        "optionId": "NO_BLOCK",
+        "defenderDamage": 2,
+        "attackerDies": false,
+        "blockerDies": false,
+        "defenderLoses": false
+      },
+      {
+        "optionId": "OPT_8F3AC501BD920A73C42F1006",
+        "defenderDamage": 0,
+        "attackerDies": true,
+        "blockerDies": false,
+        "defenderLoses": false
+      }
+    ]
+  },
+  {
+    "Case": "profitable-block-life2",
+    "Order": "NoBlockFirst",
+    "GradeType": "Immediate lethal defense",
+    "ExpectedOptionId": "OPT_8F3AC501BD920A73C42F1006",
+    "Payload": {
+      "decisionId": "probe-profitable-block-life2",
+      "decisionType": "COMBAT_BLOCKERS",
+      "stateFingerprint": "138627724040F57E37E0935975CD2D7C4B02E5B27B02600977D8460B718C1388",
+      "state": {
+        "turn": 8,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Defender",
+            "life": 2,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_B",
+                "card": {
+                  "name": "Defending creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": false,
+                  "controller": "Defender",
+                  "power": 4,
+                  "toughness": 4,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Attacker",
+            "life": 20,
+            "self": false,
+            "mana": null,
+            "battlefield": [
+              {
+                "permanentId": "PERM_A",
+                "card": {
+                  "name": "Attacking creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": true,
+                  "controller": "Attacker",
+                  "power": 2,
+                  "toughness": 2,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_A",
+              "card": {
+                "name": "Attacking creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": true,
+                "controller": "Attacker",
+                "power": 2,
+                "toughness": 2,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_B",
+              "card": {
+                "name": "Defending creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": false,
+                "controller": "Defender",
+                "power": 4,
+                "toughness": 4,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        },
+        {
+          "optionId": "OPT_8F3AC501BD920A73C42F1006",
+          "assignments": [
+            {
+              "blockerId": "PERM_B",
+              "attackerId": "PERM_A"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        }
+      ]
+    },
+    "ExpectedOutcomes": [
+      {
+        "optionId": "NO_BLOCK",
+        "defenderDamage": 2,
+        "attackerDies": false,
+        "blockerDies": false,
+        "defenderLoses": true
+      },
+      {
+        "optionId": "OPT_8F3AC501BD920A73C42F1006",
+        "defenderDamage": 0,
+        "attackerDies": true,
+        "blockerDies": false,
+        "defenderLoses": false
+      }
+    ]
+  },
+  {
+    "Case": "profitable-block-life2",
+    "Order": "BlockFirst",
+    "GradeType": "Immediate lethal defense",
+    "ExpectedOptionId": "OPT_8F3AC501BD920A73C42F1006",
+    "Payload": {
+      "decisionId": "probe-profitable-block-life2",
+      "decisionType": "COMBAT_BLOCKERS",
+      "stateFingerprint": "138627724040F57E37E0935975CD2D7C4B02E5B27B02600977D8460B718C1388",
+      "state": {
+        "turn": 8,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Defender",
+            "life": 2,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_B",
+                "card": {
+                  "name": "Defending creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": false,
+                  "controller": "Defender",
+                  "power": 4,
+                  "toughness": 4,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Attacker",
+            "life": 20,
+            "self": false,
+            "mana": null,
+            "battlefield": [
+              {
+                "permanentId": "PERM_A",
+                "card": {
+                  "name": "Attacking creature",
+                  "manaCost": "{4}",
+                  "type": "Creature",
+                  "oracleText": "",
+                  "tapped": true,
+                  "controller": "Attacker",
+                  "power": 2,
+                  "toughness": 2,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_A",
+              "card": {
+                "name": "Attacking creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": true,
+                "controller": "Attacker",
+                "power": 2,
+                "toughness": 2,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_B",
+              "card": {
+                "name": "Defending creature",
+                "manaCost": "{4}",
+                "type": "Creature",
+                "oracleText": "",
+                "tapped": false,
+                "controller": "Defender",
+                "power": 4,
+                "toughness": 4,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "OPT_8F3AC501BD920A73C42F1006",
+          "assignments": [
+            {
+              "blockerId": "PERM_B",
+              "attackerId": "PERM_A"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        },
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        }
+      ]
+    },
+    "ExpectedOutcomes": [
+      {
+        "optionId": "NO_BLOCK",
+        "defenderDamage": 2,
+        "attackerDies": false,
+        "blockerDies": false,
+        "defenderLoses": true
+      },
+      {
+        "optionId": "OPT_8F3AC501BD920A73C42F1006",
+        "defenderDamage": 0,
+        "attackerDies": true,
+        "blockerDies": false,
+        "defenderLoses": false
+      }
+    ]
+  }
+]

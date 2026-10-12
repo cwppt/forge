@@ -1,0 +1,222 @@
+{
+  "ProviderRequest": {
+    "model": "qwen3:8b",
+    "stream": false,
+    "temperature": 0,
+    "max_tokens": 512,
+    "reasoning_effort": "none",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are choosing blockers in Magic: The Gathering. Choose exactly one supplied option ID. Use only visible information. Consider survival, trades, lethal damage, trample, combat keywords, and preserving valuable creatures. Do not invent blocker assignments. Copy decisionId and stateFingerprint exactly. Return only the required JSON object: no explanation, Markdown, or code fences."
+      },
+      {
+        "role": "user",
+        "content": "{\"decisionId\":\"probe-protective-blocker\",\"decisionType\":\"COMBAT_BLOCKERS\",\"stateFingerprint\":\"CAADDF130F9B27291AF937001D600D61EA260315577CBDA61527CF2576A487BB\",\"state\":{\"turn\":8,\"phase\":\"COMBAT_DECLARE_BLOCKERS\",\"defendingPlayerId\":\"PLAYER_1\",\"players\":[{\"playerId\":\"PLAYER_0\",\"name\":\"p2\",\"life\":20,\"self\":false,\"mana\":null,\"battlefield\":[{\"permanentId\":\"PERM_415895533917BBB69F8CD91F\",\"card\":{\"name\":\"Ankle Biter\",\"manaCost\":\"{G}\",\"type\":\"Creature - Snake\",\"oracleText\":\"Deathtouch\",\"tapped\":false,\"controller\":\"p2\",\"power\":1,\"toughness\":1,\"markedDamage\":0,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[\"deathtouch\"]}]},{\"playerId\":\"PLAYER_1\",\"name\":\"p1\",\"life\":0,\"self\":true,\"mana\":{\"white\":0,\"blue\":0,\"black\":0,\"red\":0,\"green\":0,\"colorless\":0,\"total\":0},\"battlefield\":[{\"permanentId\":\"PERM_B5A48CAAEFDB2F86A3679D6C\",\"card\":{\"name\":\"Platinum Angel\",\"manaCost\":\"{7}\",\"type\":\"Artifact Creature - Angel\",\"oracleText\":\"Flying\\\\nYou can\u0027t lose the game and your opponents can\u0027t win the game.\",\"tapped\":false,\"controller\":\"p1\",\"power\":4,\"toughness\":4,\"markedDamage\":0,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[\"flying\"]}]}],\"attackers\":[{\"permanent\":{\"permanentId\":\"PERM_415895533917BBB69F8CD91F\",\"card\":{\"name\":\"Ankle Biter\",\"manaCost\":\"{G}\",\"type\":\"Creature - Snake\",\"oracleText\":\"Deathtouch\",\"tapped\":false,\"controller\":\"p2\",\"power\":1,\"toughness\":1,\"markedDamage\":0,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[\"deathtouch\"]},\"targetId\":\"PLAYER_1\"}],\"blockers\":[{\"permanent\":{\"permanentId\":\"PERM_B5A48CAAEFDB2F86A3679D6C\",\"card\":{\"name\":\"Platinum Angel\",\"manaCost\":\"{7}\",\"type\":\"Artifact Creature - Angel\",\"oracleText\":\"Flying\\\\nYou can\u0027t lose the game and your opponents can\u0027t win the game.\",\"tapped\":false,\"controller\":\"p1\",\"power\":4,\"toughness\":4,\"markedDamage\":0,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[\"flying\"]},\"canBlock\":true}]},\"options\":[{\"optionId\":\"NO_BLOCK\",\"assignments\":[],\"blockerCount\":0,\"blockedAttackerCount\":0},{\"optionId\":\"OPT_932C57340C6A377264CD6AC0\",\"assignments\":[{\"blockerId\":\"PERM_B5A48CAAEFDB2F86A3679D6C\",\"attackerId\":\"PERM_415895533917BBB69F8CD91F\"}],\"blockerCount\":1,\"blockedAttackerCount\":1}]}"
+      }
+    ],
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "forge_ai_decision",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "decisionId": {
+              "type": "string",
+              "enum": [
+                "probe-protective-blocker"
+              ]
+            },
+            "stateFingerprint": {
+              "type": "string",
+              "enum": [
+                "CAADDF130F9B27291AF937001D600D61EA260315577CBDA61527CF2576A487BB"
+              ]
+            },
+            "optionId": {
+              "type": "string",
+              "enum": [
+                "NO_BLOCK",
+                "OPT_932C57340C6A377264CD6AC0"
+              ]
+            }
+          },
+          "required": [
+            "decisionId",
+            "stateFingerprint",
+            "optionId"
+          ]
+        }
+      }
+    }
+  },
+  "Payload": {
+    "decisionId": "probe-protective-blocker",
+    "decisionType": "COMBAT_BLOCKERS",
+    "stateFingerprint": "CAADDF130F9B27291AF937001D600D61EA260315577CBDA61527CF2576A487BB",
+    "state": {
+      "turn": 8,
+      "phase": "COMBAT_DECLARE_BLOCKERS",
+      "defendingPlayerId": "PLAYER_1",
+      "players": [
+        {
+          "playerId": "PLAYER_0",
+          "name": "p2",
+          "life": 20,
+          "self": false,
+          "mana": null,
+          "battlefield": [
+            {
+              "permanentId": "PERM_415895533917BBB69F8CD91F",
+              "card": {
+                "name": "Ankle Biter",
+                "manaCost": "{G}",
+                "type": "Creature - Snake",
+                "oracleText": "Deathtouch",
+                "tapped": false,
+                "controller": "p2",
+                "power": 1,
+                "toughness": 1,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": [
+                "deathtouch"
+              ]
+            }
+          ]
+        },
+        {
+          "playerId": "PLAYER_1",
+          "name": "p1",
+          "life": 0,
+          "self": true,
+          "mana": {
+            "white": 0,
+            "blue": 0,
+            "black": 0,
+            "red": 0,
+            "green": 0,
+            "colorless": 0,
+            "total": 0
+          },
+          "battlefield": [
+            {
+              "permanentId": "PERM_B5A48CAAEFDB2F86A3679D6C",
+              "card": {
+                "name": "Platinum Angel",
+                "manaCost": "{7}",
+                "type": "Artifact Creature - Angel",
+                "oracleText": "Flying\\nYou can\u0027t lose the game and your opponents can\u0027t win the game.",
+                "tapped": false,
+                "controller": "p1",
+                "power": 4,
+                "toughness": 4,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": [
+                "flying"
+              ]
+            }
+          ]
+        }
+      ],
+      "attackers": [
+        {
+          "permanent": {
+            "permanentId": "PERM_415895533917BBB69F8CD91F",
+            "card": {
+              "name": "Ankle Biter",
+              "manaCost": "{G}",
+              "type": "Creature - Snake",
+              "oracleText": "Deathtouch",
+              "tapped": false,
+              "controller": "p2",
+              "power": 1,
+              "toughness": 1,
+              "markedDamage": 0,
+              "counters": []
+            },
+            "summoningSick": false,
+            "canAttack": false,
+            "keywords": [
+              "deathtouch"
+            ]
+          },
+          "targetId": "PLAYER_1"
+        }
+      ],
+      "blockers": [
+        {
+          "permanent": {
+            "permanentId": "PERM_B5A48CAAEFDB2F86A3679D6C",
+            "card": {
+              "name": "Platinum Angel",
+              "manaCost": "{7}",
+              "type": "Artifact Creature - Angel",
+              "oracleText": "Flying\\nYou can\u0027t lose the game and your opponents can\u0027t win the game.",
+              "tapped": false,
+              "controller": "p1",
+              "power": 4,
+              "toughness": 4,
+              "markedDamage": 0,
+              "counters": []
+            },
+            "summoningSick": false,
+            "canAttack": false,
+            "keywords": [
+              "flying"
+            ]
+          },
+          "canBlock": true
+        }
+      ]
+    },
+    "options": [
+      {
+        "optionId": "NO_BLOCK",
+        "assignments": [],
+        "blockerCount": 0,
+        "blockedAttackerCount": 0
+      },
+      {
+        "optionId": "OPT_932C57340C6A377264CD6AC0",
+        "assignments": [
+          {
+            "blockerId": "PERM_B5A48CAAEFDB2F86A3679D6C",
+            "attackerId": "PERM_415895533917BBB69F8CD91F"
+          }
+        ],
+        "blockerCount": 1,
+        "blockedAttackerCount": 1
+      }
+    ]
+  },
+  "ExpectedOptionId": "NO_BLOCK",
+  "BlockOptionId": "OPT_932C57340C6A377264CD6AC0",
+  "Case": "protective-blocker-zero-life",
+  "ExpectedOutcomes": [
+    {
+      "optionId": "NO_BLOCK",
+      "defenderDamage": 1,
+      "attackerDies": false,
+      "blockerDies": false,
+      "defenderLoses": false
+    },
+    {
+      "optionId": "OPT_932C57340C6A377264CD6AC0",
+      "defenderDamage": 0,
+      "attackerDies": true,
+      "blockerDies": true,
+      "defenderLoses": true
+    }
+  ]
+}

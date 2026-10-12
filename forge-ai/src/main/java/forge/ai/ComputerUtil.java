@@ -79,6 +79,13 @@ import java.util.stream.Collectors;
 public class ComputerUtil {
 
     public static boolean handlePlayingSpellAbility(final Player ai, SpellAbility sa, Consumer<SpellAbility> chooseTargets) {
+        return handlePlayingSpellAbility(ai, sa, chooseTargets, false);
+    }
+
+    /** Prepared combat choices are complete: optional additions and mode/target callbacks must not replace them. */
+    static boolean handlePlayingSpellAbility(final Player ai, SpellAbility sa, Consumer<SpellAbility> chooseTargets,
+            boolean preparedChoices) {
+        if (preparedChoices && chooseTargets != null) return false;
         final Card source = sa.getHostCard();
         final Game game = source.getGame();
         final Card host = sa.getHostCard();
@@ -86,7 +93,7 @@ public class ComputerUtil {
         source.setSplitStateToPlayAbility(sa);
 
         if (sa.isSpell() && !source.isCopiedSpell()) {
-            sa = AbilityUtils.addSpliceEffects(sa);
+            if (!preparedChoices) sa = AbilityUtils.addSpliceEffects(sa);
             if (sa.getSplicedCards() != null && !sa.getSplicedCards().isEmpty() && ai.getController().isAI()) {
                 // we need to reconsider and retarget the SA after additional SAs have been added onto it via splice,
                 // otherwise the AI will fail to add the card to stack and that'll knock it out of the game
@@ -106,9 +113,9 @@ public class ComputerUtil {
             sa.setPaidLife(0);
         }
 
-        sa = GameActionUtil.addExtraKeywordCost(sa);
+        if (!preparedChoices) sa = GameActionUtil.addExtraKeywordCost(sa);
 
-        if (sa.getApi() == ApiType.Charm && !CharmEffect.makeChoices(sa)) {
+        if (!preparedChoices && sa.getApi() == ApiType.Charm && !CharmEffect.makeChoices(sa)) {
             // 603.3c If no mode is chosen, the ability is removed from the stack.
             return false;
         }

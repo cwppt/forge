@@ -1,0 +1,593 @@
+[
+  {
+    "Name": "Gatecrasher-1001-Seat1-turn11",
+    "Policy": "LegacyV1",
+    "Grade": "Observed paired-game regression; not universal tactical truth",
+    "ControlResult": "Win",
+    "PolicyResult": "Loss",
+    "PublicDecision": {
+      "decisionId": "ecb530a2-002f-3584-bddb-a758178d5edb",
+      "stateFingerprint": "85A2047514336BAA4284EEAD81051163EFA483FA887E283541235E03E325DFF5",
+      "state": {
+        "turn": 11,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_1",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Ai(1)-Gatecrasher",
+            "life": 6,
+            "self": false,
+            "battlefield": [
+              {
+                "permanentId": "PERM_0EE3A22A5BFA614714C73437",
+                "card": {
+                  "name": "Forest",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Forest",
+                  "oracleText": "({T}: Add {G}.)",
+                  "tapped": false,
+                  "controller": "Ai(1)-Gatecrasher",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_B95242C2262D221E19C13153",
+                "card": {
+                  "name": "Forest",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Forest",
+                  "oracleText": "({T}: Add {G}.)",
+                  "tapped": false,
+                  "controller": "Ai(1)-Gatecrasher",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_59575CD6221F27416CF4022D",
+                "card": {
+                  "name": "Forest",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Forest",
+                  "oracleText": "({T}: Add {G}.)",
+                  "tapped": true,
+                  "controller": "Ai(1)-Gatecrasher",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_0E5383D77BE339136EF702A0",
+                "card": {
+                  "name": "Llanowar Behemoth",
+                  "manaCost": "{3}{G}{G}",
+                  "type": "Creature - Elemental",
+                  "oracleText": "Tap an untapped creature you control: Llanowar Behemoth gets +1/+1 until end of turn.",
+                  "tapped": true,
+                  "controller": "Ai(1)-Gatecrasher",
+                  "power": 4,
+                  "toughness": 4,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_6AA715D7C3859C40A37F7C87",
+                "card": {
+                  "name": "Mountain",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Mountain",
+                  "oracleText": "({T}: Add {R}.)",
+                  "tapped": false,
+                  "controller": "Ai(1)-Gatecrasher",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_3AF9D5B552868D41638BE878",
+                "card": {
+                  "name": "Mountain",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Mountain",
+                  "oracleText": "({T}: Add {R}.)",
+                  "tapped": false,
+                  "controller": "Ai(1)-Gatecrasher",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_6C3F2C772F7289373E5DB636",
+                "card": {
+                  "name": "Mountain",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Mountain",
+                  "oracleText": "({T}: Add {R}.)",
+                  "tapped": true,
+                  "controller": "Ai(1)-Gatecrasher",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_51D667A8C52974CCF63E68E9",
+                "card": {
+                  "name": "Mountain",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Mountain",
+                  "oracleText": "({T}: Add {R}.)",
+                  "tapped": true,
+                  "controller": "Ai(1)-Gatecrasher",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_07FFCD56CC94AB603352DDA4",
+                "card": {
+                  "name": "Striped Bears",
+                  "manaCost": "{3}{G}",
+                  "type": "Creature - Bear",
+                  "oracleText": "When Striped Bears enters, draw a card.",
+                  "tapped": false,
+                  "controller": "Ai(1)-Gatecrasher",
+                  "power": 2,
+                  "toughness": 2,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Ai(2)-Air Forces",
+            "life": 17,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_ED9198B106F9CB8338DA7A0B",
+                "card": {
+                  "name": "Benalish Knight",
+                  "manaCost": "{2}{W}",
+                  "type": "Creature - Human Knight",
+                  "oracleText": "Flash (You may cast this spell any time you could cast an instant.)\\nFirst strike (This creature deals combat damage before creatures without first strike.)",
+                  "tapped": false,
+                  "controller": "Ai(2)-Air Forces",
+                  "power": 2,
+                  "toughness": 2,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": true,
+                "canAttack": false,
+                "keywords": [
+                  "first strike"
+                ]
+              },
+              {
+                "permanentId": "PERM_16B4353B90D10A435FB6CE73",
+                "card": {
+                  "name": "Benalish Knight",
+                  "manaCost": "{2}{W}",
+                  "type": "Creature - Human Knight",
+                  "oracleText": "Flash (You may cast this spell any time you could cast an instant.)\\nFirst strike (This creature deals combat damage before creatures without first strike.)",
+                  "tapped": true,
+                  "controller": "Ai(2)-Air Forces",
+                  "power": 6,
+                  "toughness": 6,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": [
+                  "first strike"
+                ]
+              },
+              {
+                "permanentId": "PERM_BE2C7F023BA6ACD0012A4E79",
+                "card": {
+                  "name": "Empyrial Armor",
+                  "manaCost": "{1}{W}{W}",
+                  "type": "Enchantment - Aura",
+                  "oracleText": "Enchant creature\\nEnchanted creature gets +1/+1 for each card in your hand.",
+                  "tapped": false,
+                  "controller": "Ai(2)-Air Forces",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_BCC20609116E65E7F08C1357",
+                "card": {
+                  "name": "Island",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Island",
+                  "oracleText": "({T}: Add {U}.)",
+                  "tapped": false,
+                  "controller": "Ai(2)-Air Forces",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_D076AEEEF739288ECBB586CF",
+                "card": {
+                  "name": "Island",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Island",
+                  "oracleText": "({T}: Add {U}.)",
+                  "tapped": false,
+                  "controller": "Ai(2)-Air Forces",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_810EDD9273D7BBDBBC3D9BD7",
+                "card": {
+                  "name": "Island",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Island",
+                  "oracleText": "({T}: Add {U}.)",
+                  "tapped": true,
+                  "controller": "Ai(2)-Air Forces",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_6CB3389657606723DF8AF0AA",
+                "card": {
+                  "name": "Plains",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Plains",
+                  "oracleText": "({T}: Add {W}.)",
+                  "tapped": true,
+                  "controller": "Ai(2)-Air Forces",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_413BB91CC3FB3BE6CDB5DCF6",
+                "card": {
+                  "name": "Plains",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Plains",
+                  "oracleText": "({T}: Add {W}.)",
+                  "tapped": true,
+                  "controller": "Ai(2)-Air Forces",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_0E5383D77BE339136EF702A0",
+              "card": {
+                "name": "Llanowar Behemoth",
+                "manaCost": "{3}{G}{G}",
+                "type": "Creature - Elemental",
+                "oracleText": "Tap an untapped creature you control: Llanowar Behemoth gets +1/+1 until end of turn.",
+                "tapped": true,
+                "controller": "Ai(1)-Gatecrasher",
+                "power": 4,
+                "toughness": 4,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "targetId": "PLAYER_1"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_ED9198B106F9CB8338DA7A0B",
+              "card": {
+                "name": "Benalish Knight",
+                "manaCost": "{2}{W}",
+                "type": "Creature - Human Knight",
+                "oracleText": "Flash (You may cast this spell any time you could cast an instant.)\\nFirst strike (This creature deals combat damage before creatures without first strike.)",
+                "tapped": false,
+                "controller": "Ai(2)-Air Forces",
+                "power": 2,
+                "toughness": 2,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": true,
+              "canAttack": false,
+              "keywords": [
+                "first strike"
+              ]
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        },
+        {
+          "optionId": "OPT_C8247E026E2C03EA423B757D",
+          "assignments": [
+            {
+              "blockerId": "PERM_ED9198B106F9CB8338DA7A0B",
+              "attackerId": "PERM_0E5383D77BE339136EF702A0"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        }
+      ]
+    },
+    "ReturnedOptionId": "OPT_C8247E026E2C03EA423B757D",
+    "PolicyAppliedOptionId": "NO_BLOCK",
+    "ReferenceManifest": "work/stage12-seeded-policy-runs.json"
+  },
+  {
+    "Name": "Aurochs-121-Seat1-turn4",
+    "Policy": "RaceAwareV2",
+    "Grade": "Observed paired-game regression; not universal tactical truth",
+    "ControlResult": "Win",
+    "PolicyResult": "Loss",
+    "PublicDecision": {
+      "decisionId": "61363686-125c-34b6-8817-1b29418a7103",
+      "stateFingerprint": "72B17CAAE50F8E604239FC1385285E8D0B420CE83446729154C3F907F05BDAF7",
+      "state": {
+        "turn": 4,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_1",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Ai(1)-Aurochs Stampede",
+            "life": 20,
+            "self": false,
+            "battlefield": [
+              {
+                "permanentId": "PERM_53A7F91127C97D93F65910D5",
+                "card": {
+                  "name": "Boreal Druid",
+                  "manaCost": "{G}",
+                  "type": "Snow Creature - Elf Druid",
+                  "oracleText": "{T}: Add {C}.",
+                  "tapped": true,
+                  "controller": "Ai(1)-Aurochs Stampede",
+                  "power": 1,
+                  "toughness": 1,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_7109FF825DE9B9638DC0BE4D",
+                "card": {
+                  "name": "Snow-Covered Forest",
+                  "manaCost": "no cost",
+                  "type": "Basic Snow Land - Forest",
+                  "oracleText": "({T}: Add {G}.)",
+                  "tapped": false,
+                  "controller": "Ai(1)-Aurochs Stampede",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_1DDBCEB47EB07478227B24B7",
+                "card": {
+                  "name": "Snow-Covered Mountain",
+                  "manaCost": "no cost",
+                  "type": "Basic Snow Land - Mountain",
+                  "oracleText": "({T}: Add {R}.)",
+                  "tapped": false,
+                  "controller": "Ai(1)-Aurochs Stampede",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Ai(2)-Selesnya Surge",
+            "life": 20,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_C250A68A19107DC3995233B6",
+                "card": {
+                  "name": "Centaur's Herald",
+                  "manaCost": "{G}",
+                  "type": "Creature - Elf Scout",
+                  "oracleText": "{2}{G}, Sacrifice Centaur's Herald: Create a 3/3 green Centaur creature token.",
+                  "tapped": false,
+                  "controller": "Ai(2)-Selesnya Surge",
+                  "power": 0,
+                  "toughness": 1,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": true,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_7573CE24D5DAF8F898A1A7F4",
+                "card": {
+                  "name": "Forest",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Forest",
+                  "oracleText": "({T}: Add {G}.)",
+                  "tapped": true,
+                  "controller": "Ai(2)-Selesnya Surge",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_271C7C9AAD447215C8A83B96",
+                "card": {
+                  "name": "Plains",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Plains",
+                  "oracleText": "({T}: Add {W}.)",
+                  "tapped": false,
+                  "controller": "Ai(2)-Selesnya Surge",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_53A7F91127C97D93F65910D5",
+              "card": {
+                "name": "Boreal Druid",
+                "manaCost": "{G}",
+                "type": "Snow Creature - Elf Druid",
+                "oracleText": "{T}: Add {C}.",
+                "tapped": true,
+                "controller": "Ai(1)-Aurochs Stampede",
+                "power": 1,
+                "toughness": 1,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "targetId": "PLAYER_1"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_C250A68A19107DC3995233B6",
+              "card": {
+                "name": "Centaur's Herald",
+                "manaCost": "{G}",
+                "type": "Creature - Elf Scout",
+                "oracleText": "{2}{G}, Sacrifice Centaur's Herald: Create a 3/3 green Centaur creature token.",
+                "tapped": false,
+                "controller": "Ai(2)-Selesnya Surge",
+                "power": 0,
+                "toughness": 1,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": true,
+              "canAttack": false,
+              "keywords": []
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0
+        },
+        {
+          "optionId": "OPT_78AFB2E6DB9DB673F1F5DFA4",
+          "assignments": [
+            {
+              "blockerId": "PERM_C250A68A19107DC3995233B6",
+              "attackerId": "PERM_53A7F91127C97D93F65910D5"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1
+        }
+      ]
+    },
+    "ReturnedOptionId": "OPT_78AFB2E6DB9DB673F1F5DFA4",
+    "PolicyAppliedOptionId": "NO_BLOCK",
+    "ReferenceManifest": "work/stage12-final-broad-runs.json"
+  }
+]

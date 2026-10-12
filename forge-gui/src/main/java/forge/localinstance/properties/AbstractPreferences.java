@@ -110,6 +110,9 @@ public abstract class AbstractPreferences<T extends Enum<T> & IPreferences.IPref
 
         return val;
     }
+    public final boolean hasExplicitValue(final T preference) {
+        return preferenceValues.containsKey(preference);
+    }
 
     public void setGameType(final T q0, final Set<GameType> gameTypes) {
         String s0 = "";

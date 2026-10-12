@@ -7,7 +7,19 @@ public record AiDecisionResult(
         AiDecisionFailureReason failureReason,
         String provider,
         String model,
-        long latencyMs) {
+        long latencyMs,
+        AiDecision rejectedDecision,
+        AiProviderDiagnostics diagnostics) {
+
+    public AiDecisionResult(Optional<AiDecision> decision, AiDecisionFailureReason failureReason,
+            String provider, String model, long latencyMs, AiDecision rejectedDecision) {
+        this(decision, failureReason, provider, model, latencyMs, rejectedDecision, null);
+    }
+
+    public AiDecisionResult(Optional<AiDecision> decision, AiDecisionFailureReason failureReason,
+            String provider, String model, long latencyMs) {
+        this(decision, failureReason, provider, model, latencyMs, null);
+    }
 
     public AiDecisionResult {
         decision = decision == null ? Optional.empty() : decision;

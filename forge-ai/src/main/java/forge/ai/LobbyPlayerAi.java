@@ -11,6 +11,11 @@ import forge.game.player.PlayerController;
 import org.tinylog.Logger;
 
 public class LobbyPlayerAi extends LobbyPlayer implements IGameEntitiesFactory {
+    private boolean externalMemoryEnabled;
+    private int externalMemoryMaxFacts=12;
+    public void configureExternalMemory(boolean enabled,int max) {
+        externalMemoryEnabled=enabled;externalMemoryMaxFacts=Math.min(32,Math.max(1,max));
+    }
 
     private String aiProfile = "";
     private boolean rotateProfileEachGame;
@@ -24,6 +29,16 @@ public class LobbyPlayerAi extends LobbyPlayer implements IGameEntitiesFactory {
     private final boolean externalStackResponseEnabled;
     private final int externalStackResponseMaxActions;
     private final boolean externalStackResponseRandomizeActionOrder;
+    private boolean externalCombatActionEnabled;
+    private int externalCombatActionMaxActions = 4;
+    public void configureExternalCombatActions(boolean enabled, int maxActions) {
+        externalCombatActionEnabled = enabled;
+        externalCombatActionMaxActions = Math.min(8, Math.max(1, maxActions));
+    }
+    private final boolean externalCombatDamageOrderEnabled;
+    private final int externalCombatDamageOrderMaxOptions;
+    private final boolean externalCombatBlockersEnabled;
+    private final int externalCombatBlockersMaxOptions;
     private final boolean externalCombatAttackersEnabled;
     private final int externalCombatAttackersMaxOptions;
 
@@ -72,6 +87,31 @@ public class LobbyPlayerAi extends LobbyPlayer implements IGameEntitiesFactory {
             boolean externalMainPhaseIncludeRejected, int externalMainPhaseMaxRejectedActions,
             boolean externalStackResponseEnabled, int externalStackResponseMaxActions, boolean randomizeStackResponseOrder,
             boolean externalCombatAttackersEnabled, int externalCombatAttackersMaxOptions) {
+        this(name, options, decisionProvider, externalMulliganEnabled, externalMainPhaseEnabled, externalMainPhaseMaxActions,
+                externalMainPhaseIncludeRejected, externalMainPhaseMaxRejectedActions, externalStackResponseEnabled, externalStackResponseMaxActions,
+                randomizeStackResponseOrder, externalCombatAttackersEnabled, externalCombatAttackersMaxOptions, false, 4);
+    }
+
+    public LobbyPlayerAi(String name, Set<AIOption> options, AiDecisionProvider decisionProvider,
+            boolean externalMulliganEnabled, boolean externalMainPhaseEnabled, int externalMainPhaseMaxActions,
+            boolean externalMainPhaseIncludeRejected, int externalMainPhaseMaxRejectedActions,
+            boolean externalStackResponseEnabled, int externalStackResponseMaxActions, boolean randomizeStackResponseOrder,
+            boolean externalCombatAttackersEnabled, int externalCombatAttackersMaxOptions,
+            boolean externalCombatBlockersEnabled, int combatBlockersMaxOptions) {
+        this(name, options, decisionProvider, externalMulliganEnabled, externalMainPhaseEnabled,
+                externalMainPhaseMaxActions, externalMainPhaseIncludeRejected, externalMainPhaseMaxRejectedActions,
+                externalStackResponseEnabled, externalStackResponseMaxActions, randomizeStackResponseOrder,
+                externalCombatAttackersEnabled, externalCombatAttackersMaxOptions,
+                externalCombatBlockersEnabled, combatBlockersMaxOptions, false, 6);
+    }
+
+    public LobbyPlayerAi(String name, Set<AIOption> options, AiDecisionProvider decisionProvider,
+            boolean externalMulliganEnabled, boolean externalMainPhaseEnabled, int externalMainPhaseMaxActions,
+            boolean externalMainPhaseIncludeRejected, int externalMainPhaseMaxRejectedActions,
+            boolean externalStackResponseEnabled, int externalStackResponseMaxActions, boolean randomizeStackResponseOrder,
+            boolean externalCombatAttackersEnabled, int externalCombatAttackersMaxOptions,
+            boolean externalCombatBlockersEnabled, int combatBlockersMaxOptions,
+            boolean externalCombatDamageOrderEnabled, int combatDamageOrderMaxOptions) {
         super(name);
         this.decisionProvider = decisionProvider;
         this.externalMulliganEnabled = externalMulliganEnabled;
@@ -82,6 +122,10 @@ public class LobbyPlayerAi extends LobbyPlayer implements IGameEntitiesFactory {
         this.externalStackResponseEnabled = externalStackResponseEnabled;
         this.externalStackResponseMaxActions = externalStackResponseMaxActions;
         this.externalStackResponseRandomizeActionOrder = randomizeStackResponseOrder;
+        this.externalCombatDamageOrderEnabled = externalCombatDamageOrderEnabled;
+        this.externalCombatDamageOrderMaxOptions = combatDamageOrderMaxOptions;
+        this.externalCombatBlockersEnabled = externalCombatBlockersEnabled;
+        this.externalCombatBlockersMaxOptions = combatBlockersMaxOptions;
         this.externalCombatAttackersEnabled = externalCombatAttackersEnabled;
         this.externalCombatAttackersMaxOptions = externalCombatAttackersMaxOptions;
         if (options != null && !options.isEmpty()) {
@@ -106,7 +150,11 @@ public class LobbyPlayerAi extends LobbyPlayer implements IGameEntitiesFactory {
                 externalMulliganEnabled, externalMainPhaseEnabled, externalMainPhaseMaxActions,
                 externalMainPhaseIncludeRejected, externalMainPhaseMaxRejectedActions,
                 externalStackResponseEnabled, externalStackResponseMaxActions, externalStackResponseRandomizeActionOrder,
-                externalCombatAttackersEnabled, externalCombatAttackersMaxOptions);
+                externalCombatAttackersEnabled, externalCombatAttackersMaxOptions,
+                externalCombatBlockersEnabled, externalCombatBlockersMaxOptions,
+                externalCombatDamageOrderEnabled, externalCombatDamageOrderMaxOptions);
+        result.getAi().configureExternalCombatActions(externalCombatActionEnabled, externalCombatActionMaxActions);
+        ExternalAiStrategicMemory.configure(ai,externalMemoryEnabled,externalMemoryMaxFacts);
         result.getAi().setUseSimulation(option);
         return result;
     }

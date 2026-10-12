@@ -1,0 +1,119 @@
+{
+  "script_files_scanned": 33980,
+  "affected_cards": 4842,
+  "warning_eligible_cards": 2500,
+  "categories": {
+    "D HEURISTIC_REFUSAL": 2472,
+    "H UNKNOWN": 2194,
+    "E MECHANICAL_AI_GAP": 164,
+    "C PREPARATION_GAP": 7,
+    "B CANDIDATE_SELECTION": 1,
+    "F RULES_OR_SCRIPT_GAP": 3,
+    "G WARNING_ONLY / STALE_METADATA": 1
+  },
+  "recoverability": {
+    "LOW": 4670,
+    "NONE": 170,
+    "MEDIUM": 1,
+    "HIGH": 1
+  },
+  "warned_categories": {
+    "D HEURISTIC_REFUSAL": 2456,
+    "E MECHANICAL_AI_GAP": 34,
+    "C PREPARATION_GAP": 7,
+    "B CANDIDATE_SELECTION": 1,
+    "F RULES_OR_SCRIPT_GAP": 1,
+    "G WARNING_ONLY / STALE_METADATA": 1
+  },
+  "warned_recoverability": {
+    "LOW": 2460,
+    "NONE": 38,
+    "MEDIUM": 1,
+    "HIGH": 1
+  },
+  "markers": {
+    "All": 2501,
+    "Random": 2383,
+    "NonCommander": 70,
+    "conditional/refusal/unsupported": 27
+  },
+  "explicit_cannot_play_apis": [
+    "ControlPlayer",
+    "ControlSpell",
+    "ExchangeControlVariant",
+    "GainOwnership",
+    "GameDrawn",
+    "ManaReflected",
+    "MultiplePiles",
+    "PlayLandVariant",
+    "RemoveCounterAll",
+    "InternalIgnoreEffect"
+  ],
+  "api_gap_cards": 164,
+  "ability_definitions": 9163,
+  "code_evidence_lines": 2130,
+  "deck_scope": "forge-gui/res/quest/precons/*.dck",
+  "decks_scanned": 505,
+  "decks_with_warned_cards": 321,
+  "mean_warned_names_per_deck": 2.1465346534653467,
+  "mean_warned_copies_per_deck": 2.786138613861386,
+  "decks_with_four_or_more_warned_copies": 166,
+  "clusters": {
+    "modal": {
+      "affected_cards": 298,
+      "warning_eligible": 201
+    },
+    "X/cost coupling": {
+      "affected_cards": 183,
+      "warning_eligible": 147
+    },
+    "sacrifice/discard costs": {
+      "affected_cards": 764,
+      "warning_eligible": 502
+    },
+    "copy/clone": {
+      "affected_cards": 66,
+      "warning_eligible": 34
+    },
+    "tutor/library selection": {
+      "affected_cards": 222,
+      "warning_eligible": 83
+    },
+    "name/type/color choice": {
+      "affected_cards": 126,
+      "warning_eligible": 95
+    },
+    "graveyard selection": {
+      "affected_cards": 326,
+      "warning_eligible": 170
+    },
+    "alternate costs": {
+      "affected_cards": 37,
+      "warning_eligible": 28
+    },
+    "damage distribution": {
+      "affected_cards": 19,
+      "warning_eligible": 15
+    },
+    "replacement": {
+      "affected_cards": 243,
+      "warning_eligible": 90
+    },
+    "control gain (includes temporary control)": {
+      "affected_cards": 76,
+      "warning_eligible": 44
+    },
+    "pump abilities": {
+      "affected_cards": 544,
+      "warning_eligible": 358
+    },
+    "blink/reanimation/change-zone": {
+      "affected_cards": 941,
+      "warning_eligible": 487
+    },
+    "nested repeat choices": {
+      "affected_cards": 104,
+      "warning_eligible": 69
+    }
+  }
+}

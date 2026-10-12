@@ -109,6 +109,8 @@ public class AiController {
     private int externalStackResponseMaxActions = 3;
     private boolean externalStackResponseRandomizeActionOrder;
     private long externalStackResponseDecisionSequence;
+    private boolean externalCombatBlockersEnabled;
+    private int externalCombatBlockersMaxOptions = 4;
     private boolean externalCombatAttackersEnabled;
     private int externalCombatAttackersMaxOptions = 4;
 
@@ -172,6 +174,12 @@ public class AiController {
         externalStackResponseEnabled = enabled && provider != null;
         externalStackResponseMaxActions = Math.max(1, maxActions);
         externalStackResponseRandomizeActionOrder = randomizeActionOrder;
+    }
+
+    void configureExternalCombatBlockers(AiDecisionProvider provider, boolean enabled, int maxOptions) {
+        if (provider != null) decisionProvider = provider;
+        externalCombatBlockersEnabled = enabled && provider != null;
+        externalCombatBlockersMaxOptions = Math.min(ExternalCombatBlockers.HARD_MAX_OPTIONS, Math.max(1, maxOptions));
     }
 
     void configureExternalCombatAttackers(AiDecisionProvider provider, boolean enabled, int maxOptions) {
@@ -1344,6 +1352,8 @@ public class AiController {
         AiBlockController block = new AiBlockController(defender, defender != player);
         // When player != defender, AI should declare blockers for its benefit.
         block.assignBlockersForCombat(combat);
+        if (externalCombatBlockersEnabled && defender == player)
+            ExternalCombatBlockers.choose(player, combat, decisionProvider, externalCombatBlockersMaxOptions);
     }
 
     public void declareAttackers(Player attacker, Combat combat) {
@@ -1398,6 +1408,7 @@ public class AiController {
     }
 
     public List<SpellAbility> chooseSpellAbilityToPlay() {
+        pendingExternalCombatAction = null;
         AiCache.clear();
         // Reset cached predicted combat, as it may be stale. It will be
         // re-created if needed and used for any AI logic that needs it.
@@ -1614,6 +1625,14 @@ public class AiController {
             saList = ComputerUtilAbility.getSpellAbilities(cards, player);
         }
 
+        // Recovery is external-only: preserve the original native choice/fallback list.
+        List<SpellAbility> recoveredCombatAbilities = List.of();
+        if (externalCombatActions != null && decisionProvider != null && ExternalCombatActions.window(player)) {
+            recoveredCombatAbilities = saList.stream().filter(sa ->
+                    ExternalAiAbilitySupport.status(sa, AiDecisionType.COMBAT_ACTION)
+                            == ExternalAiAbilitySupport.Status.VERIFIED_SAFE).toList();
+            CombatActionEligibilityAudit.recordSupport(player, saList);
+        }
         saList.removeIf(spellAbility -> {
             // don't include removedAI cards if somehow the AI can play the ability or gain control of unsupported card
             // TODO allow when experimental profile?
@@ -1633,6 +1652,9 @@ public class AiController {
         }
 
         if (shouldRouteExternalStackResponse(top, topOwnedByAI, mustRespond)) {
+            if (externalCombatActions != null) {
+                CombatActionEligibilityAudit.record(player, saList, "STACK_RESPONSE_OWNED", List.of(), null);
+            }
             List<SpellAbility> responseCandidates = new ArrayList<>(getPlayableCounters(cards));
             responseCandidates.addAll(saList);
             responseCandidates.addAll(getPossibleETBCounters());
@@ -1648,10 +1670,42 @@ public class AiController {
 
         if (topOwnedByAI && !mustRespond && (chosenAction == null
                 || chosenAction.originalAbility() != ComputerUtilAbility.getFirstCopySASpell(saList))) {
+            if (externalCombatActions != null) {
+                CombatActionEligibilityAudit.record(player, saList, "OWN_STACK_NATIVE_PRIORITY", List.of(), null);
+            }
             return null; // not planning to copy the spell and not marked as something the AI would respond to
         }
 
+        if (externalCombatActions != null && decisionProvider != null && game.getStack().isEmpty()) {
+            List<SpellAbility> combatCandidates = saList;
+            if (!recoveredCombatAbilities.isEmpty()) {
+                combatCandidates = new ArrayList<>(saList);
+                combatCandidates.addAll(recoveredCombatAbilities);
+            }
+            return externalCombatActions.choose(this, player, decisionProvider, combatCandidates, chosenAction,
+                    legacyStackResponse, externalCombatActionMaxActions);
+        }
+        if (externalCombatActions != null && !game.getStack().isEmpty()) {
+            CombatActionEligibilityAudit.record(player, saList, "NONEMPTY_STACK", List.of(), null);
+        }
         return legacyStackResponse;
+    }
+
+    private SpellAbility pendingExternalCombatAction;
+    void retainPreparedCombatAction(SpellAbility action) { pendingExternalCombatAction = action; }
+    boolean consumePreparedCombatAction(SpellAbility action) {
+        boolean prepared = pendingExternalCombatAction == action;
+        pendingExternalCombatAction = null;
+        return prepared;
+    }
+    private ExternalCombatActions externalCombatActions;
+    private int externalCombatActionMaxActions = 4;
+    public void configureExternalCombatActions(boolean enabled, int maxActions) {
+        externalCombatActions = enabled ? new ExternalCombatActions() : null;
+        externalCombatActionMaxActions = Math.min(8, Math.max(1, maxActions));
+    }
+    PreparedAiActionSet prepareCombatActionCandidates(List<SpellAbility> candidates, int cap) {
+        return prepareCandidateActions(candidates, true, cap, true, cap, true);
     }
 
     private boolean shouldRouteExternalStackResponse(SpellAbility top, boolean topOwnedByAI,
@@ -1660,9 +1714,7 @@ public class AiController {
         return externalStackResponseEnabled && decisionProvider != null && !game.getStack().isEmpty()
                 && top != null && !topOwnedByAI && !mustRespond && !top.isTrigger()
                 && !top.isReplacementAbility() && !top.isManaAbility()
-                && phase != PhaseType.COMBAT_BEGIN && phase != PhaseType.COMBAT_DECLARE_ATTACKERS
-                && phase != PhaseType.COMBAT_DECLARE_BLOCKERS && phase != PhaseType.COMBAT_FIRST_STRIKE_DAMAGE
-                && phase != PhaseType.COMBAT_DAMAGE && phase != PhaseType.COMBAT_END;
+                && phase != PhaseType.COMBAT_BEGIN && phase != PhaseType.COMBAT_DAMAGE && phase != PhaseType.COMBAT_END;
     }
 
     private boolean unsupportedExternalStackResponse(SpellAbility ability) {
@@ -1735,7 +1787,8 @@ public class AiController {
             fallback = true;
             staleOrInvalid = true;
             failure = AiDecisionFailureReason.STALE_ACTION_SET;
-        } else if (!fallback && !selectedPass && !revalidatePreparedAction(selected)) {
+        } else if (!fallback && !selectedPass && (!ExternalAiAbilitySupport.stackResponseAllowed(selected.spellAbility())
+                || !revalidatePreparedAction(selected))) {
             fallback = true;
             staleOrInvalid = true;
             failure = AiDecisionFailureReason.REVALIDATION_FAILED;
@@ -1948,7 +2001,7 @@ public class AiController {
         return staleOrInvalid ? null : selected;
     }
 
-    private boolean revalidatePreparedAction(PreparedAiAction action) {
+    boolean revalidatePreparedAction(PreparedAiAction action) {
         if (action == null || action.spellAbility() == null || action.sourceCard() == null
                 || action.spellAbility().getHostCard() != action.sourceCard()
                 || action.spellAbility().getActivatingPlayer() != player
@@ -2134,7 +2187,7 @@ public class AiController {
         return prepareCandidateActions(all, skipCounter, maxActions, false, false);
     }
 
-    private PreparedAiActionSet prepareStackResponseActions(final List<SpellAbility> all, int maxActions) {
+    PreparedAiActionSet prepareStackResponseActions(final List<SpellAbility> all, int maxActions) {
         long started = System.nanoTime();
         List<PreparedAiAction> actions = new ArrayList<>();
         int evaluated = 0;
@@ -2171,7 +2224,7 @@ public class AiController {
                 }
                 PreparedAiAction copiedAction = new PreparedAiAction("COPIED", mapped, mapped,
                         mapped.getHostCard(), copiedAi.actionCategory(mapped), index, mapped.toString(), true);
-                if (!copiedAi.revalidatePreparedAction(copiedAction)) {
+                if (!ExternalAiAbilitySupport.stackResponseAllowed(mapped) || !copiedAi.revalidatePreparedAction(copiedAction)) {
                     continue;
                 }
                 SpellAbility livePrepared = SpellAbilityChoiceCopier.copyCastChoices(
@@ -2183,7 +2236,7 @@ public class AiController {
                 PreparedAiAction action = new PreparedAiAction("ACTION_" + actions.size(), livePrepared,
                         original, livePrepared.getHostCard(), actionCategory(livePrepared), index,
                         livePrepared.toString(), true);
-                if (revalidatePreparedAction(action)) {
+                if (ExternalAiAbilitySupport.stackResponseAllowed(livePrepared) && revalidatePreparedAction(action)) {
                     actions.add(action);
                 }
             } catch (RuntimeException ex) {
@@ -2295,8 +2348,12 @@ public class AiController {
      */
     PreparedAiActionSet prepareCandidateActions(final List<SpellAbility> all, boolean skipCounter, int maxActions,
             boolean includeRejected, int maxRejectedActions) {
+        return prepareCandidateActions(all, skipCounter, maxActions, includeRejected, maxRejectedActions, false);
+    }
+    private PreparedAiActionSet prepareCandidateActions(List<SpellAbility> all, boolean skipCounter, int maxActions,
+            boolean includeRejected, int maxRejectedActions, boolean allowRejectedOnly) {
         PreparedAiActionSet accepted = prepareCandidateActions(all, skipCounter, maxActions);
-        if (!includeRejected || maxRejectedActions <= 0 || accepted.actions().isEmpty() || all == null || all.isEmpty()) {
+        if (!includeRejected || maxRejectedActions <= 0 || (!allowRejectedOnly && accepted.actions().isEmpty()) || all == null || all.isEmpty()) {
             return accepted;
         }
         long started = System.nanoTime();

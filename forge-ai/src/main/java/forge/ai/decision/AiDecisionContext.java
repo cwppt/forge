@@ -4,4 +4,6 @@ public interface AiDecisionContext {
     String decisionId();
 
     AiDecisionType type();
+
+    default StrategicMemorySnapshot memorySnapshot() { return null; }
 }

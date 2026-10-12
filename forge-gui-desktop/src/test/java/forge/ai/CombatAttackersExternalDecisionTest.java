@@ -174,6 +174,11 @@ public class CombatAttackersExternalDecisionTest extends AITest {
             controller(f, provider, true, 4).declareAttackers(f.ai(), f.combat());
             Assert.assertEquals(f.combat().getAttackersAndDefenders(), original.get());
             var event = AiDecisionMetrics.combatAttackerEvents().get(0);
+            if (failure.equals("STALE")) {
+                Assert.assertFalse(event.fallback());
+                Assert.assertEquals(event.liveRevalidationResult(), "PASSED");
+                continue;
+            }
             Assert.assertTrue(event.fallback()); Assert.assertEquals(event.selectedOptionId(), event.heuristicOptionId());
             Assert.assertFalse(event.responseAccepted());
             Assert.assertNotNull(event.failureReason());
@@ -316,6 +321,101 @@ public class CombatAttackersExternalDecisionTest extends AITest {
         Assert.assertNull(ExternalCombatAttackers.prepare(f.ai(), f.combat(), "costs", 4));
     }
 
+    @Test public void originalSnapshotSurvivesLatencyAndUnrelatedVisibleChange() {
+        Fixture f = fixture(); heuristic(f);
+        ExternalCombatAttackers.choose(f.ai(), f.combat(), c -> {
+            var context = (CombatAttackersDecisionContext) c;
+            String original = context.stateFingerprint();
+            try { Thread.sleep(20); } catch (InterruptedException ex) { throw new RuntimeException(ex); }
+            f.opponent().setLife(18, null);
+            Assert.assertEquals(context.stateFingerprint(), original);
+            return Optional.of(choose(context, "NO_ATTACK"));
+        }, 4);
+        var event = AiDecisionMetrics.combatAttackerEvents().get(0);
+        Assert.assertFalse(event.fallback()); Assert.assertEquals(event.liveRevalidationResult(), "PASSED");
+    }
+
+    @Test public void sequentialContextsRejectCrossAssociatedResponseWithoutOverwritingReason() {
+        Fixture f = fixture(); heuristic(f);
+        AtomicReference<AiDecision> first = new AtomicReference<>();
+        ExternalCombatAttackers.choose(f.ai(), f.combat(), c -> {
+            var context = (CombatAttackersDecisionContext) c;
+            first.set(choose(context, "NO_ATTACK")); return Optional.of(first.get());
+        }, 4);
+        heuristic(f);
+        ExternalCombatAttackers.choose(f.ai(), f.combat(), c -> {
+            Assert.assertNotEquals(c.decisionId(), first.get().decisionId());
+            f.opponent().setLife(18, null);
+            return Optional.of(first.get());
+        }, 4);
+        var event = AiDecisionMetrics.combatAttackerEvents().get(1);
+        Assert.assertEquals(event.failureReason(), AiDecisionFailureReason.DECISION_ID_MISMATCH);
+        Assert.assertEquals(event.returnedDecisionId(), first.get().decisionId());
+        Assert.assertEquals(event.liveRevalidationResult(), "NOT_RUN");
+    }
+
+    @Test public void requestFailuresAndLiveFailuresAreDistinct() {
+        for (String kind : List.of("OPTION", "FINGERPRINT", "PHASE", "REMOVED", "DEFENDER")) {
+            AiDecisionMetrics.reset(); Fixture f = fixture(); heuristic(f);
+            Card walker = addCard("Jace Beleren", f.opponent()); f.combat().initConstraints();
+            ExternalCombatAttackers.choose(f.ai(), f.combat(), c -> {
+                var context = (CombatAttackersDecisionContext) c;
+                String option = context.options().get(0).optionId();
+                if (kind.equals("DEFENDER")) {
+                    String defender = context.state().legalDefenders().stream().filter(d -> d.kind().equals("PLANESWALKER")).findFirst().orElseThrow().defenderId();
+                    option = context.options().stream().filter(o -> !o.attackers().isEmpty() && o.attackers().get(0).defenderId().equals(defender)).findFirst().orElseThrow().optionId();
+                    f.opponent().getZone(ZoneType.Battlefield).remove(walker);
+                }
+                if (kind.equals("REMOVED")) f.ai().getZone(ZoneType.Battlefield).remove(f.bear());
+                if (kind.equals("PHASE")) f.game().getPhaseHandler().devModeSet(PhaseType.COMBAT_DECLARE_BLOCKERS, f.ai());
+                return Optional.of(new AiDecision(context.decisionId(), kind.equals("FINGERPRINT") ? "wrong" : context.stateFingerprint(),
+                        kind.equals("OPTION") ? "unknown" : option));
+            }, 8);
+            var event = AiDecisionMetrics.combatAttackerEvents().get(0);
+            Assert.assertEquals(event.failureReason(), switch (kind) {
+                case "OPTION" -> AiDecisionFailureReason.ACTION_ID_MISMATCH;
+                case "FINGERPRINT" -> AiDecisionFailureReason.FINGERPRINT_MISMATCH;
+                case "PHASE" -> AiDecisionFailureReason.LIVE_STATE_CHANGED;
+                default -> AiDecisionFailureReason.REVALIDATION_FAILED;
+            });
+        }
+    }
+
+    @Test public void rejectedProviderIdentitySurvivesVisibleDriftInAuditTelemetry() {
+        Fixture f = fixture(); heuristic(f);
+        AiDecisionProvider provider = new AiDecisionProvider() {
+            @Override public Optional<AiDecision> choose(AiDecisionContext context) { return Optional.empty(); }
+            @Override public AiDecisionResult chooseWithDiagnostics(AiDecisionContext context) {
+                f.opponent().setLife(18, null);
+                return new AiDecisionResult(Optional.empty(), AiDecisionFailureReason.DECISION_ID_MISMATCH,
+                        "test", "test", 20, new AiDecision("wrong-id", "returned-fingerprint", "NO_ATTACK"));
+            }
+        };
+        ExternalCombatAttackers.choose(f.ai(), f.combat(), provider, 4);
+        var event = AiDecisionMetrics.combatAttackerEvents().get(0);
+        Assert.assertEquals(event.failureReason(), AiDecisionFailureReason.DECISION_ID_MISMATCH);
+        Assert.assertEquals(event.returnedDecisionId(), "wrong-id");
+        Assert.assertEquals(event.returnedFingerprint(), "returned-fingerprint");
+        Assert.assertEquals(event.returnedOptionId(), "NO_ATTACK");
+        Assert.assertEquals(event.liveRevalidationResult(), "NOT_RUN");
+    }
+
+    @Test public void canonicalCandidateMaterialIgnoresAssignmentAndDefenderTraversalOrder() {
+        Fixture f = fixture(); heuristic(f);
+        addCard("Jace Beleren", f.opponent()); addCard("Jace, the Mind Sculptor", f.opponent());
+        f.combat().initConstraints();
+        var original = ExternalCombatAttackers.prepare(f.ai(), f.combat(), "original", 8);
+        Map<Card, GameEntity> reversed = new LinkedHashMap<>();
+        reversed.put(f.giant(), f.opponent()); reversed.put(f.bear(), f.opponent());
+        Combat spy = Mockito.spy(f.combat());
+        Mockito.doReturn(new HashMap<>(reversed)).when(spy).getAttackersAndDefenders();
+        var defenders = new ArrayList<>(f.combat().getDefenders()); Collections.reverse(defenders);
+        Mockito.doReturn(new forge.util.collect.FCollection<>(defenders)).when(spy).getDefenders(); f.game().getPhaseHandler().setCombat(spy);
+        var reordered = ExternalCombatAttackers.prepare(f.ai(), spy, "reordered", 8);
+        Assert.assertEquals(reordered.context().options(), original.context().options());
+        Assert.assertEquals(reordered.context().stateFingerprint(), original.context().stateFingerprint());
+    }
+
     @Test public void combatMetricsCsvAndAuditRetainOutcomeAndInternalMapping() throws Exception {
         var audit = Files.createTempFile("forge-combat-", ".jsonl");
         var csv = Files.createTempFile("forge-combat-", ".csv");
@@ -333,6 +433,7 @@ public class CombatAttackersExternalDecisionTest extends AITest {
             Assert.assertTrue(json.get("decidingPlayerWon").getAsBoolean());
             Assert.assertEquals(json.getAsJsonObject("telemetry").get("selectedOptionId").getAsString(), "NO_ATTACK");
             Assert.assertEquals(json.getAsJsonObject("telemetry").get("runSeed").getAsLong(), 1000L);
+            Assert.assertEquals(json.getAsJsonObject("telemetry").get("liveRevalidationResult").getAsString(), "PASSED");
             Assert.assertTrue(AiDecisionMetrics.summary(1).contains("combatAttackerDecisions=1"));
             AiDecisionMetrics.writeCsv(csv);
             Assert.assertTrue(Files.readString(csv).contains("COMBAT_ATTACKERS"));

@@ -60,8 +60,11 @@ public final class GamePlayerUtil {
         return createAiPlayer(name, avatarIndex, "");
     }
     public static LobbyPlayer createAiPlayer(final String name, final int avatarIndex, final String profileOverride) {
+        return createAiPlayer(name, avatarIndex, profileOverride, true);
+    }
+    public static LobbyPlayer createAiPlayer(final String name, final int avatarIndex, final String profileOverride, final boolean allowExternalDecisions) {
         final int sleeveCount = GuiBase.getInterface().getSleevesCount();
-        return createAiPlayer(name, avatarIndex, sleeveCount == 0 ? 0 : MyRandom.getRandom().nextInt(sleeveCount), null, profileOverride);
+        return createAiPlayer(name, avatarIndex, sleeveCount == 0 ? 0 : MyRandom.getRandom().nextInt(sleeveCount), null, profileOverride, allowExternalDecisions);
     }
     public static LobbyPlayer createAiPlayer(final String name, final int avatarIndex, final int sleeveIndex) {
         return createAiPlayer(name, avatarIndex, sleeveIndex, null, "");
@@ -70,10 +73,15 @@ public final class GamePlayerUtil {
         return createAiPlayer(name, avatarIndex, sleeveIndex, options, "");
     }
     public static LobbyPlayer createAiPlayer(final String name, final int avatarIndex, final int sleeveIndex, final Set<AIOption> options, final String profileOverride) {
-        final boolean externalMulligan = FModel.getPreferences()
-                .getPrefBoolean(FPref.AI_EXTERNAL_MULLIGAN_ENABLED);
-        final boolean externalMainPhase = FModel.getPreferences()
-                .getPrefBoolean(FPref.AI_EXTERNAL_MAIN_PHASE_ENABLED);
+        return createAiPlayer(name, avatarIndex, sleeveIndex, options, profileOverride, true);
+    }
+    public static LobbyPlayer createAiPlayer(final String name, final int avatarIndex, final int sleeveIndex, final Set<AIOption> options, final String profileOverride, final boolean allowExternalDecisions) {
+        if (FModel.getPreferences().getPrefBoolean(FPref.AI_EXTERNAL_FULL_GAME_ENABLED))
+            forge.localinstance.properties.ForgePreferences.disableExperimentalCombatGuards();
+        final boolean externalMulligan = allowExternalDecisions && FModel.getPreferences()
+                .externalSurfaceEnabled(FPref.AI_EXTERNAL_MULLIGAN_ENABLED);
+        final boolean externalMainPhase = allowExternalDecisions && FModel.getPreferences()
+                .externalSurfaceEnabled(FPref.AI_EXTERNAL_MAIN_PHASE_ENABLED);
         int maxActions;
         int maxRejectedActions;
         int maxStackResponseActions;
@@ -100,14 +108,34 @@ public final class GamePlayerUtil {
         } catch (NumberFormatException e) {
             maxCombatAttackerOptions = 4;
         }
+        int maxCombatBlockerOptions;
+        try {
+            maxCombatBlockerOptions = Integer.parseInt(FModel.getPreferences().getPref(FPref.AI_EXTERNAL_COMBAT_BLOCKERS_MAX_OPTIONS));
+        } catch (NumberFormatException e) { maxCombatBlockerOptions = 4; }
+        int maxDamageOrderOptions;
+        try { maxDamageOrderOptions = Integer.parseInt(FModel.getPreferences().getPref(FPref.AI_EXTERNAL_COMBAT_DAMAGE_ORDER_MAX_OPTIONS)); }
+        catch (NumberFormatException e) { maxDamageOrderOptions = 6; }
         final LobbyPlayerAi player = new LobbyPlayerAi(name, options,
-                AiDecisionProviderFactory.create(FModel.getPreferences()).orElse(null),
+                allowExternalDecisions ? AiDecisionProviderFactory.create(FModel.getPreferences()).orElse(null) : null,
                 externalMulligan, externalMainPhase, Math.max(2, maxActions), FModel.getPreferences()
                         .getPrefBoolean(FPref.AI_EXTERNAL_MAIN_PHASE_INCLUDE_REJECTED), Math.max(0, maxRejectedActions),
-                FModel.getPreferences().getPrefBoolean(FPref.AI_EXTERNAL_STACK_RESPONSE_ENABLED),
+                allowExternalDecisions && FModel.getPreferences().externalSurfaceEnabled(FPref.AI_EXTERNAL_STACK_RESPONSE_ENABLED),
                 Math.max(1, maxStackResponseActions), FModel.getPreferences()
                         .getPrefBoolean(FPref.AI_EXTERNAL_STACK_RESPONSE_RANDOMIZE_ACTION_ORDER),
-                FModel.getPreferences().getPrefBoolean(FPref.AI_EXTERNAL_COMBAT_ATTACKERS_ENABLED), maxCombatAttackerOptions);
+                allowExternalDecisions && combatSurfaceEnabled(FPref.AI_EXTERNAL_COMBAT_ATTACKERS_ENABLED), maxCombatAttackerOptions,
+                allowExternalDecisions && combatSurfaceEnabled(FPref.AI_EXTERNAL_COMBAT_BLOCKERS_ENABLED), maxCombatBlockerOptions,
+                allowExternalDecisions && combatSurfaceEnabled(FPref.AI_EXTERNAL_COMBAT_DAMAGE_ORDER_ENABLED), maxDamageOrderOptions);
+
+        int combatActions;
+        try { combatActions = Integer.parseInt(FModel.getPreferences().getPref(FPref.AI_EXTERNAL_COMBAT_ACTION_MAX_ACTIONS)); }
+        catch (NumberFormatException e) { combatActions = 4; }
+        player.configureExternalCombatActions(allowExternalDecisions && FModel.getPreferences()
+                .externalSurfaceEnabled(FPref.AI_EXTERNAL_COMBAT_ACTION_ENABLED), combatActions);
+        int memoryFacts;
+        try { memoryFacts=Integer.parseInt(FModel.getPreferences().getPref(FPref.AI_EXTERNAL_MEMORY_MAX_FACTS)); }
+        catch(NumberFormatException e) { memoryFacts=12; }
+        player.configureExternalMemory(allowExternalDecisions && FModel.getPreferences()
+                .getPrefBoolean(FPref.AI_EXTERNAL_MEMORY_ENABLED),memoryFacts);
 
         // TODO: implement specific AI profiles for quest mode.
         String profile = "";
@@ -191,6 +219,13 @@ public final class GamePlayerUtil {
             newName = newName.trim();
         }
         return newName;
+    }
+
+    private static boolean combatSurfaceEnabled(FPref surface) {
+        if (FModel.getPreferences().getPrefBoolean(FPref.AI_EXTERNAL_FULL_GAME_ENABLED))
+            return FModel.getPreferences().externalSurfaceEnabled(surface);
+        return FModel.getPreferences().getPrefBoolean(FPref.AI_EXTERNAL_COMBAT_INTEGRATED_ENABLED)
+                || FModel.getPreferences().externalSurfaceEnabled(surface);
     }
 
     public static void setServerPort() {

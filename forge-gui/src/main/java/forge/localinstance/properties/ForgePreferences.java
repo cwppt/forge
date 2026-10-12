@@ -26,6 +26,20 @@ import forge.game.GameLogEntryType;
 import forge.game.GameLogVerbosity;
 
 public class ForgePreferences extends AbstractPreferences<ForgePreferences.FPref> {
+    public static final Set<FPref> EXTERNAL_STABLE_SURFACES = Set.copyOf(EnumSet.of(FPref.AI_EXTERNAL_MULLIGAN_ENABLED,
+            FPref.AI_EXTERNAL_MAIN_PHASE_ENABLED, FPref.AI_EXTERNAL_STACK_RESPONSE_ENABLED,
+            FPref.AI_EXTERNAL_COMBAT_ATTACKERS_ENABLED, FPref.AI_EXTERNAL_COMBAT_BLOCKERS_ENABLED,
+            FPref.AI_EXTERNAL_COMBAT_DAMAGE_ORDER_ENABLED, FPref.AI_EXTERNAL_COMBAT_ACTION_ENABLED));
+
+    public boolean externalSurfaceEnabled(FPref surface) {
+        return getPrefBoolean(surface) || EXTERNAL_STABLE_SURFACES.contains(surface)
+                && getPrefBoolean(FPref.AI_EXTERNAL_FULL_GAME_ENABLED) && !hasExplicitValue(surface);
+    }
+
+    public static void disableExperimentalCombatGuards() {
+        System.setProperty("forge.ai.external.combat.materialGuard", "false");
+        System.setProperty("forge.ai.external.combat.materialGuardRaceAware", "false");
+    }
 
     /**
      * Preference identifiers and their default values.
@@ -203,6 +217,7 @@ public class ForgePreferences extends AbstractPreferences<ForgePreferences.FPref
         MATCH_AI_SIDEBOARDING_MODE("Human For AI"),
         MATCH_AI_TIMEOUT("5"),
         UI_ENABLE_AI_CHEATS ("false"),
+        AI_EXTERNAL_FULL_GAME_ENABLED("false"),
         AI_EXTERNAL_MULLIGAN_ENABLED("false"),
         AI_EXTERNAL_MULLIGAN_ENDPOINT("http://localhost:11434/v1/chat/completions"),
         AI_EXTERNAL_MULLIGAN_MODEL(""),
@@ -216,6 +231,15 @@ public class ForgePreferences extends AbstractPreferences<ForgePreferences.FPref
         AI_EXTERNAL_STACK_RESPONSE_ENABLED("false"),
         AI_EXTERNAL_STACK_RESPONSE_MAX_ACTIONS("3"),
         AI_EXTERNAL_STACK_RESPONSE_RANDOMIZE_ACTION_ORDER("false"),
+        AI_EXTERNAL_COMBAT_ACTION_ENABLED("false"),
+        AI_EXTERNAL_MEMORY_ENABLED("false"),
+        AI_EXTERNAL_MEMORY_MAX_FACTS("12"),
+        AI_EXTERNAL_COMBAT_ACTION_MAX_ACTIONS("4"),
+        AI_EXTERNAL_COMBAT_INTEGRATED_ENABLED("false"),
+        AI_EXTERNAL_COMBAT_DAMAGE_ORDER_ENABLED("false"),
+        AI_EXTERNAL_COMBAT_DAMAGE_ORDER_MAX_OPTIONS("6"),
+        AI_EXTERNAL_COMBAT_BLOCKERS_ENABLED("false"),
+        AI_EXTERNAL_COMBAT_BLOCKERS_MAX_OPTIONS("4"),
         AI_EXTERNAL_COMBAT_ATTACKERS_ENABLED("false"),
         AI_EXTERNAL_COMBAT_ATTACKERS_MAX_OPTIONS("4"),
         MATCH_EXPERIMENTAL_RESTORE("false"),

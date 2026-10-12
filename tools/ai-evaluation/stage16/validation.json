@@ -1,0 +1,22 @@
+{
+  "java_tests": 37,
+  "java_tests_by_class": {
+    "forge.ai.PreparedAiActionTest": 17,
+    "forge.ai.StackResponseExternalDecisionTest": 12,
+    "forge.ai.Stage16CardSupportAuditTest": 8
+  },
+  "java_failures": 0,
+  "java_errors": 0,
+  "java_skipped": 0,
+  "python_tests": 8,
+  "python_exit_code": 0,
+  "python_result": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.001s\n\nOK",
+  "inventory_repeat_byte_identical": true,
+  "preservation_baseline_files": 39116,
+  "production_java_preserved": 2119,
+  "card_scripts_preserved": 33980,
+  "existing_ai_eval_files_preserved": 3017,
+  "changed_or_missing_baseline_files": [],
+  "git_diff_check_exit_code": 0,
+  "git_diff_check_output": "warning: in the working copy of 'forge-ai/src/main/java/forge/ai/AiController.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-ai/src/main/java/forge/ai/ExternalCombatAttackers.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-ai/src/main/java/forge/ai/LobbyPlayerAi.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-ai/src/main/java/forge/ai/MainPhaseStateProjector.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-ai/src/main/java/forge/ai/PlayerControllerAi.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-ai/src/main/java/forge/ai/decision/AiDecisionContext.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-ai/src/main/java/forge/ai/decision/AiDecisionFailureReason.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-ai/src/main/java/forge/ai/decision/AiDecisionMetrics.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-ai/src/main/java/forge/ai/decision/AiDecisionResult.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-ai/src/main/java/forge/ai/decision/CombatAttackersDecisionContext.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-ai/src/main/java/forge/ai/decision/MainPhaseDecisionContext.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-ai/src/main/java/forge/ai/decision/StackResponseDecisionContext.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-ai/src/main/java/forge/ai/decision/external/OpenAiCompatibleDecisionProvider.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-gui-desktop/src/main/java/forge/view/SimulateMatch.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-gui-desktop/src/test/java/forge/ai/CombatAttackersExternalDecisionTest.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-gui-desktop/src/test/java/forge/ai/decision/external/OpenAiCompatibleDecisionProviderTest.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-gui/src/main/java/forge/localinstance/properties/AbstractPreferences.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-gui/src/main/java/forge/localinstance/properties/ForgePreferences.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-gui/src/main/java/forge/player/AiDecisionProviderFactory.java', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'forge-gui/src/main/java/forge/player/GamePlayerUtil.java', LF will be replaced by CRLF the next time Git touches it\n"
+}

@@ -17,15 +17,52 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class AiDecisionMetrics {
+    private static final List<CombatSequenceAuditRecord> COMBAT_SEQUENCES = new ArrayList<>();
     private static final List<MulliganDecisionEvent> EVENTS = new ArrayList<>();
     private static final List<MainPhaseDecisionEvent> ACTION_EVENTS = new ArrayList<>();
     private static final List<StackResponseDecisionEvent> STACK_EVENTS = new ArrayList<>();
     private static final List<PendingActionAudit> PENDING_ACTION_AUDITS = new ArrayList<>();
     private static final List<PendingStackAudit> PENDING_STACK_AUDITS = new ArrayList<>();
+    private static final List<CombatDamageOrderDecisionEvent> DAMAGE_ORDER_EVENTS = new ArrayList<>();
+    private static final List<PendingDamageOrderAudit> PENDING_DAMAGE_ORDER_AUDITS = new ArrayList<>();
+    private static final List<CombatBlockersDecisionEvent> BLOCK_EVENTS = new ArrayList<>();
+    private static final List<PendingBlockAudit> PENDING_BLOCK_AUDITS = new ArrayList<>();
     private static final List<CombatAttackersDecisionEvent> COMBAT_EVENTS = new ArrayList<>();
     private static final List<PendingCombatAudit> PENDING_COMBAT_AUDITS = new ArrayList<>();
     private static final Map<Integer, GameRunMetadata> GAME_METADATA = new ConcurrentHashMap<>();
     private static final Gson AUDIT_GSON = new GsonBuilder().disableHtmlEscaping().create();
+    private static final Gson MEMORY_AUDIT_GSON = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
+    private static final List<CombatActionDecisionEvent> COMBAT_ACTION_EVENTS = new ArrayList<>();
+    private static final List<PendingCombatActionAudit> PENDING_COMBAT_ACTION_AUDITS = new ArrayList<>();
+    private record PendingCombatActionAudit(CombatActionDecisionEvent telemetry, CombatActionDecisionContext modelVisibleDecision) { }
+    private record CombatActionAudit(String decisionType, CombatActionDecisionContext modelVisibleDecision,
+            CombatActionDecisionEvent telemetry, CombatSequenceAuditRecord eventualCombatResult,
+            String finalWinner, boolean draw, int finalTurnCount) { }
+    public static synchronized List<CombatActionDecisionEvent> combatActionEvents() { return List.copyOf(COMBAT_ACTION_EVENTS); }
+    public static synchronized void record(CombatActionDecisionEvent event, CombatActionDecisionContext context) {
+        FullGameExternalAiAudit.record(AiDecisionType.COMBAT_ACTION, event, context);
+        COMBAT_ACTION_EVENTS.add(event);
+        if (auditWriter != null) PENDING_COMBAT_ACTION_AUDITS.add(new PendingCombatActionAudit(event, context));
+        Logger.info("combatActionDecision {}", AUDIT_GSON.toJson(event));
+    }
+    public static synchronized String combatActionSummary() {
+        var events = COMBAT_ACTION_EVENTS;
+        long accepted = events.stream().filter(e -> !e.fallback()).count();
+        long agreements = events.stream().filter(e -> !e.fallback() && e.heuristicOptionId().equals(e.selectedOptionId())).count();
+        return String.format(Locale.ROOT, " combatActionDecisions=%d combatActionProviderCalls=%d combatActionOptions=%d "
+                + "combatActionPassSelections=%d combatActionAgreements=%d combatActionDisagreements=%d combatActionFallbacks=%d "
+                + "combatActionStaleOrRevalidationFailures=%d combatActionAvgProviderLatencyMs=%.2f combatActionAvgTotalLatencyMs=%.2f "
+                + "combatActionForgePassExternalAction=%d combatActionForgeActionExternalPass=%d combatActionDifferentAction=%d",
+                events.size(), events.size(), events.stream().mapToLong(CombatActionDecisionEvent::optionCount).sum(),
+                events.stream().filter(CombatActionDecisionEvent::passSelection).count(), agreements, accepted - agreements,
+                events.stream().filter(CombatActionDecisionEvent::fallback).count(),
+                events.stream().filter(CombatActionDecisionEvent::staleOrRevalidationFailure).count(),
+                events.stream().mapToLong(CombatActionDecisionEvent::providerLatencyMs).average().orElse(0),
+                events.stream().mapToLong(CombatActionDecisionEvent::totalLatencyMs).average().orElse(0),
+                events.stream().filter(e -> "FORGE_PASS_EXTERNAL_ACTION".equals(e.disagreementCategory())).count(),
+                events.stream().filter(e -> "FORGE_ACTION_EXTERNAL_PASS".equals(e.disagreementCategory())).count(),
+                events.stream().filter(e -> "DIFFERENT_ACTION".equals(e.disagreementCategory())).count());
+    }
     private static BufferedWriter auditWriter;
     private static long mainPhaseWindowsConsidered;
     private static long mainPhaseNotActivePlayer;
@@ -42,7 +79,20 @@ public final class AiDecisionMetrics {
     private AiDecisionMetrics() {
     }
 
+    private static void writeAuditRecord(Object record) throws IOException {
+        var json = record instanceof com.google.gson.JsonObject object ? object : AUDIT_GSON.toJsonTree(record).getAsJsonObject();
+        auditWriter.write(MEMORY_AUDIT_GSON.toJson(FullGameExternalAiAudit.decorate(json)));
+    }
+
+    private static void writeAuditRecord(Object record, AiDecisionContext context) throws IOException {
+        var json = AUDIT_GSON.toJsonTree(record).getAsJsonObject();
+        json.addProperty("memoryEnabled", context.memorySnapshot() != null);
+        if (context.memorySnapshot() != null) json.add("memory", MEMORY_AUDIT_GSON.toJsonTree(context.memorySnapshot()));
+        writeAuditRecord(json);
+    }
+
     public static synchronized void record(MulliganDecisionEvent event) {
+        FullGameExternalAiAudit.record(AiDecisionType.MULLIGAN_KEEP, event, null);
         EVENTS.add(event);
         Logger.info("aiDecision decisionId={} fingerprint={} gameId={} gameIndex={} runSeed={} player={} "
                         + "seat={} deck={} provider={} model={} source={} heuristicOption={} finalOption={} "
@@ -73,6 +123,7 @@ public final class AiDecisionMetrics {
     }
 
     public static synchronized void record(MainPhaseDecisionEvent event, MainPhaseDecisionContext context) {
+        FullGameExternalAiAudit.record(AiDecisionType.MAIN_PHASE_ACTION, event, context);
         record(event);
         if (auditWriter != null) {
             PENDING_ACTION_AUDITS.add(new PendingActionAudit(event, context));
@@ -81,6 +132,7 @@ public final class AiDecisionMetrics {
 
     public static synchronized void record(StackResponseDecisionEvent event,
             StackResponseDecisionContext context) {
+        FullGameExternalAiAudit.record(AiDecisionType.STACK_RESPONSE, event, context);
         STACK_EVENTS.add(event);
         Logger.debug("aiStackResponse decisionId={} gameId={} player={} actions={} heuristic={} selected={} "
                         + "pass={} fallback={} reason={} providerLatencyMs={} totalLatencyMs={}",
@@ -93,7 +145,9 @@ public final class AiDecisionMetrics {
     }
 
     public static synchronized void record(CombatAttackersDecisionEvent event, CombatAttackersDecisionContext context) {
+        FullGameExternalAiAudit.record(AiDecisionType.COMBAT_ATTACKERS, event, context);
         COMBAT_EVENTS.add(event);
+        CombatSequenceTracker.decision(event);
         Logger.info("aiCombatAttackers decisionId={} options={} heuristic={} selected={} fallback={} reason={} providerLatencyMs={} totalLatencyMs={}",
                 event.decisionId(), event.optionCount(), event.heuristicOptionId(), event.selectedOptionId(),
                 event.fallback(), event.failureReason(), event.providerLatencyMs(), event.totalLatencyMs());
@@ -101,6 +155,76 @@ public final class AiDecisionMetrics {
     }
 
     public static synchronized List<CombatAttackersDecisionEvent> combatAttackerEvents() { return List.copyOf(COMBAT_EVENTS); }
+
+    public static synchronized void record(CombatBlockersDecisionEvent event, CombatBlockersDecisionContext context) {
+        FullGameExternalAiAudit.record(AiDecisionType.COMBAT_BLOCKERS, event, context);
+        BLOCK_EVENTS.add(event);
+        CombatSequenceTracker.decision(event);
+        Logger.info("aiCombatBlockers decisionId={} options={} heuristic={} selected={} fallback={} reason={} providerLatencyMs={} totalLatencyMs={}",
+                event.decisionId(), event.optionCount(), event.heuristicOptionId(), event.selectedOptionId(),
+                event.fallback(), event.failureReason(), event.providerLatencyMs(), event.totalLatencyMs());
+        if (auditWriter != null) PENDING_BLOCK_AUDITS.add(new PendingBlockAudit(event, context));
+    }
+
+    public static synchronized List<CombatBlockersDecisionEvent> combatBlockerEvents() { return List.copyOf(BLOCK_EVENTS); }
+
+    public static synchronized void record(CombatDamageOrderDecisionEvent event, CombatDamageOrderDecisionContext context) {
+        FullGameExternalAiAudit.record(AiDecisionType.COMBAT_DAMAGE_ORDER, event, context);
+        DAMAGE_ORDER_EVENTS.add(event);
+        CombatSequenceTracker.decision(event);
+        Logger.info("aiCombatDamageOrder decisionId={} options={} heuristic={} selected={} fallback={} reason={} providerLatencyMs={} totalLatencyMs={}",
+                event.decisionId(), event.optionCount(), event.heuristicOptionId(), event.selectedOptionId(),
+                event.fallback(), event.failureReason(), event.providerLatencyMs(), event.totalLatencyMs());
+        if (auditWriter != null) PENDING_DAMAGE_ORDER_AUDITS.add(new PendingDamageOrderAudit(event, context));
+    }
+
+    public static synchronized List<CombatDamageOrderDecisionEvent> combatDamageOrderEvents() { return List.copyOf(DAMAGE_ORDER_EVENTS); }
+
+    public record CombatCorrelation(String combatSequenceId, int turnNumber, int activePlayerSeat, Integer defendingPlayerSeat) { }
+
+    public static void observeCombatSequences(forge.game.Game game) { CombatSequenceTracker.observe(game); }
+
+    public static CombatCorrelation combatCorrelation(forge.game.Game game, forge.game.combat.Combat combat, AiDecisionType surface) {
+        var correlation = CombatSequenceTracker.correlation(game, combat);
+        return new CombatCorrelation(correlation.combatSequenceId(), correlation.turnNumber(),
+                correlation.activePlayerSeat(), correlation.defendingPlayerSeat());
+    }
+
+    static synchronized void recordCombatSequence(CombatSequenceAuditRecord sequence, boolean auditEnabled) {
+        COMBAT_SEQUENCES.add(sequence);
+        Logger.debug("aiCombatSequence sequenceId={} calls={} fallbacks={} providerLatencyMs={} lethal={}",
+                sequence.combatSequenceId(), sequence.providerCallCount(), sequence.fallbackCount(),
+                sequence.totalProviderLatencyMs(), sequence.afterState().lethal());
+        if (auditEnabled && auditWriter != null) {
+            try { auditWriter.write(AUDIT_GSON.toJson(sequence)); auditWriter.newLine(); auditWriter.flush(); }
+            catch (IOException ex) { Logger.error(ex, "Unable to write combat sequence audit"); }
+        }
+    }
+
+    public static synchronized List<CombatSequenceAuditRecord> combatSequences() { return List.copyOf(COMBAT_SEQUENCES); }
+
+    public static synchronized IntegratedCombatMetrics integratedCombatMetrics() {
+        long count = COMBAT_SEQUENCES.size();
+        long attacker = COMBAT_SEQUENCES.stream().filter(s -> hasSurface(s, AiDecisionType.COMBAT_ATTACKERS)).count();
+        long blocker = COMBAT_SEQUENCES.stream().filter(s -> hasSurface(s, AiDecisionType.COMBAT_BLOCKERS)).count();
+        long order = COMBAT_SEQUENCES.stream().filter(s -> hasSurface(s, AiDecisionType.COMBAT_DAMAGE_ORDER)).count();
+        long all = COMBAT_SEQUENCES.stream().filter(s -> hasSurface(s, AiDecisionType.COMBAT_ATTACKERS)
+                && hasSurface(s, AiDecisionType.COMBAT_BLOCKERS) && hasSurface(s, AiDecisionType.COMBAT_DAMAGE_ORDER)).count();
+        long calls = COMBAT_SEQUENCES.stream().mapToLong(CombatSequenceAuditRecord::providerCallCount).sum();
+        long fallbacks = COMBAT_SEQUENCES.stream().mapToLong(CombatSequenceAuditRecord::fallbackCount).sum();
+        long[] latency = COMBAT_SEQUENCES.stream().mapToLong(CombatSequenceAuditRecord::totalProviderLatencyMs).sorted().toArray();
+        return new IntegratedCombatMetrics(count, attacker, blocker, order, all, calls,
+                COMBAT_SEQUENCES.stream().filter(s -> s.fallbackCount() > 0).count(), fallbacks,
+                count == 0 ? 0 : (double) calls / count,
+                count == 0 ? 0 : (double) COMBAT_SEQUENCES.stream().mapToLong(CombatSequenceAuditRecord::totalProviderLatencyMs).sum() / count,
+                percentile(latency, 0.50), percentile(latency, 0.95), COMBAT_SEQUENCES.stream().filter(s -> s.afterState().lethal()).count());
+    }
+    private static boolean hasSurface(CombatSequenceAuditRecord sequence, AiDecisionType surface) {
+        return sequence.decisions().stream().anyMatch(d -> d.surface() == surface && d.providerAttempted());
+    }
+    private static long percentile(long[] sorted, double fraction) {
+        return sorted.length == 0 ? 0 : sorted[(int) Math.ceil(sorted.length * fraction) - 1];
+    }
 
     /** Enables optional JSONL auditing. Existing files are replaced for a new simulation cohort. */
     public static synchronized void configureDecisionAudit(Path path) throws IOException {
@@ -117,7 +241,26 @@ public final class AiDecisionMetrics {
     /** Flushes the decisions for one completed game with joinable, non-causal outcome information. */
     public static synchronized void completeGame(int gameId, String winner, boolean draw,
             long durationMs, int finalTurnCount) {
+        CombatSequenceTracker.completeGame(gameId);
+        var fullGameRecords = FullGameExternalAiAudit.completeGame(gameId, winner, draw, durationMs, finalTurnCount);
+        forge.ai.ExternalAiStrategicMemory.release(gameId);
+        if (auditWriter != null) try {
+            for (var record : fullGameRecords) { writeAuditRecord(record); auditWriter.newLine(); }
+            auditWriter.flush();
+        } catch (IOException ex) { Logger.error(ex, "Unable to write full game audit"); }
+        if (auditWriter != null) {
+            try {
+                for (var pending : PENDING_COMBAT_ACTION_AUDITS.stream().filter(p -> p.telemetry().gameId() == gameId).toList()) {
+                    var eventual = COMBAT_SEQUENCES.stream().filter(c -> c.combatSequenceId().equals(pending.telemetry().combatSequenceId())).findFirst().orElse(null);
+                    writeAuditRecord(new CombatActionAudit("COMBAT_ACTION", pending.modelVisibleDecision(),
+                            pending.telemetry(), eventual, winner, draw, finalTurnCount), pending.modelVisibleDecision()); auditWriter.newLine();
+                }
+                auditWriter.flush();
+            } catch (IOException e) { throw new IllegalStateException("Unable to write combat action audit", e); }
+        }
+        PENDING_COMBAT_ACTION_AUDITS.removeIf(p -> p.telemetry().gameId() == gameId);
         if (auditWriter == null) {
+            FullGameExternalAiAudit.release(gameId);
             return;
         }
         try {
@@ -137,7 +280,7 @@ public final class AiDecisionMetrics {
                         context.state(), context.legalActions(), e.returnedDecisionId(), e.returnedFingerprint(),
                         e.returnedOptionId(), e.responseAccepted(), winner,
                         !draw && e.playerIdentity().equals(winner), draw, durationMs, finalTurnCount);
-                auditWriter.write(AUDIT_GSON.toJson(record));
+                writeAuditRecord(record, context);
                 auditWriter.newLine();
             }
             PENDING_ACTION_AUDITS.removeIf(p -> p.event().gameId() == gameId);
@@ -157,7 +300,7 @@ public final class AiDecisionMetrics {
                         !draw && e.playerIdentity().equals(winner), draw, durationMs, finalTurnCount,
                         context.randomizedOrder(), context.internalActionMapping().stream()
                                 .map(mapping -> mapping.withHeuristic(e.heuristicResponseId())).toList());
-                auditWriter.write(AUDIT_GSON.toJson(record));
+                writeAuditRecord(record, context);
                 auditWriter.newLine();
             }
             PENDING_STACK_AUDITS.removeIf(p -> p.event().gameId() == gameId);
@@ -172,13 +315,47 @@ public final class AiDecisionMetrics {
                 CombatAttackersDecisionAuditRecord record = new CombatAttackersDecisionAuditRecord("COMBAT_ATTACKERS",
                         pending.context(), mapping, e, e.heuristicOptionId().equals(e.selectedOptionId()), winner,
                         !draw && e.playerIdentity().equals(winner), draw, durationMs, finalTurnCount);
-                auditWriter.write(AUDIT_GSON.toJson(record));
+                writeAuditRecord(record, pending.context());
                 auditWriter.newLine();
             }
             PENDING_COMBAT_AUDITS.removeIf(p -> p.event().gameId() == gameId);
+            for (PendingBlockAudit pending : PENDING_BLOCK_AUDITS.stream().filter(p -> p.event().gameId() == gameId).toList()) {
+                CombatBlockersDecisionEvent e = pending.event();
+                List<CombatBlockersDecisionAuditRecord.Mapping> mapping = new ArrayList<>();
+                for (int i = 0; i < pending.context().options().size(); i++) {
+                    CombatBlockOptionView option = pending.context().options().get(i);
+                    mapping.add(new CombatBlockersDecisionAuditRecord.Mapping(option.optionId(), i,
+                            option.optionId().equals(e.heuristicOptionId()), option.assignments()));
+                }
+                CombatBlockersDecisionAuditRecord record = new CombatBlockersDecisionAuditRecord("COMBAT_BLOCKERS",
+                        pending.context(), mapping, e, e.heuristicOptionId().equals(e.selectedOptionId()), winner,
+                        !draw && e.playerIdentity().equals(winner), draw, durationMs, finalTurnCount);
+                writeAuditRecord(record, pending.context());
+                auditWriter.newLine();
+            }
+            PENDING_BLOCK_AUDITS.removeIf(p -> p.event().gameId() == gameId);
+            for (PendingDamageOrderAudit pending : PENDING_DAMAGE_ORDER_AUDITS.stream().filter(p -> p.event().gameId() == gameId).toList()) {
+                CombatDamageOrderDecisionEvent e = pending.event();
+                List<CombatDamageOrderDecisionAuditRecord.Mapping> mapping = new ArrayList<>();
+                for (int i = 0; i < pending.context().options().size(); i++) {
+                    CombatDamageOrderOptionView option = pending.context().options().get(i);
+                    mapping.add(new CombatDamageOrderDecisionAuditRecord.Mapping(option.optionId(), i,
+                            option.optionId().equals(e.heuristicOptionId()), option.orderedRecipientIds()));
+                }
+                CombatDamageOrderDecisionAuditRecord record = new CombatDamageOrderDecisionAuditRecord("COMBAT_DAMAGE_ORDER",
+                        pending.context(), mapping, damageOrder(pending.context(), e.heuristicOptionId()),
+                        damageOrder(pending.context(), e.returnedOptionId()), damageOrder(pending.context(), e.selectedOptionId()),
+                        e, e.heuristicOptionId().equals(e.selectedOptionId()), winner,
+                        !draw && e.playerIdentity().equals(winner), draw, durationMs, finalTurnCount);
+                writeAuditRecord(record);
+                auditWriter.newLine();
+            }
+            PENDING_DAMAGE_ORDER_AUDITS.removeIf(p -> p.event().gameId() == gameId);
             auditWriter.flush();
         } catch (IOException ex) {
             Logger.error(ex, "Unable to write external AI decision audit");
+        } finally {
+            FullGameExternalAiAudit.release(gameId);
         }
     }
 
@@ -225,11 +402,20 @@ public final class AiDecisionMetrics {
     }
 
     public static synchronized void reset() {
+        FullGameExternalAiAudit.reset();
+        forge.ai.ExternalAiStrategicMemory.reset();
+        COMBAT_ACTION_EVENTS.clear(); PENDING_COMBAT_ACTION_AUDITS.clear();
+        COMBAT_SEQUENCES.clear();
+        CombatSequenceTracker.reset();
         EVENTS.clear();
         ACTION_EVENTS.clear();
         STACK_EVENTS.clear();
         PENDING_ACTION_AUDITS.clear();
         PENDING_STACK_AUDITS.clear();
+        DAMAGE_ORDER_EVENTS.clear();
+        PENDING_DAMAGE_ORDER_AUDITS.clear();
+        BLOCK_EVENTS.clear();
+        PENDING_BLOCK_AUDITS.clear();
         COMBAT_EVENTS.clear();
         PENDING_COMBAT_AUDITS.clear();
         GAME_METADATA.clear();
@@ -332,6 +518,34 @@ public final class AiDecisionMetrics {
                         + e.playerSeat() + "," + csv(e.deckIdentifier()) + "," + csv(e.heuristicOptionId()) + ","
                         + csv(e.selectedOptionId()) + ",COMBAT_ATTACKERS," + e.optionCount() + ",,,,,"
                         + e.totalLatencyMs() + "," + e.staleOrRevalidationFailure() + ",,,,,,"));
+        BLOCK_EVENTS.stream().sorted(Comparator.comparing(CombatBlockersDecisionEvent::decisionId)).forEach(e -> lines.add(
+                csv(e.decisionId()) + "," + csv(e.stateFingerprint()) + "," + csv(e.provider()) + "," + csv(e.model())
+                        + "," + e.source() + "," + csv(e.selectedOptionId()) + "," + e.providerLatencyMs() + ","
+                        + e.providerAttempted() + "," + e.fallback() + "," + value(e.failureReason()) + ",,," + e.gameId()
+                        + "," + value(e.gameIndex()) + "," + value(e.runSeed()) + "," + csv(e.playerIdentity()) + ","
+                        + e.playerSeat() + "," + csv(e.deckIdentifier()) + "," + csv(e.heuristicOptionId()) + ","
+                        + csv(e.selectedOptionId()) + ",COMBAT_BLOCKERS," + e.optionCount() + ",,,,,"
+                        + e.totalLatencyMs() + "," + e.staleOrRevalidationFailure() + ",,,,,,"));
+        DAMAGE_ORDER_EVENTS.stream().sorted(Comparator.comparing(CombatDamageOrderDecisionEvent::decisionId)).forEach(e -> lines.add(
+                csv(e.decisionId()) + "," + csv(e.stateFingerprint()) + "," + csv(e.provider()) + "," + csv(e.model())
+                        + "," + e.source() + "," + csv(e.selectedOptionId()) + "," + e.providerLatencyMs() + ","
+                        + e.providerAttempted() + "," + e.fallback() + "," + value(e.failureReason()) + ",,," + e.gameId()
+                        + "," + value(e.gameIndex()) + "," + value(e.runSeed()) + "," + csv(e.playerIdentity()) + ","
+                        + e.playerSeat() + "," + csv(e.deckIdentifier()) + "," + csv(e.heuristicOptionId()) + ","
+                        + csv(e.selectedOptionId()) + ",COMBAT_DAMAGE_ORDER," + e.optionCount() + ",,,,,"
+                        + e.totalLatencyMs() + "," + e.staleOrRevalidationFailure() + ",,,,,,"));
+        for (var e : COMBAT_ACTION_EVENTS.stream().sorted(Comparator.comparing(CombatActionDecisionEvent::decisionId)).toList()) {
+            List<String> row = new ArrayList<>(java.util.Collections.nCopies(34, ""));
+            row.set(0, csv(e.decisionId())); row.set(1, csv(e.stateFingerprint())); row.set(2, csv(e.provider())); row.set(3, csv(e.model()));
+            row.set(4, e.fallback() ? "FORGE_HEURISTIC" : "EXTERNAL_PROVIDER"); row.set(5, csv(e.selectedOptionId()));
+            row.set(6, Long.toString(e.providerLatencyMs())); row.set(7, "true"); row.set(8, Boolean.toString(e.fallback()));
+            row.set(9, value(e.failureReason())); row.set(12, Integer.toString(e.gameId())); row.set(16, Integer.toString(e.playerSeat()));
+            var run = gameMetadata(e.gameId());
+            if (run != null) { row.set(13, Integer.toString(run.gameIndex())); row.set(14, value(run.runSeed())); }
+            row.set(18, csv(e.heuristicOptionId())); row.set(19, csv(e.selectedOptionId())); row.set(20, "COMBAT_ACTION");
+            row.set(21, Integer.toString(e.optionCount())); row.set(26, Long.toString(e.totalLatencyMs()));
+            row.set(27, Boolean.toString(e.staleOrRevalidationFailure())); lines.add(String.join(",", row));
+        }
         Files.write(path, lines, StandardCharsets.UTF_8);
     }
 
@@ -387,7 +601,7 @@ public final class AiDecisionMetrics {
                         && e.heuristicResponseId().equals(e.selectedResponseId())).count(),
                 STACK_EVENTS.stream().filter(e -> e.source() == AiDecisionSource.EXTERNAL_PROVIDER
                         && !e.heuristicResponseId().equals(e.selectedResponseId())).count(),
-                STACK_EVENTS.stream().filter(StackResponseDecisionEvent::fallback).count()) + combatAttackerSummary();
+                STACK_EVENTS.stream().filter(StackResponseDecisionEvent::fallback).count()) + combatAttackerSummary() + combatBlockerSummary() + combatDamageOrderSummary() + " " + integratedCombatMetrics() + combatActionSummary();
     }
 
     private static String combatAttackerSummary() {
@@ -403,6 +617,40 @@ public final class AiDecisionMetrics {
                 COMBAT_EVENTS.stream().filter(CombatAttackersDecisionEvent::staleOrRevalidationFailure).count(),
                 COMBAT_EVENTS.stream().mapToLong(CombatAttackersDecisionEvent::providerLatencyMs).average().orElse(0),
                 COMBAT_EVENTS.stream().mapToLong(CombatAttackersDecisionEvent::totalLatencyMs).average().orElse(0));
+    }
+
+    private static String combatBlockerSummary() {
+        return String.format(Locale.ROOT, " combatBlockerDecisions=%d combatBlockerProviderCalls=%d combatBlockerOptions=%d "
+                        + "combatBlockerNoBlockSelections=%d combatBlockerAgreements=%d combatBlockerDisagreements=%d "
+                        + "combatBlockerFallbacks=%d combatBlockerStaleOrRevalidationFailures=%d combatBlockerAvgProviderLatencyMs=%.2f combatBlockerAvgTotalLatencyMs=%.2f",
+                BLOCK_EVENTS.size(), BLOCK_EVENTS.stream().filter(CombatBlockersDecisionEvent::providerAttempted).count(),
+                BLOCK_EVENTS.stream().mapToLong(CombatBlockersDecisionEvent::optionCount).sum(),
+                BLOCK_EVENTS.stream().filter(CombatBlockersDecisionEvent::noBlockSelected).count(),
+                BLOCK_EVENTS.stream().filter(e -> e.responseAccepted() && e.heuristicOptionId().equals(e.selectedOptionId())).count(),
+                BLOCK_EVENTS.stream().filter(e -> e.responseAccepted() && !e.heuristicOptionId().equals(e.selectedOptionId())).count(),
+                BLOCK_EVENTS.stream().filter(CombatBlockersDecisionEvent::fallback).count(),
+                BLOCK_EVENTS.stream().filter(CombatBlockersDecisionEvent::staleOrRevalidationFailure).count(),
+                BLOCK_EVENTS.stream().mapToLong(CombatBlockersDecisionEvent::providerLatencyMs).average().orElse(0),
+                BLOCK_EVENTS.stream().mapToLong(CombatBlockersDecisionEvent::totalLatencyMs).average().orElse(0));
+    }
+
+    private static String combatDamageOrderSummary() {
+        return String.format(Locale.ROOT, " combatDamageOrderDecisions=%d combatDamageOrderProviderCalls=%d combatDamageOrderOptions=%d "
+                        + "combatDamageOrderAgreements=%d combatDamageOrderDisagreements=%d "
+                        + "combatDamageOrderFallbacks=%d combatDamageOrderStaleOrRevalidationFailures=%d combatDamageOrderAvgProviderLatencyMs=%.2f combatDamageOrderAvgTotalLatencyMs=%.2f",
+                DAMAGE_ORDER_EVENTS.size(), DAMAGE_ORDER_EVENTS.stream().filter(CombatDamageOrderDecisionEvent::providerAttempted).count(),
+                DAMAGE_ORDER_EVENTS.stream().mapToLong(CombatDamageOrderDecisionEvent::optionCount).sum(),
+                DAMAGE_ORDER_EVENTS.stream().filter(e -> e.responseAccepted() && e.heuristicOptionId().equals(e.selectedOptionId())).count(),
+                DAMAGE_ORDER_EVENTS.stream().filter(e -> e.responseAccepted() && !e.heuristicOptionId().equals(e.selectedOptionId())).count(),
+                DAMAGE_ORDER_EVENTS.stream().filter(CombatDamageOrderDecisionEvent::fallback).count(),
+                DAMAGE_ORDER_EVENTS.stream().filter(CombatDamageOrderDecisionEvent::staleOrRevalidationFailure).count(),
+                DAMAGE_ORDER_EVENTS.stream().mapToLong(CombatDamageOrderDecisionEvent::providerLatencyMs).average().orElse(0),
+                DAMAGE_ORDER_EVENTS.stream().mapToLong(CombatDamageOrderDecisionEvent::totalLatencyMs).average().orElse(0));
+    }
+
+    private static List<String> damageOrder(CombatDamageOrderDecisionContext context, String optionId) {
+        return context.options().stream().filter(o -> o.optionId().equals(optionId))
+                .map(CombatDamageOrderOptionView::orderedRecipientIds).findFirst().orElse(List.of());
     }
 
     private static long countCandidates(int count) {
@@ -484,6 +732,9 @@ public final class AiDecisionMetrics {
 
     private record PendingStackAudit(StackResponseDecisionEvent event, StackResponseDecisionContext context) {
     }
+    private record PendingDamageOrderAudit(CombatDamageOrderDecisionEvent event, CombatDamageOrderDecisionContext context) { }
+    private record PendingBlockAudit(CombatBlockersDecisionEvent event, CombatBlockersDecisionContext context) { }
+
     private record PendingCombatAudit(CombatAttackersDecisionEvent event, CombatAttackersDecisionContext context) { }
 
     private static void closeAuditWriter() {

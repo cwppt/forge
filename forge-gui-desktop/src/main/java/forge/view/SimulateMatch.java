@@ -74,6 +74,7 @@ public class SimulateMatch {
         }
 
         configureExternalAi(params);
+        Set<Integer> externalSeats = externalSeats(params, params.getOrDefault("d", List.of()).size());
         AiDecisionMetrics.reset();
         List<String> auditOutput = params.get("decision-audit-jsonl");
         if (auditOutput != null && !auditOutput.isEmpty()) {
@@ -116,6 +117,7 @@ public class SimulateMatch {
         }
 
         GameRules rules = new GameRules(type);
+        rules.setOrderCombatants(params.containsKey("legacy-order-combatants"));
         rules.setAppliedVariants(EnumSet.of(type));
 
         if (matchSize != 0) {
@@ -171,7 +173,8 @@ public class SimulateMatch {
                 } else {
                     rp = new RegisteredPlayer(d);
                 }
-                rp.setPlayer(GamePlayerUtil.createAiPlayer(name, i - 1, profile));
+                rp.setPlayer(GamePlayerUtil.createAiPlayer(name, i - 1, profile,
+                        externalSeats == null || externalSeats.contains(i - 1)));
                 pp.add(rp);
                 i++;
             }
@@ -224,16 +227,31 @@ public class SimulateMatch {
         System.out.println("\tA - AI profile per player, in the same order as the decks (e.g. -a Default Experimental)");
         System.out.println("\tc - Clock flag. Set the maximum time in seconds before calling the match a draw, defaults to 120.");
         System.out.println("\tq - Quiet flag. Output just the game result, not the entire game log.");
+        System.out.println("\t--external-ai-seats <0-based seats...> - restrict external AI in direct matches; no values means Forge only");
         System.out.println("\t--external-ai-enabled - legacy alias: enable external mulligan decisions");
         System.out.println("\t--external-ai-mulligan-enabled - enable external mulligan decisions");
         System.out.println("\t--external-ai-mulligan-disabled - disable external mulligan decisions for this run");
         System.out.println("\t--external-ai-main-phase-enabled - enable prepared main-phase action selection");
+        System.out.println("\t--external-ai-main-phase-disabled - disable external main-phase decisions for this run");
+        System.out.println("\t--external-ai-stack-response-disabled - disable external stack-response decisions for this run");
+        System.out.println("\t--external-ai-combat-integrated-enabled - enable attackers, blockers and damage ordering together");
         System.out.println("\t--external-ai-main-phase-max-actions <N> - bounded prepared action count (default 3)");
         System.out.println("\t--external-ai-main-phase-include-rejected - expose bounded safe heuristic-rejected actions");
         System.out.println("\t--external-ai-main-phase-max-rejected-actions <N> - rejected action bound (default 1)");
         System.out.println("\t--external-ai-stack-response-enabled - enable prepared stack-response selection");
         System.out.println("\t--external-ai-stack-response-max-actions <N> - bounded response count (default 3)");
         System.out.println("\t--external-ai-stack-response-randomize-action-order - shuffle presented responses (default false)");
+        System.out.println("\t--legacy-order-combatants - use legacy damage assignment ordering rules (default false)");
+        System.out.println("\t--external-ai-request-diagnostics - log damage-order request sizes and latency breakdown (no request bodies)");
+        System.out.println("\t--external-ai-combat-action-enabled - prepared proactive combat actions (default false)");
+        System.out.println("\t--external-ai-full-game-enabled - enable the seven stable surfaces; individual CLI overrides win");
+        System.out.println("\t--external-ai-combat-action-max-actions N - default 4, hard cap 8");
+        System.out.println("\t--external-ai-memory-enabled - observer-scoped same-game history (default false)");
+        System.out.println("\t--external-ai-memory-max-facts N - default 12, hard cap 32");
+        System.out.println("\t--external-ai-combat-damage-order-enabled - enable prepared damage orders (default false)");
+        System.out.println("\t--external-ai-combat-damage-order-max-options N - maximum orders (default 6, hard cap 12)");
+        System.out.println("\t--external-ai-combat-blockers-enabled - enable prepared blocker-set selection (default false)");
+        System.out.println("\t--external-ai-combat-blockers-max-options N - maximum complete block options (default 4, hard cap 8)");
         System.out.println("\t--external-ai-combat-attackers-enabled - enable prepared attacker-set selection (default false)");
         System.out.println("\t--external-ai-combat-attackers-max-options <N> - bounded attacker options (default 4, hard cap 8)");
         System.out.println("\t--external-ai-endpoint <URL> - OpenAI-compatible chat/completions endpoint");
@@ -255,6 +273,10 @@ public class SimulateMatch {
 
         final Game g1 = mc.createGame();
         AiDecisionMetrics.registerGame(g1.getId(), iGame, runSeed);
+        if (Boolean.getBoolean("forge.ai.fullGame.audit")) forge.ai.decision.FullGameExternalAiAudit.observe(g1);
+        if (FModel.getPreferences().getPrefBoolean(FPref.AI_EXTERNAL_COMBAT_INTEGRATED_ENABLED)
+                || FModel.getPreferences().getPrefBoolean(FPref.AI_EXTERNAL_COMBAT_ACTION_ENABLED))
+            AiDecisionMetrics.observeCombatSequences(g1);
         g1.setNoGUIUser();
         // will run match in the same thread
         try {
@@ -303,7 +325,35 @@ public class SimulateMatch {
     public record GameSimulationResult(long durationMs, boolean draw, String winner) {
     }
 
-    private static void configureExternalAi(Map<String, List<String>> params) {
+    static Set<Integer> externalSeats(Map<String, List<String>> params, int playerCount) {
+        if (!params.containsKey("external-ai-seats")) return null; // Preserve existing all-seat routing.
+        if (params.containsKey("t")) throw new IllegalArgumentException("External seat selection requires a direct match");
+        Set<Integer> seats = new HashSet<>();
+        for (String value : params.get("external-ai-seats")) {
+            int seat = Integer.parseInt(value);
+            if (seat < 0 || seat >= playerCount) throw new IllegalArgumentException("External AI seat is outside the player list: " + seat);
+            seats.add(seat);
+        }
+        return Set.copyOf(seats);
+    }
+
+    static void configureExternalAi(Map<String, List<String>> params) {
+        if (params.containsKey("external-ai-full-game-disabled")) FModel.getPreferences().setPref(FPref.AI_EXTERNAL_FULL_GAME_ENABLED, false);
+        if (params.containsKey("external-ai-full-game-enabled")) {
+            FModel.getPreferences().setPref(FPref.AI_EXTERNAL_FULL_GAME_ENABLED, true);
+            forge.localinstance.properties.ForgePreferences.EXTERNAL_STABLE_SURFACES.forEach(p -> FModel.getPreferences().setPref(p, true));
+            forge.localinstance.properties.ForgePreferences.disableExperimentalCombatGuards();
+        }
+        if (params.containsKey("external-ai-combat-action-enabled")) FModel.getPreferences().setPref(FPref.AI_EXTERNAL_COMBAT_ACTION_ENABLED, true);
+        if (params.containsKey("external-ai-combat-action-disabled")) FModel.getPreferences().setPref(FPref.AI_EXTERNAL_COMBAT_ACTION_ENABLED, false);
+        setPreference(params, "external-ai-combat-action-max-actions", FPref.AI_EXTERNAL_COMBAT_ACTION_MAX_ACTIONS);
+        if(params.containsKey("external-ai-memory-enabled"))FModel.getPreferences().setPref(FPref.AI_EXTERNAL_MEMORY_ENABLED,true);
+        if(params.containsKey("external-ai-memory-disabled"))FModel.getPreferences().setPref(FPref.AI_EXTERNAL_MEMORY_ENABLED,false);
+        setPreference(params,"external-ai-memory-max-facts",FPref.AI_EXTERNAL_MEMORY_MAX_FACTS);
+        if (params.containsKey("external-ai-combat-integrated-enabled")) {
+            FModel.getPreferences().setPref(FPref.AI_EXTERNAL_COMBAT_INTEGRATED_ENABLED, true);
+        }
+        System.setProperty("forge.ai.damageOrder.requestDiagnostics", String.valueOf(params.containsKey("external-ai-request-diagnostics")));
         if (params.containsKey("external-ai-enabled")) {
             FModel.getPreferences().setPref(FPref.AI_EXTERNAL_MULLIGAN_ENABLED, true);
         }
@@ -322,12 +372,32 @@ public class SimulateMatch {
         if (params.containsKey("external-ai-stack-response-enabled")) {
             FModel.getPreferences().setPref(FPref.AI_EXTERNAL_STACK_RESPONSE_ENABLED, true);
         }
+        // Explicit disables win over enables, as with the existing mulligan override.
+        if (params.containsKey("external-ai-main-phase-disabled")) {
+            FModel.getPreferences().setPref(FPref.AI_EXTERNAL_MAIN_PHASE_ENABLED, false);
+        }
+        if (params.containsKey("external-ai-stack-response-disabled")) {
+            FModel.getPreferences().setPref(FPref.AI_EXTERNAL_STACK_RESPONSE_ENABLED, false);
+        }
         if (params.containsKey("external-ai-stack-response-randomize-action-order")) {
             FModel.getPreferences().setPref(FPref.AI_EXTERNAL_STACK_RESPONSE_RANDOMIZE_ACTION_ORDER, true);
         }
         if (params.containsKey("external-ai-combat-attackers-enabled")) {
             FModel.getPreferences().setPref(FPref.AI_EXTERNAL_COMBAT_ATTACKERS_ENABLED, true);
         }
+        if (params.containsKey("external-ai-combat-damage-order-enabled")) {
+            FModel.getPreferences().setPref(FPref.AI_EXTERNAL_COMBAT_DAMAGE_ORDER_ENABLED, true);
+        }
+        setPreference(params, "external-ai-combat-damage-order-max-options", FPref.AI_EXTERNAL_COMBAT_DAMAGE_ORDER_MAX_OPTIONS);
+        if (params.containsKey("external-ai-combat-integrated-disabled")) FModel.getPreferences().setPref(FPref.AI_EXTERNAL_COMBAT_INTEGRATED_ENABLED, false);
+        if (params.containsKey("external-ai-combat-attackers-disabled")) FModel.getPreferences().setPref(FPref.AI_EXTERNAL_COMBAT_ATTACKERS_ENABLED, false);
+        if (params.containsKey("external-ai-combat-damage-order-disabled")) FModel.getPreferences().setPref(FPref.AI_EXTERNAL_COMBAT_DAMAGE_ORDER_ENABLED, false);
+
+        if (params.containsKey("external-ai-combat-blockers-enabled")) {
+            FModel.getPreferences().setPref(FPref.AI_EXTERNAL_COMBAT_BLOCKERS_ENABLED, true);
+        }
+        if (params.containsKey("external-ai-combat-blockers-disabled")) FModel.getPreferences().setPref(FPref.AI_EXTERNAL_COMBAT_BLOCKERS_ENABLED, false);
+        setPreference(params, "external-ai-combat-blockers-max-options", FPref.AI_EXTERNAL_COMBAT_BLOCKERS_MAX_OPTIONS);
         setPreference(params, "external-ai-combat-attackers-max-options", FPref.AI_EXTERNAL_COMBAT_ATTACKERS_MAX_OPTIONS);
         setPreference(params, "external-ai-endpoint", FPref.AI_EXTERNAL_MULLIGAN_ENDPOINT);
         setPreference(params, "external-ai-model", FPref.AI_EXTERNAL_MULLIGAN_MODEL);

@@ -50,7 +50,12 @@ final class MainPhaseStateProjector {
 
     static MainPhaseDecisionContext project(Player decidingPlayer, String decisionId,
             List<PreparedAiAction> preparedActions) {
-        return project(decidingPlayer, decisionId, preparedActions, true);
+        var original=project(decidingPlayer, decisionId, preparedActions, true);
+        var memory=ExternalAiStrategicMemory.snapshot(decidingPlayer,forge.ai.decision.AiDecisionType.MAIN_PHASE_ACTION,
+                original.legalActions().stream().flatMap(a->java.util.stream.Stream.concat(java.util.stream.Stream.of(a.sourceName()),a.targets().stream())).toList());
+        var s=original.state();
+        return memory==null?original:new MainPhaseDecisionContext(decisionId,new MainPhaseAiState(
+                ExternalAiStrategicMemory.fingerprint(s.fingerprint(),memory),s.turnNumber(),s.phase(),s.activePlayer(),s.self(),s.players(),s.stackSize()),original.legalActions(),memory);
     }
 
     private static MainPhaseDecisionContext project(Player decidingPlayer, String decisionId,
@@ -128,7 +133,7 @@ final class MainPhaseStateProjector {
             items.add(new StackItemView(position++, visible ? source.getName() : HIDDEN_CARD,
                     ability == null || ability.getActivatingPlayer() == null ? null : ability.getActivatingPlayer().getName(),
                     ability == null || ability.getApi() == null ? "SPELL_OR_ABILITY" : ability.getApi().name(),
-                    visible && ability != null ? ability.toString() : "Hidden stack item", targets));
+                    visible && ability != null ? ability.toString() : "Hidden stack item", targets, StackObjectType.classify(ability).name()));
         }
         String fingerprint;
         try {
@@ -142,6 +147,7 @@ final class MainPhaseStateProjector {
                     write(data, item.sourceName());
                     write(data, item.controller());
                     write(data, item.category());
+                    write(data, item.objectType());
                     write(data, item.rulesSummary());
                     writeStrings(data, item.targets());
                 }
@@ -187,8 +193,11 @@ final class MainPhaseStateProjector {
                     preparedActions.get(originalPosition).actionId(), originalPosition, i,
                     view.sourceName(), view.description()));
         }
-        return new StackResponseDecisionContext(decisionId, fingerprint, base.state(), items,
-                base.legalActions(), randomizedOrder, mappings);
+        // Attach history after the original option-ID/ordering material has been finalized.
+        var memory=opaqueIds?ExternalAiStrategicMemory.snapshot(decidingPlayer,forge.ai.decision.AiDecisionType.STACK_RESPONSE,
+                base.legalActions().stream().flatMap(a->java.util.stream.Stream.concat(java.util.stream.Stream.of(a.sourceName()),a.targets().stream())).toList()):null;
+        return new StackResponseDecisionContext(decisionId, ExternalAiStrategicMemory.fingerprint(fingerprint,memory), base.state(), items,
+                base.legalActions(), randomizedOrder, mappings,memory);
     }
 
     private static List<MainPhaseCardView> cards(Player perspective, Player owner, ZoneType zone) {
@@ -221,7 +230,7 @@ final class MainPhaseStateProjector {
                 pool.getAmountOfColor((byte) ManaAtom.COLORLESS), pool.totalMana());
     }
 
-    private static LegalActionView actionView(Player perspective, PreparedAiAction prepared,
+    static LegalActionView actionView(Player perspective, PreparedAiAction prepared,
             boolean includeRecommendations) {
         SpellAbility sa = prepared.spellAbility();
         Card source = prepared.sourceCard();
@@ -271,6 +280,20 @@ final class MainPhaseStateProjector {
             return (!(targetCard.isFaceDown() && !targetCard.getOwner().equals(perspective))
                     && targetCard.getView().canBeShownTo(perspective.getView()))
                     ? "Card: " + targetCard.getName() : "Card: " + HIDDEN_CARD;
+        }
+        if (target instanceof SpellAbility stackTarget) {
+            Card source = stackTarget.getHostCard();
+            boolean visible = source != null && source.getView().canBeShownTo(perspective.getView());
+            int position = 0;
+            for (var instance : perspective.getGame().getStack()) {
+                if (instance.getSpellAbility() == stackTarget) {
+                    return "Stack " + position + ": " + StackObjectType.classify(stackTarget).name() + " "
+                            + (visible ? source.getName() : HIDDEN_CARD) + " ("
+                            + (stackTarget.getActivatingPlayer() == null ? "unknown" : stackTarget.getActivatingPlayer().getName()) + ")";
+                }
+                position++;
+            }
+            return "Unavailable stack target";
         }
         return "Prepared game target";
     }

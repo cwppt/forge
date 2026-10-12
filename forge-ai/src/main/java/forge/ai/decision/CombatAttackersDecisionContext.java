@@ -4,7 +4,10 @@ import java.util.List;
 
 /** Battlefield-only whitelist: no hands, libraries, heuristic labels, or engine objects. */
 public record CombatAttackersDecisionContext(String decisionId, String stateFingerprint,
-        State state, List<CombatAttackOptionView> options) implements AiDecisionContext {
+        State state, List<CombatAttackOptionView> options, StrategicMemorySnapshot memorySnapshot) implements AiDecisionContext {
+    public CombatAttackersDecisionContext(String id,String fingerprint,State state,List<CombatAttackOptionView> options) {
+        this(id,fingerprint,state,options,null);
+    }
     public static final String NO_ATTACK = "NO_ATTACK";
     public CombatAttackersDecisionContext { options = List.copyOf(options); }
     @Override public AiDecisionType type() { return AiDecisionType.COMBAT_ATTACKERS; }

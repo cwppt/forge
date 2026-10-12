@@ -18,10 +18,15 @@ public final class AiDecisionProviderFactory {
 
     public static Optional<AiDecisionProvider> create(ForgePreferences preferences) {
         return create(
-                preferences.getPrefBoolean(FPref.AI_EXTERNAL_MULLIGAN_ENABLED)
+                preferences.getPrefBoolean(FPref.AI_EXTERNAL_FULL_GAME_ENABLED)
+                        || preferences.getPrefBoolean(FPref.AI_EXTERNAL_MULLIGAN_ENABLED)
                         || preferences.getPrefBoolean(FPref.AI_EXTERNAL_MAIN_PHASE_ENABLED)
                         || preferences.getPrefBoolean(FPref.AI_EXTERNAL_STACK_RESPONSE_ENABLED)
-                        || preferences.getPrefBoolean(FPref.AI_EXTERNAL_COMBAT_ATTACKERS_ENABLED),
+                        || preferences.getPrefBoolean(FPref.AI_EXTERNAL_COMBAT_INTEGRATED_ENABLED)
+                        || preferences.getPrefBoolean(FPref.AI_EXTERNAL_COMBAT_ATTACKERS_ENABLED)
+                        || preferences.getPrefBoolean(FPref.AI_EXTERNAL_COMBAT_ACTION_ENABLED)
+                        || preferences.getPrefBoolean(FPref.AI_EXTERNAL_COMBAT_DAMAGE_ORDER_ENABLED)
+                        || preferences.getPrefBoolean(FPref.AI_EXTERNAL_COMBAT_BLOCKERS_ENABLED),
                 preferences.getPref(FPref.AI_EXTERNAL_MULLIGAN_ENDPOINT),
                 preferences.getPref(FPref.AI_EXTERNAL_MULLIGAN_MODEL),
                 preferences.getPref(FPref.AI_EXTERNAL_MULLIGAN_API_KEY),

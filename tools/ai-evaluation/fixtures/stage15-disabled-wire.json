@@ -1,0 +1,1348 @@
+[
+  {
+    "surface": "COMBAT_ATTACKERS",
+    "context": {
+      "decisionId": "e7e85331-bab9-4273-ba3e-35a75443e2e4",
+      "stateFingerprint": "91576DE4242E00237329D839F6D30143B75CCB44B26FACA5972972DCB8A8E865",
+      "state": {
+        "turn": 4,
+        "phase": "COMBAT_DECLARE_ATTACKERS",
+        "attackingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Ai(1)-Aurochs Stampede",
+            "life": 20,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_BFE66F4220D6C5D31CA0264F",
+                "card": {
+                  "name": "Gorilla Shaman",
+                  "manaCost": "{R}",
+                  "type": "Creature - Ape Shaman",
+                  "oracleText": "{X}{X}{1}: Destroy target noncreature artifact with mana value X.",
+                  "tapped": false,
+                  "controller": "Ai(1)-Aurochs Stampede",
+                  "power": 1,
+                  "toughness": 1,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": true,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_7109FF825DE9B9638DC0BE4D",
+                "card": {
+                  "name": "Snow-Covered Forest",
+                  "manaCost": "no cost",
+                  "type": "Basic Snow Land - Forest",
+                  "oracleText": "({T}: Add {G}.)",
+                  "tapped": false,
+                  "controller": "Ai(1)-Aurochs Stampede",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_1DDBCEB47EB07478227B24B7",
+                "card": {
+                  "name": "Snow-Covered Mountain",
+                  "manaCost": "no cost",
+                  "type": "Basic Snow Land - Mountain",
+                  "oracleText": "({T}: Add {R}.)",
+                  "tapped": false,
+                  "controller": "Ai(1)-Aurochs Stampede",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Ai(2)-Selesnya Surge",
+            "life": 20,
+            "self": false,
+            "battlefield": [
+              {
+                "permanentId": "PERM_C250A68A19107DC3995233B6",
+                "card": {
+                  "name": "Centaur's Herald",
+                  "manaCost": "{G}",
+                  "type": "Creature - Elf Scout",
+                  "oracleText": "{2}{G}, Sacrifice Centaur's Herald: Create a 3/3 green Centaur creature token.",
+                  "tapped": false,
+                  "controller": "Ai(2)-Selesnya Surge",
+                  "power": 0,
+                  "toughness": 1,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_6814127FC045A4F222531C94",
+                "card": {
+                  "name": "Forest",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Forest",
+                  "oracleText": "({T}: Add {G}.)",
+                  "tapped": false,
+                  "controller": "Ai(2)-Selesnya Surge",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_F51B03DA8D141273EFAC80A9",
+                "card": {
+                  "name": "Forest",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Forest",
+                  "oracleText": "({T}: Add {G}.)",
+                  "tapped": false,
+                  "controller": "Ai(2)-Selesnya Surge",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          }
+        ],
+        "legalDefenders": [
+          {
+            "defenderId": "PLAYER_1",
+            "name": "Ai(2)-Selesnya Surge",
+            "kind": "PLAYER",
+            "controllerId": "PLAYER_1",
+            "defendingPlayerId": "PLAYER_1"
+          }
+        ],
+        "restrictions": [
+          "No additional attack payments or mandatory attack assignments apply"
+        ]
+      },
+      "options": [
+        {
+          "optionId": "OPT_75F934BB54A66A1BDC82D97A",
+          "attackers": [
+            {
+              "attackerId": "PERM_BFE66F4220D6C5D31CA0264F",
+              "defenderId": "PLAYER_1"
+            }
+          ],
+          "totalPower": 1,
+          "attackerCount": 1
+        },
+        {
+          "optionId": "NO_ATTACK",
+          "attackers": [],
+          "totalPower": 0,
+          "attackerCount": 0
+        }
+      ]
+    },
+    "request": {
+      "model": "qwen3:8b",
+      "stream": false,
+      "temperature": 0,
+      "max_tokens": 512,
+      "reasoning_effort": "none",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are choosing attackers in Magic: The Gathering. Choose exactly one supplied option ID. Use only visible information. Consider damage, blockers, combat keywords, life totals, and preserving creatures. Do not invent attackers or targets. Copy decisionId and stateFingerprint exactly. Return only the required JSON object: no explanation, Markdown, or code fences."
+        },
+        {
+          "role": "user",
+          "content": "{\"decisionId\":\"e7e85331-bab9-4273-ba3e-35a75443e2e4\",\"decisionType\":\"COMBAT_ATTACKERS\",\"stateFingerprint\":\"91576DE4242E00237329D839F6D30143B75CCB44B26FACA5972972DCB8A8E865\",\"state\":{\"turn\":4,\"phase\":\"COMBAT_DECLARE_ATTACKERS\",\"attackingPlayerId\":\"PLAYER_0\",\"players\":[{\"playerId\":\"PLAYER_0\",\"name\":\"Ai(1)-Aurochs Stampede\",\"life\":20,\"self\":true,\"mana\":{\"white\":0,\"blue\":0,\"black\":0,\"red\":0,\"green\":0,\"colorless\":0,\"total\":0},\"battlefield\":[{\"permanentId\":\"PERM_BFE66F4220D6C5D31CA0264F\",\"card\":{\"name\":\"Gorilla Shaman\",\"manaCost\":\"{R}\",\"type\":\"Creature - Ape Shaman\",\"oracleText\":\"{X}{X}{1}: Destroy target noncreature artifact with mana value X.\",\"tapped\":false,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":1,\"toughness\":1,\"markedDamage\":0,\"counters\":[]},\"summoningSick\":false,\"canAttack\":true,\"keywords\":[]},{\"permanentId\":\"PERM_7109FF825DE9B9638DC0BE4D\",\"card\":{\"name\":\"Snow-Covered Forest\",\"manaCost\":\"no cost\",\"type\":\"Basic Snow Land - Forest\",\"oracleText\":\"({T}: Add {G}.)\",\"tapped\":false,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]},{\"permanentId\":\"PERM_1DDBCEB47EB07478227B24B7\",\"card\":{\"name\":\"Snow-Covered Mountain\",\"manaCost\":\"no cost\",\"type\":\"Basic Snow Land - Mountain\",\"oracleText\":\"({T}: Add {R}.)\",\"tapped\":false,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]}]},{\"playerId\":\"PLAYER_1\",\"name\":\"Ai(2)-Selesnya Surge\",\"life\":20,\"self\":false,\"mana\":null,\"battlefield\":[{\"permanentId\":\"PERM_C250A68A19107DC3995233B6\",\"card\":{\"name\":\"Centaur's Herald\",\"manaCost\":\"{G}\",\"type\":\"Creature - Elf Scout\",\"oracleText\":\"{2}{G}, Sacrifice Centaur's Herald: Create a 3/3 green Centaur creature token.\",\"tapped\":false,\"controller\":\"Ai(2)-Selesnya Surge\",\"power\":0,\"toughness\":1,\"markedDamage\":0,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]},{\"permanentId\":\"PERM_6814127FC045A4F222531C94\",\"card\":{\"name\":\"Forest\",\"manaCost\":\"no cost\",\"type\":\"Basic Land - Forest\",\"oracleText\":\"({T}: Add {G}.)\",\"tapped\":false,\"controller\":\"Ai(2)-Selesnya Surge\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]},{\"permanentId\":\"PERM_F51B03DA8D141273EFAC80A9\",\"card\":{\"name\":\"Forest\",\"manaCost\":\"no cost\",\"type\":\"Basic Land - Forest\",\"oracleText\":\"({T}: Add {G}.)\",\"tapped\":false,\"controller\":\"Ai(2)-Selesnya Surge\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]}]}],\"legalDefenders\":[{\"defenderId\":\"PLAYER_1\",\"name\":\"Ai(2)-Selesnya Surge\",\"kind\":\"PLAYER\",\"controllerId\":\"PLAYER_1\",\"defendingPlayerId\":\"PLAYER_1\"}],\"restrictions\":[\"No additional attack payments or mandatory attack assignments apply\"]},\"options\":[{\"optionId\":\"OPT_75F934BB54A66A1BDC82D97A\",\"attackers\":[{\"attackerId\":\"PERM_BFE66F4220D6C5D31CA0264F\",\"defenderId\":\"PLAYER_1\"}],\"totalPower\":1,\"attackerCount\":1},{\"optionId\":\"NO_ATTACK\",\"attackers\":[],\"totalPower\":0,\"attackerCount\":0}]}"
+        }
+      ],
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "forge_ai_decision",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "decisionId": {
+                "type": "string",
+                "enum": [
+                  "e7e85331-bab9-4273-ba3e-35a75443e2e4"
+                ]
+              },
+              "stateFingerprint": {
+                "type": "string",
+                "enum": [
+                  "91576DE4242E00237329D839F6D30143B75CCB44B26FACA5972972DCB8A8E865"
+                ]
+              },
+              "optionId": {
+                "type": "string",
+                "enum": [
+                  "OPT_75F934BB54A66A1BDC82D97A",
+                  "NO_ATTACK"
+                ]
+              }
+            },
+            "required": [
+              "decisionId",
+              "stateFingerprint",
+              "optionId"
+            ]
+          }
+        }
+      }
+    },
+    "baselineSource": "ai-eval\\stage14-2\\20261009-094931\\cohort\\Revised\\Aurochs-1401-seat0-External.requests.jsonl"
+  },
+  {
+    "surface": "MAIN_PHASE_ACTION",
+    "context": {
+      "decisionId": "d9afbac5-286d-4765-8b01-96956f953f97",
+      "state": {
+        "fingerprint": "4659f8b55ae077e3e89fa283b37a30d6591d6ca9762c08cf17d0bf1d26e062ff",
+        "turnNumber": 4,
+        "phase": "MAIN2",
+        "activePlayer": {
+          "id": 0,
+          "name": "Ai(1)-Aurochs Stampede"
+        },
+        "self": {
+          "id": 0,
+          "name": "Ai(1)-Aurochs Stampede"
+        },
+        "players": [
+          {
+            "identity": {
+              "id": 0,
+              "name": "Ai(1)-Aurochs Stampede"
+            },
+            "life": 20,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "hand": [
+              {
+                "name": "Bull Aurochs",
+                "manaCost": "{1}{G}",
+                "type": "Creature - Aurochs",
+                "oracleText": "Trample\\nWhenever Bull Aurochs attacks, it gets +1/+0 until end of turn for each other attacking Aurochs.",
+                "tapped": false,
+                "controller": "Ai(1)-Aurochs Stampede",
+                "counters": []
+              },
+              {
+                "name": "Earthen Goo",
+                "manaCost": "{2}{R}",
+                "type": "Creature - Ooze",
+                "oracleText": "Trample\\nCumulative upkeep {R} or {G} (At the beginning of your upkeep, put an age counter on this permanent, then sacrifice it unless you pay its upkeep cost for each age counter on it.)\\nEarthen Goo gets +1/+1 for each age counter on it.",
+                "tapped": false,
+                "controller": "Ai(1)-Aurochs Stampede",
+                "counters": []
+              },
+              {
+                "name": "Giant Trap Door Spider",
+                "manaCost": "{1}{R}{G}",
+                "type": "Creature - Spider",
+                "oracleText": "{1}{R}{G}, {T}: Exile Giant Trap Door Spider and target creature without flying that's attacking you.",
+                "tapped": false,
+                "controller": "Ai(1)-Aurochs Stampede",
+                "counters": []
+              },
+              {
+                "name": "Highland Weald",
+                "manaCost": "no cost",
+                "type": "Snow Land",
+                "oracleText": "Highland Weald enters tapped.\\n{T}: Add {R} or {G}.",
+                "tapped": false,
+                "controller": "Ai(1)-Aurochs Stampede",
+                "counters": []
+              },
+              {
+                "name": "Rimehorn Aurochs",
+                "manaCost": "{4}{G}",
+                "type": "Snow Creature - Aurochs",
+                "oracleText": "Trample\\nWhenever Rimehorn Aurochs attacks, it gets +1/+0 until end of turn for each other attacking Aurochs.\\n{2}{S}: Target creature blocks target creature this turn if able. ({S} can be paid with one mana from a snow source.)",
+                "tapped": false,
+                "controller": "Ai(1)-Aurochs Stampede",
+                "counters": []
+              },
+              {
+                "name": "Whalebone Glider",
+                "manaCost": "{2}",
+                "type": "Artifact",
+                "oracleText": "{2}, {T}: Target creature with power 3 or less gains flying until end of turn.",
+                "tapped": false,
+                "controller": "Ai(1)-Aurochs Stampede",
+                "counters": []
+              }
+            ],
+            "battlefield": [
+              {
+                "name": "Gorilla Shaman",
+                "manaCost": "{R}",
+                "type": "Creature - Ape Shaman",
+                "oracleText": "{X}{X}{1}: Destroy target noncreature artifact with mana value X.",
+                "tapped": true,
+                "controller": "Ai(1)-Aurochs Stampede",
+                "power": 1,
+                "toughness": 1,
+                "markedDamage": 0,
+                "counters": []
+              },
+              {
+                "name": "Snow-Covered Forest",
+                "manaCost": "no cost",
+                "type": "Basic Snow Land - Forest",
+                "oracleText": "({T}: Add {G}.)",
+                "tapped": false,
+                "controller": "Ai(1)-Aurochs Stampede",
+                "counters": []
+              },
+              {
+                "name": "Snow-Covered Mountain",
+                "manaCost": "no cost",
+                "type": "Basic Snow Land - Mountain",
+                "oracleText": "({T}: Add {R}.)",
+                "tapped": false,
+                "controller": "Ai(1)-Aurochs Stampede",
+                "counters": []
+              }
+            ],
+            "graveyard": [],
+            "exile": [],
+            "command": []
+          },
+          {
+            "identity": {
+              "id": 1,
+              "name": "Ai(2)-Selesnya Surge"
+            },
+            "life": 19,
+            "self": false,
+            "hand": [],
+            "battlefield": [
+              {
+                "name": "Centaur's Herald",
+                "manaCost": "{G}",
+                "type": "Creature - Elf Scout",
+                "oracleText": "{2}{G}, Sacrifice Centaur's Herald: Create a 3/3 green Centaur creature token.",
+                "tapped": false,
+                "controller": "Ai(2)-Selesnya Surge",
+                "power": 0,
+                "toughness": 1,
+                "markedDamage": 0,
+                "counters": []
+              },
+              {
+                "name": "Forest",
+                "manaCost": "no cost",
+                "type": "Basic Land - Forest",
+                "oracleText": "({T}: Add {G}.)",
+                "tapped": false,
+                "controller": "Ai(2)-Selesnya Surge",
+                "counters": []
+              },
+              {
+                "name": "Forest",
+                "manaCost": "no cost",
+                "type": "Basic Land - Forest",
+                "oracleText": "({T}: Add {G}.)",
+                "tapped": false,
+                "controller": "Ai(2)-Selesnya Surge",
+                "counters": []
+              }
+            ],
+            "graveyard": [],
+            "exile": [],
+            "command": []
+          }
+        ],
+        "stackSize": 0
+      },
+      "legalActions": [
+        {
+          "actionId": "ACTION_0",
+          "category": "SPELL",
+          "sourceName": "Bull Aurochs",
+          "sourceType": "Creature - Aurochs",
+          "apiType": "PermanentCreature",
+          "description": "Bull Aurochs - Creature 2 / 1",
+          "cost": "{1}{G}",
+          "targets": [],
+          "modes": [],
+          "heuristicPosition": 0,
+          "forgeRecommendation": "PREFERRED"
+        },
+        {
+          "actionId": "ACTION_1",
+          "category": "SPELL",
+          "sourceName": "Whalebone Glider",
+          "sourceType": "Artifact",
+          "apiType": "PermanentNoncreature",
+          "description": "Whalebone Glider",
+          "cost": "{2}",
+          "targets": [],
+          "modes": [],
+          "heuristicPosition": 2,
+          "forgeRecommendation": "ALTERNATIVE"
+        }
+      ]
+    },
+    "request": {
+      "model": "qwen3:8b",
+      "stream": false,
+      "temperature": 0,
+      "max_tokens": 512,
+      "reasoning_effort": "none",
+      "messages": [
+        {
+          "role": "system",
+          "content": "Choose one Forge-prepared Magic: The Gathering action. Forge is authoritative. Choose exactly one supplied optionId. Copy decisionId and stateFingerprint exactly. Forge's recommendation is advisory; you may select any supplied action ID. Do not invent option IDs, alter targets, or assume hidden information. Return only the required JSON object: no explanation, Markdown, or code fences."
+        },
+        {
+          "role": "user",
+          "content": "{\"decisionId\":\"d9afbac5-286d-4765-8b01-96956f953f97\",\"decisionType\":\"MAIN_PHASE_ACTION\",\"stateFingerprint\":\"4659f8b55ae077e3e89fa283b37a30d6591d6ca9762c08cf17d0bf1d26e062ff\",\"state\":{\"turnNumber\":4,\"phase\":\"MAIN2\",\"activePlayer\":{\"id\":0,\"name\":\"Ai(1)-Aurochs Stampede\"},\"self\":{\"id\":0,\"name\":\"Ai(1)-Aurochs Stampede\"},\"stackSize\":0,\"players\":[{\"identity\":{\"id\":0,\"name\":\"Ai(1)-Aurochs Stampede\"},\"life\":20,\"self\":true,\"mana\":{\"white\":0,\"blue\":0,\"black\":0,\"red\":0,\"green\":0,\"colorless\":0,\"total\":0},\"hand\":[{\"name\":\"Bull Aurochs\",\"manaCost\":\"{1}{G}\",\"type\":\"Creature - Aurochs\",\"oracleText\":\"Trample\\\\nWhenever Bull Aurochs attacks, it gets +1/+0 until end of turn for each other attacking Aurochs.\",\"tapped\":false,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},{\"name\":\"Earthen Goo\",\"manaCost\":\"{2}{R}\",\"type\":\"Creature - Ooze\",\"oracleText\":\"Trample\\\\nCumulative upkeep {R} or {G} (At the beginning of your upkeep, put an age counter on this permanent, then sacrifice it unless you pay its upkeep cost for each age counter on it.)\\\\nEarthen Goo gets +1/+1 for each age counter on it.\",\"tapped\":false,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},{\"name\":\"Giant Trap Door Spider\",\"manaCost\":\"{1}{R}{G}\",\"type\":\"Creature - Spider\",\"oracleText\":\"{1}{R}{G}, {T}: Exile Giant Trap Door Spider and target creature without flying that's attacking you.\",\"tapped\":false,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},{\"name\":\"Highland Weald\",\"manaCost\":\"no cost\",\"type\":\"Snow Land\",\"oracleText\":\"Highland Weald enters tapped.\\\\n{T}: Add {R} or {G}.\",\"tapped\":false,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},{\"name\":\"Rimehorn Aurochs\",\"manaCost\":\"{4}{G}\",\"type\":\"Snow Creature - Aurochs\",\"oracleText\":\"Trample\\\\nWhenever Rimehorn Aurochs attacks, it gets +1/+0 until end of turn for each other attacking Aurochs.\\\\n{2}{S}: Target creature blocks target creature this turn if able. ({S} can be paid with one mana from a snow source.)\",\"tapped\":false,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},{\"name\":\"Whalebone Glider\",\"manaCost\":\"{2}\",\"type\":\"Artifact\",\"oracleText\":\"{2}, {T}: Target creature with power 3 or less gains flying until end of turn.\",\"tapped\":false,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]}],\"battlefield\":[{\"name\":\"Gorilla Shaman\",\"manaCost\":\"{R}\",\"type\":\"Creature - Ape Shaman\",\"oracleText\":\"{X}{X}{1}: Destroy target noncreature artifact with mana value X.\",\"tapped\":true,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":1,\"toughness\":1,\"markedDamage\":0,\"counters\":[]},{\"name\":\"Snow-Covered Forest\",\"manaCost\":\"no cost\",\"type\":\"Basic Snow Land - Forest\",\"oracleText\":\"({T}: Add {G}.)\",\"tapped\":false,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},{\"name\":\"Snow-Covered Mountain\",\"manaCost\":\"no cost\",\"type\":\"Basic Snow Land - Mountain\",\"oracleText\":\"({T}: Add {R}.)\",\"tapped\":false,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]}],\"graveyard\":[],\"exile\":[],\"command\":[]},{\"identity\":{\"id\":1,\"name\":\"Ai(2)-Selesnya Surge\"},\"life\":19,\"self\":false,\"mana\":null,\"hand\":[],\"battlefield\":[{\"name\":\"Centaur's Herald\",\"manaCost\":\"{G}\",\"type\":\"Creature - Elf Scout\",\"oracleText\":\"{2}{G}, Sacrifice Centaur's Herald: Create a 3/3 green Centaur creature token.\",\"tapped\":false,\"controller\":\"Ai(2)-Selesnya Surge\",\"power\":0,\"toughness\":1,\"markedDamage\":0,\"counters\":[]},{\"name\":\"Forest\",\"manaCost\":\"no cost\",\"type\":\"Basic Land - Forest\",\"oracleText\":\"({T}: Add {G}.)\",\"tapped\":false,\"controller\":\"Ai(2)-Selesnya Surge\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},{\"name\":\"Forest\",\"manaCost\":\"no cost\",\"type\":\"Basic Land - Forest\",\"oracleText\":\"({T}: Add {G}.)\",\"tapped\":false,\"controller\":\"Ai(2)-Selesnya Surge\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]}],\"graveyard\":[],\"exile\":[],\"command\":[]}]},\"legalActions\":[{\"actionId\":\"ACTION_0\",\"category\":\"SPELL\",\"sourceName\":\"Bull Aurochs\",\"sourceType\":\"Creature - Aurochs\",\"apiType\":\"PermanentCreature\",\"description\":\"Bull Aurochs - Creature 2 / 1\",\"cost\":\"{1}{G}\",\"targets\":[],\"modes\":[],\"xValue\":null,\"heuristicPosition\":0,\"forgeRecommendation\":\"PREFERRED\"},{\"actionId\":\"ACTION_1\",\"category\":\"SPELL\",\"sourceName\":\"Whalebone Glider\",\"sourceType\":\"Artifact\",\"apiType\":\"PermanentNoncreature\",\"description\":\"Whalebone Glider\",\"cost\":\"{2}\",\"targets\":[],\"modes\":[],\"xValue\":null,\"heuristicPosition\":2,\"forgeRecommendation\":\"ALTERNATIVE\"}]}"
+        }
+      ],
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "forge_ai_decision",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "decisionId": {
+                "type": "string"
+              },
+              "stateFingerprint": {
+                "type": "string"
+              },
+              "optionId": {
+                "type": "string",
+                "enum": [
+                  "ACTION_0",
+                  "ACTION_1"
+                ]
+              }
+            },
+            "required": [
+              "decisionId",
+              "stateFingerprint",
+              "optionId"
+            ]
+          }
+        }
+      }
+    },
+    "baselineSource": "ai-eval\\stage14-2\\20261009-094931\\cohort\\Revised\\Aurochs-1401-seat0-External.requests.jsonl"
+  },
+  {
+    "surface": "COMBAT_BLOCKERS",
+    "context": {
+      "decisionId": "ca97d3e3-e6e1-43dd-8884-28bf5f98ee9b",
+      "stateFingerprint": "CFDDBBE6A4331D9D8C2562F195C94AC0362A1EB9A943209470C8324391FD7B32",
+      "state": {
+        "turn": 9,
+        "phase": "COMBAT_DECLARE_BLOCKERS",
+        "defendingPlayerId": "PLAYER_0",
+        "players": [
+          {
+            "playerId": "PLAYER_0",
+            "name": "Ai(1)-Aurochs Stampede",
+            "life": 17,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "battlefield": [
+              {
+                "permanentId": "PERM_37A21B497F7647265B140DD4",
+                "card": {
+                  "name": "Earthen Goo",
+                  "manaCost": "{2}{R}",
+                  "type": "Creature - Ooze",
+                  "oracleText": "Trample\\nCumulative upkeep {R} or {G} (At the beginning of your upkeep, put an age counter on this permanent, then sacrifice it unless you pay its upkeep cost for each age counter on it.)\\nEarthen Goo gets +1/+1 for each age counter on it.",
+                  "tapped": false,
+                  "controller": "Ai(1)-Aurochs Stampede",
+                  "power": 2,
+                  "toughness": 2,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": true,
+                "canAttack": false,
+                "keywords": [
+                  "trample"
+                ]
+              },
+              {
+                "permanentId": "PERM_0B38A5D0DD7CCBD35C749535",
+                "card": {
+                  "name": "Highland Weald",
+                  "manaCost": "no cost",
+                  "type": "Snow Land",
+                  "oracleText": "Highland Weald enters tapped.\\n{T}: Add {R} or {G}.",
+                  "tapped": true,
+                  "controller": "Ai(1)-Aurochs Stampede",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_DF60AE1143183166271CA6D0",
+                "card": {
+                  "name": "Snow-Covered Forest",
+                  "manaCost": "no cost",
+                  "type": "Basic Snow Land - Forest",
+                  "oracleText": "({T}: Add {G}.)",
+                  "tapped": true,
+                  "controller": "Ai(1)-Aurochs Stampede",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_6ACDB00F42D054F57649371F",
+                "card": {
+                  "name": "Snow-Covered Mountain",
+                  "manaCost": "no cost",
+                  "type": "Basic Snow Land - Mountain",
+                  "oracleText": "({T}: Add {R}.)",
+                  "tapped": true,
+                  "controller": "Ai(1)-Aurochs Stampede",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_BB2544ADE94F27D562EE0CD1",
+                "card": {
+                  "name": "Whalebone Glider",
+                  "manaCost": "{2}",
+                  "type": "Artifact",
+                  "oracleText": "{2}, {T}: Target creature with power 3 or less gains flying until end of turn.",
+                  "tapped": false,
+                  "controller": "Ai(1)-Aurochs Stampede",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          },
+          {
+            "playerId": "PLAYER_1",
+            "name": "Ai(2)-Selesnya Surge",
+            "life": 18,
+            "self": false,
+            "battlefield": [
+              {
+                "permanentId": "PERM_362C098536F6DAE0C563C2E8",
+                "card": {
+                  "name": "Centaur Courser",
+                  "manaCost": "{2}{G}",
+                  "type": "Creature - Centaur Warrior",
+                  "oracleText": "",
+                  "tapped": true,
+                  "controller": "Ai(2)-Selesnya Surge",
+                  "power": 3,
+                  "toughness": 3,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_A3CFB030EA28369DA322FDF3",
+                "card": {
+                  "name": "Centaur Courser",
+                  "manaCost": "{2}{G}",
+                  "type": "Creature - Centaur Warrior",
+                  "oracleText": "",
+                  "tapped": true,
+                  "controller": "Ai(2)-Selesnya Surge",
+                  "power": 3,
+                  "toughness": 3,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_984375EABEF0ACFB57239E6D",
+                "card": {
+                  "name": "Centaur's Herald",
+                  "manaCost": "{G}",
+                  "type": "Creature - Elf Scout",
+                  "oracleText": "{2}{G}, Sacrifice Centaur's Herald: Create a 3/3 green Centaur creature token.",
+                  "tapped": false,
+                  "controller": "Ai(2)-Selesnya Surge",
+                  "power": 0,
+                  "toughness": 1,
+                  "markedDamage": 0,
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_31843446E97BEEA3837B6E6A",
+                "card": {
+                  "name": "Forest",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Forest",
+                  "oracleText": "({T}: Add {G}.)",
+                  "tapped": false,
+                  "controller": "Ai(2)-Selesnya Surge",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_5F4BA03CC1556AB7555E23EB",
+                "card": {
+                  "name": "Forest",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Forest",
+                  "oracleText": "({T}: Add {G}.)",
+                  "tapped": false,
+                  "controller": "Ai(2)-Selesnya Surge",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              },
+              {
+                "permanentId": "PERM_5B9B4DC19971F3523A873864",
+                "card": {
+                  "name": "Forest",
+                  "manaCost": "no cost",
+                  "type": "Basic Land - Forest",
+                  "oracleText": "({T}: Add {G}.)",
+                  "tapped": false,
+                  "controller": "Ai(2)-Selesnya Surge",
+                  "counters": []
+                },
+                "summoningSick": false,
+                "canAttack": false,
+                "keywords": []
+              }
+            ]
+          }
+        ],
+        "attackers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_362C098536F6DAE0C563C2E8",
+              "card": {
+                "name": "Centaur Courser",
+                "manaCost": "{2}{G}",
+                "type": "Creature - Centaur Warrior",
+                "oracleText": "",
+                "tapped": true,
+                "controller": "Ai(2)-Selesnya Surge",
+                "power": 3,
+                "toughness": 3,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "targetId": "PLAYER_0"
+          },
+          {
+            "permanent": {
+              "permanentId": "PERM_A3CFB030EA28369DA322FDF3",
+              "card": {
+                "name": "Centaur Courser",
+                "manaCost": "{2}{G}",
+                "type": "Creature - Centaur Warrior",
+                "oracleText": "",
+                "tapped": true,
+                "controller": "Ai(2)-Selesnya Surge",
+                "power": 3,
+                "toughness": 3,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": false,
+              "canAttack": false,
+              "keywords": []
+            },
+            "targetId": "PLAYER_0"
+          }
+        ],
+        "blockers": [
+          {
+            "permanent": {
+              "permanentId": "PERM_37A21B497F7647265B140DD4",
+              "card": {
+                "name": "Earthen Goo",
+                "manaCost": "{2}{R}",
+                "type": "Creature - Ooze",
+                "oracleText": "Trample\\nCumulative upkeep {R} or {G} (At the beginning of your upkeep, put an age counter on this permanent, then sacrifice it unless you pay its upkeep cost for each age counter on it.)\\nEarthen Goo gets +1/+1 for each age counter on it.",
+                "tapped": false,
+                "controller": "Ai(1)-Aurochs Stampede",
+                "power": 2,
+                "toughness": 2,
+                "markedDamage": 0,
+                "counters": []
+              },
+              "summoningSick": true,
+              "canAttack": false,
+              "keywords": [
+                "trample"
+              ]
+            },
+            "canBlock": true
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "NO_BLOCK",
+          "assignments": [],
+          "blockerCount": 0,
+          "blockedAttackerCount": 0,
+          "tacticalConsequences": {
+            "basis": "Current visible combat only; assumes no further spells or activated abilities. Creature losses describe combat damage, not future card value.",
+            "projectedCreatureLossesSelf": 0,
+            "projectedCreatureLossesOpponent": 0,
+            "projectedDamagePrevented": 0,
+            "projectedLifeAfterCombat": 11,
+            "preventsLethal": false,
+            "nearLethalProtection": false,
+            "unfavorableTrade": false,
+            "chumpBlock": false,
+            "preservesBoard": true,
+            "unnecessaryLosingBlock": false
+          }
+        },
+        {
+          "optionId": "OPT_1E7CBC4DBF634169F340D411",
+          "assignments": [
+            {
+              "blockerId": "PERM_37A21B497F7647265B140DD4",
+              "attackerId": "PERM_362C098536F6DAE0C563C2E8"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1,
+          "tacticalConsequences": {
+            "basis": "Current visible combat only; assumes no further spells or activated abilities. Creature losses describe combat damage, not future card value.",
+            "projectedCreatureLossesSelf": 1,
+            "projectedCreatureLossesOpponent": 0,
+            "projectedDamagePrevented": 3,
+            "projectedLifeAfterCombat": 14,
+            "preventsLethal": false,
+            "nearLethalProtection": false,
+            "unfavorableTrade": true,
+            "chumpBlock": true,
+            "preservesBoard": false,
+            "unnecessaryLosingBlock": true
+          }
+        },
+        {
+          "optionId": "OPT_093A17114152BFC79A047595",
+          "assignments": [
+            {
+              "blockerId": "PERM_37A21B497F7647265B140DD4",
+              "attackerId": "PERM_A3CFB030EA28369DA322FDF3"
+            }
+          ],
+          "blockerCount": 1,
+          "blockedAttackerCount": 1,
+          "tacticalConsequences": {
+            "basis": "Current visible combat only; assumes no further spells or activated abilities. Creature losses describe combat damage, not future card value.",
+            "projectedCreatureLossesSelf": 1,
+            "projectedCreatureLossesOpponent": 0,
+            "projectedDamagePrevented": 3,
+            "projectedLifeAfterCombat": 14,
+            "preventsLethal": false,
+            "nearLethalProtection": false,
+            "unfavorableTrade": true,
+            "chumpBlock": true,
+            "preservesBoard": false,
+            "unnecessaryLosingBlock": true
+          }
+        }
+      ]
+    },
+    "request": {
+      "model": "qwen3:8b",
+      "stream": false,
+      "temperature": 0,
+      "max_tokens": 512,
+      "reasoning_effort": "none",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are choosing blockers in Magic: The Gathering. Choose exactly one supplied option ID. Use only visible information. Consider survival, trades, lethal damage, trample, combat keywords, and preserving valuable creatures. Do not invent blocker assignments. When life is safely above immediate lethal danger, avoid sacrificing valuable blockers merely to prevent small amounts of damage unless the block creates a meaningful trade or other tactical benefit. Choose a survival-preserving block when taking the damage would be lethal and a supplied block prevents it. Copy decisionId and stateFingerprint exactly. Return only the required JSON object: no explanation, Markdown, or code fences."
+        },
+        {
+          "role": "user",
+          "content": "{\"decisionId\":\"ca97d3e3-e6e1-43dd-8884-28bf5f98ee9b\",\"decisionType\":\"COMBAT_BLOCKERS\",\"stateFingerprint\":\"CFDDBBE6A4331D9D8C2562F195C94AC0362A1EB9A943209470C8324391FD7B32\",\"state\":{\"turn\":9,\"phase\":\"COMBAT_DECLARE_BLOCKERS\",\"defendingPlayerId\":\"PLAYER_0\",\"players\":[{\"playerId\":\"PLAYER_0\",\"name\":\"Ai(1)-Aurochs Stampede\",\"life\":17,\"self\":true,\"mana\":{\"white\":0,\"blue\":0,\"black\":0,\"red\":0,\"green\":0,\"colorless\":0,\"total\":0},\"battlefield\":[{\"permanentId\":\"PERM_37A21B497F7647265B140DD4\",\"card\":{\"name\":\"Earthen Goo\",\"manaCost\":\"{2}{R}\",\"type\":\"Creature - Ooze\",\"oracleText\":\"Trample\\\\nCumulative upkeep {R} or {G} (At the beginning of your upkeep, put an age counter on this permanent, then sacrifice it unless you pay its upkeep cost for each age counter on it.)\\\\nEarthen Goo gets +1/+1 for each age counter on it.\",\"tapped\":false,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":2,\"toughness\":2,\"markedDamage\":0,\"counters\":[]},\"summoningSick\":true,\"canAttack\":false,\"keywords\":[\"trample\"]},{\"permanentId\":\"PERM_0B38A5D0DD7CCBD35C749535\",\"card\":{\"name\":\"Highland Weald\",\"manaCost\":\"no cost\",\"type\":\"Snow Land\",\"oracleText\":\"Highland Weald enters tapped.\\\\n{T}: Add {R} or {G}.\",\"tapped\":true,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]},{\"permanentId\":\"PERM_DF60AE1143183166271CA6D0\",\"card\":{\"name\":\"Snow-Covered Forest\",\"manaCost\":\"no cost\",\"type\":\"Basic Snow Land - Forest\",\"oracleText\":\"({T}: Add {G}.)\",\"tapped\":true,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]},{\"permanentId\":\"PERM_6ACDB00F42D054F57649371F\",\"card\":{\"name\":\"Snow-Covered Mountain\",\"manaCost\":\"no cost\",\"type\":\"Basic Snow Land - Mountain\",\"oracleText\":\"({T}: Add {R}.)\",\"tapped\":true,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]},{\"permanentId\":\"PERM_BB2544ADE94F27D562EE0CD1\",\"card\":{\"name\":\"Whalebone Glider\",\"manaCost\":\"{2}\",\"type\":\"Artifact\",\"oracleText\":\"{2}, {T}: Target creature with power 3 or less gains flying until end of turn.\",\"tapped\":false,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]}]},{\"playerId\":\"PLAYER_1\",\"name\":\"Ai(2)-Selesnya Surge\",\"life\":18,\"self\":false,\"mana\":null,\"battlefield\":[{\"permanentId\":\"PERM_362C098536F6DAE0C563C2E8\",\"card\":{\"name\":\"Centaur Courser\",\"manaCost\":\"{2}{G}\",\"type\":\"Creature - Centaur Warrior\",\"oracleText\":\"\",\"tapped\":true,\"controller\":\"Ai(2)-Selesnya Surge\",\"power\":3,\"toughness\":3,\"markedDamage\":0,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]},{\"permanentId\":\"PERM_A3CFB030EA28369DA322FDF3\",\"card\":{\"name\":\"Centaur Courser\",\"manaCost\":\"{2}{G}\",\"type\":\"Creature - Centaur Warrior\",\"oracleText\":\"\",\"tapped\":true,\"controller\":\"Ai(2)-Selesnya Surge\",\"power\":3,\"toughness\":3,\"markedDamage\":0,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]},{\"permanentId\":\"PERM_984375EABEF0ACFB57239E6D\",\"card\":{\"name\":\"Centaur's Herald\",\"manaCost\":\"{G}\",\"type\":\"Creature - Elf Scout\",\"oracleText\":\"{2}{G}, Sacrifice Centaur's Herald: Create a 3/3 green Centaur creature token.\",\"tapped\":false,\"controller\":\"Ai(2)-Selesnya Surge\",\"power\":0,\"toughness\":1,\"markedDamage\":0,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]},{\"permanentId\":\"PERM_31843446E97BEEA3837B6E6A\",\"card\":{\"name\":\"Forest\",\"manaCost\":\"no cost\",\"type\":\"Basic Land - Forest\",\"oracleText\":\"({T}: Add {G}.)\",\"tapped\":false,\"controller\":\"Ai(2)-Selesnya Surge\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]},{\"permanentId\":\"PERM_5F4BA03CC1556AB7555E23EB\",\"card\":{\"name\":\"Forest\",\"manaCost\":\"no cost\",\"type\":\"Basic Land - Forest\",\"oracleText\":\"({T}: Add {G}.)\",\"tapped\":false,\"controller\":\"Ai(2)-Selesnya Surge\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]},{\"permanentId\":\"PERM_5B9B4DC19971F3523A873864\",\"card\":{\"name\":\"Forest\",\"manaCost\":\"no cost\",\"type\":\"Basic Land - Forest\",\"oracleText\":\"({T}: Add {G}.)\",\"tapped\":false,\"controller\":\"Ai(2)-Selesnya Surge\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]}]}],\"attackers\":[{\"permanent\":{\"permanentId\":\"PERM_362C098536F6DAE0C563C2E8\",\"card\":{\"name\":\"Centaur Courser\",\"manaCost\":\"{2}{G}\",\"type\":\"Creature - Centaur Warrior\",\"oracleText\":\"\",\"tapped\":true,\"controller\":\"Ai(2)-Selesnya Surge\",\"power\":3,\"toughness\":3,\"markedDamage\":0,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]},\"targetId\":\"PLAYER_0\"},{\"permanent\":{\"permanentId\":\"PERM_A3CFB030EA28369DA322FDF3\",\"card\":{\"name\":\"Centaur Courser\",\"manaCost\":\"{2}{G}\",\"type\":\"Creature - Centaur Warrior\",\"oracleText\":\"\",\"tapped\":true,\"controller\":\"Ai(2)-Selesnya Surge\",\"power\":3,\"toughness\":3,\"markedDamage\":0,\"counters\":[]},\"summoningSick\":false,\"canAttack\":false,\"keywords\":[]},\"targetId\":\"PLAYER_0\"}],\"blockers\":[{\"permanent\":{\"permanentId\":\"PERM_37A21B497F7647265B140DD4\",\"card\":{\"name\":\"Earthen Goo\",\"manaCost\":\"{2}{R}\",\"type\":\"Creature - Ooze\",\"oracleText\":\"Trample\\\\nCumulative upkeep {R} or {G} (At the beginning of your upkeep, put an age counter on this permanent, then sacrifice it unless you pay its upkeep cost for each age counter on it.)\\\\nEarthen Goo gets +1/+1 for each age counter on it.\",\"tapped\":false,\"controller\":\"Ai(1)-Aurochs Stampede\",\"power\":2,\"toughness\":2,\"markedDamage\":0,\"counters\":[]},\"summoningSick\":true,\"canAttack\":false,\"keywords\":[\"trample\"]},\"canBlock\":true}]},\"options\":[{\"optionId\":\"NO_BLOCK\",\"assignments\":[],\"blockerCount\":0,\"blockedAttackerCount\":0,\"tacticalConsequences\":{\"basis\":\"Current visible combat only; assumes no further spells or activated abilities. Creature losses describe combat damage, not future card value.\",\"projectedCreatureLossesSelf\":0,\"projectedCreatureLossesOpponent\":0,\"projectedDamagePrevented\":0,\"projectedLifeAfterCombat\":11,\"preventsLethal\":false,\"nearLethalProtection\":false,\"unfavorableTrade\":false,\"chumpBlock\":false,\"preservesBoard\":true,\"unnecessaryLosingBlock\":false}},{\"optionId\":\"OPT_1E7CBC4DBF634169F340D411\",\"assignments\":[{\"blockerId\":\"PERM_37A21B497F7647265B140DD4\",\"attackerId\":\"PERM_362C098536F6DAE0C563C2E8\"}],\"blockerCount\":1,\"blockedAttackerCount\":1,\"tacticalConsequences\":{\"basis\":\"Current visible combat only; assumes no further spells or activated abilities. Creature losses describe combat damage, not future card value.\",\"projectedCreatureLossesSelf\":1,\"projectedCreatureLossesOpponent\":0,\"projectedDamagePrevented\":3,\"projectedLifeAfterCombat\":14,\"preventsLethal\":false,\"nearLethalProtection\":false,\"unfavorableTrade\":true,\"chumpBlock\":true,\"preservesBoard\":false,\"unnecessaryLosingBlock\":true}},{\"optionId\":\"OPT_093A17114152BFC79A047595\",\"assignments\":[{\"blockerId\":\"PERM_37A21B497F7647265B140DD4\",\"attackerId\":\"PERM_A3CFB030EA28369DA322FDF3\"}],\"blockerCount\":1,\"blockedAttackerCount\":1,\"tacticalConsequences\":{\"basis\":\"Current visible combat only; assumes no further spells or activated abilities. Creature losses describe combat damage, not future card value.\",\"projectedCreatureLossesSelf\":1,\"projectedCreatureLossesOpponent\":0,\"projectedDamagePrevented\":3,\"projectedLifeAfterCombat\":14,\"preventsLethal\":false,\"nearLethalProtection\":false,\"unfavorableTrade\":true,\"chumpBlock\":true,\"preservesBoard\":false,\"unnecessaryLosingBlock\":true}}]}"
+        }
+      ],
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "forge_ai_decision",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "decisionId": {
+                "type": "string",
+                "enum": [
+                  "ca97d3e3-e6e1-43dd-8884-28bf5f98ee9b"
+                ]
+              },
+              "stateFingerprint": {
+                "type": "string",
+                "enum": [
+                  "CFDDBBE6A4331D9D8C2562F195C94AC0362A1EB9A943209470C8324391FD7B32"
+                ]
+              },
+              "optionId": {
+                "type": "string",
+                "enum": [
+                  "NO_BLOCK",
+                  "OPT_1E7CBC4DBF634169F340D411",
+                  "OPT_093A17114152BFC79A047595"
+                ]
+              }
+            },
+            "required": [
+              "decisionId",
+              "stateFingerprint",
+              "optionId"
+            ]
+          }
+        }
+      }
+    },
+    "baselineSource": "ai-eval\\stage14-2\\20261009-094931\\cohort\\Revised\\Aurochs-1401-seat0-External.requests.jsonl"
+  },
+  {
+    "surface": "COMBAT_ACTION",
+    "context": {
+      "decisionId": "92028de7-9d44-4082-809c-7330a990291f",
+      "stateFingerprint": "d64fbb11e4527d020b89e0bdf5d2284b80c5ed458f0dd84fc0d62343929cb802",
+      "state": {
+        "turn": 13,
+        "window": "COMBAT_DECLARE_BLOCKERS",
+        "decidingSeat": 1,
+        "attackingSeat": 1,
+        "defendingSeat": 0,
+        "lifeTotals": [
+          5,
+          9
+        ],
+        "combatants": [
+          {
+            "ref": "PERM_535fa30d7e25dd8a49f15367",
+            "name": "Bull Aurochs",
+            "controllerSeat": 0,
+            "power": 2,
+            "toughness": 1,
+            "damage": 0,
+            "tapped": false,
+            "counters": [],
+            "keywords": [
+              "Trample"
+            ],
+            "blocking": [
+              "PERM_a88a7902cb4ef697ba0b6759"
+            ],
+            "visibleEffects": []
+          },
+          {
+            "ref": "PERM_7902699be42c8a8e46fbbb45",
+            "name": "Gorilla Shaman",
+            "controllerSeat": 0,
+            "power": 1,
+            "toughness": 1,
+            "damage": 0,
+            "tapped": false,
+            "counters": [],
+            "keywords": [],
+            "blocking": [
+              "PERM_f74efabef12ea619e30b79bd"
+            ],
+            "visibleEffects": []
+          },
+          {
+            "ref": "PERM_a88a7902cb4ef697ba0b6759",
+            "name": "Centaur Courser",
+            "controllerSeat": 1,
+            "power": 3,
+            "toughness": 3,
+            "damage": 0,
+            "tapped": true,
+            "counters": [],
+            "keywords": [],
+            "attackTarget": "Ai(1)-Aurochs Stampede",
+            "blocking": [],
+            "visibleEffects": []
+          },
+          {
+            "ref": "PERM_f74efabef12ea619e30b79bd",
+            "name": "Centaur Courser",
+            "controllerSeat": 1,
+            "power": 3,
+            "toughness": 3,
+            "damage": 0,
+            "tapped": true,
+            "counters": [],
+            "keywords": [],
+            "attackTarget": "Ai(1)-Aurochs Stampede",
+            "blocking": [],
+            "visibleEffects": []
+          }
+        ],
+        "relevantBattlefield": [
+          {
+            "ref": "PERM_e629fa6598d732768f7c726b",
+            "name": "Earthen Goo",
+            "controllerSeat": 0,
+            "power": 3,
+            "toughness": 3,
+            "damage": 0,
+            "tapped": true,
+            "counters": [
+              {
+                "name": "Age",
+                "amount": 1
+              }
+            ],
+            "keywords": [
+              "Cumulative upkeep:RG",
+              "Trample"
+            ],
+            "blocking": [],
+            "visibleEffects": [
+              "Earthen Goo gets +1/+1 for each age counter on it."
+            ]
+          }
+        ],
+        "mana": [
+          {
+            "seat": 0,
+            "floating": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "availableSources": []
+          },
+          {
+            "seat": 1,
+            "floating": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "availableSources": [
+              "PERM_1253e9373e781b7500266caa Plains",
+              "PERM_5316ca1c5ddca8e6ceccfce5 Forest",
+              "PERM_69f59c273b6e669ac32a6dd5 Forest",
+              "PERM_b4944c6ff08dc6f43da2e9c8 Forest",
+              "PERM_cd70bea023f752a0564abb6e Forest"
+            ]
+          }
+        ]
+      },
+      "options": [
+        {
+          "optionId": "OPT_5a9d70039285bd942cc4d4607a96a24e22099941e89eba1245fd660bee8be27a",
+          "sourceRef": "PERM_f6e0a1e2ac41945a9aa7ff8a",
+          "sourceName": "Chorus of Might",
+          "category": "SPELL",
+          "cost": "{3}{G}",
+          "targets": [
+            "PERM_a88a7902cb4ef697ba0b6759 Centaur Courser"
+          ],
+          "effect": "Pump NumAtt=2 NumDef=2 KW=Trample",
+          "modes": [],
+          "optionalCosts": []
+        },
+        {
+          "optionId": "OPT_dd60a5b08a910477cb1870c46fab3bcdec27be1b36ab7067feb15bb3fcd32f75",
+          "sourceRef": "PERM_f6e0a1e2ac41945a9aa7ff8a",
+          "sourceName": "Chorus of Might",
+          "category": "SPELL",
+          "cost": "{3}{G}",
+          "targets": [
+            "PERM_f74efabef12ea619e30b79bd Centaur Courser"
+          ],
+          "effect": "Pump NumAtt=2 NumDef=2 KW=Trample",
+          "modes": [],
+          "optionalCosts": []
+        }
+      ],
+      "passAvailable": true
+    },
+    "request": {
+      "model": "qwen3:8b",
+      "stream": false,
+      "temperature": 0,
+      "max_tokens": 512,
+      "reasoning_effort": "none",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are choosing whether to take an instant-speed combat action in Magic: The Gathering. Choose exactly one supplied option ID or PASS. All supplied actions are already prepared and legal. Use only visible information. Consider lethal damage, trades, combat tricks, removal, protection, card value, and whether holding interaction is better. Do not invent actions or targets. Return only the required structured response."
+        },
+        {
+          "role": "user",
+          "content": "{\"decisionId\":\"92028de7-9d44-4082-809c-7330a990291f\",\"stateFingerprint\":\"d64fbb11e4527d020b89e0bdf5d2284b80c5ed458f0dd84fc0d62343929cb802\",\"state\":{\"turn\":13,\"window\":\"COMBAT_DECLARE_BLOCKERS\",\"decidingSeat\":1,\"attackingSeat\":1,\"defendingSeat\":0,\"lifeTotals\":[5,9],\"combatants\":[{\"ref\":\"PERM_535fa30d7e25dd8a49f15367\",\"name\":\"Bull Aurochs\",\"controllerSeat\":0,\"power\":2,\"toughness\":1,\"damage\":0,\"tapped\":false,\"counters\":[],\"keywords\":[\"Trample\"],\"attackTarget\":null,\"blocking\":[\"PERM_a88a7902cb4ef697ba0b6759\"],\"visibleEffects\":[]},{\"ref\":\"PERM_7902699be42c8a8e46fbbb45\",\"name\":\"Gorilla Shaman\",\"controllerSeat\":0,\"power\":1,\"toughness\":1,\"damage\":0,\"tapped\":false,\"counters\":[],\"keywords\":[],\"attackTarget\":null,\"blocking\":[\"PERM_f74efabef12ea619e30b79bd\"],\"visibleEffects\":[]},{\"ref\":\"PERM_a88a7902cb4ef697ba0b6759\",\"name\":\"Centaur Courser\",\"controllerSeat\":1,\"power\":3,\"toughness\":3,\"damage\":0,\"tapped\":true,\"counters\":[],\"keywords\":[],\"attackTarget\":\"Ai(1)-Aurochs Stampede\",\"blocking\":[],\"visibleEffects\":[]},{\"ref\":\"PERM_f74efabef12ea619e30b79bd\",\"name\":\"Centaur Courser\",\"controllerSeat\":1,\"power\":3,\"toughness\":3,\"damage\":0,\"tapped\":true,\"counters\":[],\"keywords\":[],\"attackTarget\":\"Ai(1)-Aurochs Stampede\",\"blocking\":[],\"visibleEffects\":[]}],\"relevantBattlefield\":[{\"ref\":\"PERM_e629fa6598d732768f7c726b\",\"name\":\"Earthen Goo\",\"controllerSeat\":0,\"power\":3,\"toughness\":3,\"damage\":0,\"tapped\":true,\"counters\":[{\"name\":\"Age\",\"amount\":1}],\"keywords\":[\"Cumulative upkeep:RG\",\"Trample\"],\"attackTarget\":null,\"blocking\":[],\"visibleEffects\":[\"Earthen Goo gets +1/+1 for each age counter on it.\"]}],\"mana\":[{\"seat\":0,\"floating\":{\"white\":0,\"blue\":0,\"black\":0,\"red\":0,\"green\":0,\"colorless\":0,\"total\":0},\"availableSources\":[]},{\"seat\":1,\"floating\":{\"white\":0,\"blue\":0,\"black\":0,\"red\":0,\"green\":0,\"colorless\":0,\"total\":0},\"availableSources\":[\"PERM_1253e9373e781b7500266caa Plains\",\"PERM_5316ca1c5ddca8e6ceccfce5 Forest\",\"PERM_69f59c273b6e669ac32a6dd5 Forest\",\"PERM_b4944c6ff08dc6f43da2e9c8 Forest\",\"PERM_cd70bea023f752a0564abb6e Forest\"]}]},\"options\":[{\"optionId\":\"OPT_5a9d70039285bd942cc4d4607a96a24e22099941e89eba1245fd660bee8be27a\",\"sourceRef\":\"PERM_f6e0a1e2ac41945a9aa7ff8a\",\"sourceName\":\"Chorus of Might\",\"category\":\"SPELL\",\"cost\":\"{3}{G}\",\"targets\":[\"PERM_a88a7902cb4ef697ba0b6759 Centaur Courser\"],\"effect\":\"Pump NumAtt=2 NumDef=2 KW=Trample\",\"modes\":[],\"xValue\":null,\"optionalCosts\":[]},{\"optionId\":\"OPT_dd60a5b08a910477cb1870c46fab3bcdec27be1b36ab7067feb15bb3fcd32f75\",\"sourceRef\":\"PERM_f6e0a1e2ac41945a9aa7ff8a\",\"sourceName\":\"Chorus of Might\",\"category\":\"SPELL\",\"cost\":\"{3}{G}\",\"targets\":[\"PERM_f74efabef12ea619e30b79bd Centaur Courser\"],\"effect\":\"Pump NumAtt=2 NumDef=2 KW=Trample\",\"modes\":[],\"xValue\":null,\"optionalCosts\":[]}],\"passAvailable\":true,\"decisionType\":\"COMBAT_ACTION\"}"
+        }
+      ],
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "forge_ai_decision",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "decisionId": {
+                "type": "string",
+                "enum": [
+                  "92028de7-9d44-4082-809c-7330a990291f"
+                ]
+              },
+              "stateFingerprint": {
+                "type": "string",
+                "enum": [
+                  "d64fbb11e4527d020b89e0bdf5d2284b80c5ed458f0dd84fc0d62343929cb802"
+                ]
+              },
+              "optionId": {
+                "type": "string",
+                "enum": [
+                  "PASS",
+                  "OPT_5a9d70039285bd942cc4d4607a96a24e22099941e89eba1245fd660bee8be27a",
+                  "OPT_dd60a5b08a910477cb1870c46fab3bcdec27be1b36ab7067feb15bb3fcd32f75"
+                ]
+              }
+            },
+            "required": [
+              "decisionId",
+              "stateFingerprint",
+              "optionId"
+            ]
+          }
+        }
+      }
+    },
+    "baselineSource": "ai-eval\\stage14-2\\20261009-094931\\cohort\\Revised\\Aurochs-1401-seat1-External.requests.jsonl"
+  },
+  {
+    "surface": "STACK_RESPONSE",
+    "context": {
+      "decisionId": "726924d0-6faf-4f21-b403-9d8187c84bc2",
+      "stateFingerprint": "a46bc1f0f2f21f38a52fdabea2147d7fdc1e55c31c271fd9dcb5121260a0170e",
+      "visibleState": {
+        "fingerprint": "b7498c8857e3cd0e198c832a0fb0f7302acd11f6693e01e0aa597ab6d30d0199",
+        "turnNumber": 3,
+        "phase": "MAIN1",
+        "activePlayer": {
+          "id": 0,
+          "name": "Ai(1)-Gatecrasher"
+        },
+        "self": {
+          "id": 1,
+          "name": "Ai(2)-Air Forces"
+        },
+        "players": [
+          {
+            "identity": {
+              "id": 0,
+              "name": "Ai(1)-Gatecrasher"
+            },
+            "life": 20,
+            "self": false,
+            "hand": [],
+            "battlefield": [
+              {
+                "name": "Forest",
+                "manaCost": "no cost",
+                "type": "Basic Land - Forest",
+                "oracleText": "({T}: Add {G}.)",
+                "tapped": true,
+                "controller": "Ai(1)-Gatecrasher",
+                "counters": []
+              },
+              {
+                "name": "Mountain",
+                "manaCost": "no cost",
+                "type": "Basic Land - Mountain",
+                "oracleText": "({T}: Add {R}.)",
+                "tapped": true,
+                "controller": "Ai(1)-Gatecrasher",
+                "counters": []
+              }
+            ],
+            "graveyard": [],
+            "exile": [],
+            "command": []
+          },
+          {
+            "identity": {
+              "id": 1,
+              "name": "Ai(2)-Air Forces"
+            },
+            "life": 20,
+            "self": true,
+            "mana": {
+              "white": 0,
+              "blue": 0,
+              "black": 0,
+              "red": 0,
+              "green": 0,
+              "colorless": 0,
+              "total": 0
+            },
+            "hand": [
+              {
+                "name": "Abduction",
+                "manaCost": "{2}{U}{U}",
+                "type": "Enchantment - Aura",
+                "oracleText": "Enchant creature\\nWhen Abduction enters, untap enchanted creature.\\nYou control enchanted creature.\\nWhen enchanted creature dies, return that card to the battlefield under its owner's control.",
+                "tapped": false,
+                "controller": "Ai(2)-Air Forces",
+                "counters": []
+              },
+              {
+                "name": "Benalish Knight",
+                "manaCost": "{2}{W}",
+                "type": "Creature - Human Knight",
+                "oracleText": "Flash (You may cast this spell any time you could cast an instant.)\\nFirst strike (This creature deals combat damage before creatures without first strike.)",
+                "tapped": false,
+                "controller": "Ai(2)-Air Forces",
+                "counters": []
+              },
+              {
+                "name": "Disrupt",
+                "manaCost": "{U}",
+                "type": "Instant",
+                "oracleText": "Counter target instant or sorcery spell unless its controller pays {1}.\\nDraw a card.",
+                "tapped": false,
+                "controller": "Ai(2)-Air Forces",
+                "counters": []
+              },
+              {
+                "name": "Fog Elemental",
+                "manaCost": "{2}{U}",
+                "type": "Creature - Elemental",
+                "oracleText": "Flying (This creature can't be blocked except by creatures with flying or reach.)\\nWhen Fog Elemental attacks or blocks, sacrifice it at end of combat.",
+                "tapped": false,
+                "controller": "Ai(2)-Air Forces",
+                "counters": []
+              },
+              {
+                "name": "Island",
+                "manaCost": "no cost",
+                "type": "Basic Land - Island",
+                "oracleText": "({T}: Add {U}.)",
+                "tapped": false,
+                "controller": "Ai(2)-Air Forces",
+                "counters": []
+              },
+              {
+                "name": "Island",
+                "manaCost": "no cost",
+                "type": "Basic Land - Island",
+                "oracleText": "({T}: Add {U}.)",
+                "tapped": false,
+                "controller": "Ai(2)-Air Forces",
+                "counters": []
+              },
+              {
+                "name": "Vodalian Illusionist",
+                "manaCost": "{2}{U}",
+                "type": "Creature - Merfolk Wizard",
+                "oracleText": "{U}{U}, {T}: Target creature phases out. (While it's phased out, it's treated as though it doesn't exist. It phases in before its controller untaps during their next untap step.)",
+                "tapped": false,
+                "controller": "Ai(2)-Air Forces",
+                "counters": []
+              }
+            ],
+            "battlefield": [
+              {
+                "name": "Island",
+                "manaCost": "no cost",
+                "type": "Basic Land - Island",
+                "oracleText": "({T}: Add {U}.)",
+                "tapped": false,
+                "controller": "Ai(2)-Air Forces",
+                "counters": []
+              }
+            ],
+            "graveyard": [],
+            "exile": [],
+            "command": []
+          }
+        ],
+        "stackSize": 1
+      },
+      "stackItems": [
+        {
+          "position": 0,
+          "sourceName": "Rampant Growth",
+          "controller": "Ai(1)-Gatecrasher",
+          "category": "ChangeZone",
+          "rulesSummary": "Search your library for a basic land card, put that card onto the battlefield tapped, then shuffle.",
+          "targets": []
+        }
+      ],
+      "legalActions": [
+        {
+          "actionId": "OPT_F2566AD308A29CB00ED9C2C5",
+          "category": "SPELL",
+          "sourceName": "Disrupt",
+          "sourceType": "Instant",
+          "apiType": "Counter",
+          "description": "Counter target instant or sorcery spell unless its controller pays {1}. Draw a card. ",
+          "cost": "{U}",
+          "targets": [
+            "Prepared game target"
+          ],
+          "modes": [],
+          "heuristicPosition": 0
+        }
+      ],
+      "randomizedOrder": false,
+      "internalActionMapping": [
+        {
+          "modelVisibleOptionId": "OPT_F2566AD308A29CB00ED9C2C5",
+          "originalActionId": "ACTION_0",
+          "originalPosition": 0,
+          "presentedPosition": 0,
+          "sourceName": "Disrupt",
+          "description": "Counter target instant or sorcery spell unless its controller pays {1}. Draw a card. ",
+          "matchesForgeHeuristic": true
+        }
+      ]
+    },
+    "request": {
+      "model": "qwen3:8b",
+      "stream": false,
+      "temperature": 0,
+      "max_tokens": 512,
+      "reasoning_effort": "none",
+      "messages": [
+        {
+          "role": "system",
+          "content": "Choose one Forge-prepared Magic: The Gathering stack response. Choose exactly one supplied option ID or PASS based on the visible game state. Copy decisionId and stateFingerprint exactly. Do not invent actions or hidden information. Return only the required JSON object: no explanation, Markdown, or code fences."
+        },
+        {
+          "role": "user",
+          "content": "{\"decisionId\":\"726924d0-6faf-4f21-b403-9d8187c84bc2\",\"decisionType\":\"STACK_RESPONSE\",\"stateFingerprint\":\"a46bc1f0f2f21f38a52fdabea2147d7fdc1e55c31c271fd9dcb5121260a0170e\",\"state\":{\"turnNumber\":3,\"phase\":\"MAIN1\",\"activePlayer\":{\"id\":0,\"name\":\"Ai(1)-Gatecrasher\"},\"self\":{\"id\":1,\"name\":\"Ai(2)-Air Forces\"},\"stackSize\":1,\"players\":[{\"identity\":{\"id\":0,\"name\":\"Ai(1)-Gatecrasher\"},\"life\":20,\"self\":false,\"mana\":null,\"hand\":[],\"battlefield\":[{\"name\":\"Forest\",\"manaCost\":\"no cost\",\"type\":\"Basic Land - Forest\",\"oracleText\":\"({T}: Add {G}.)\",\"tapped\":true,\"controller\":\"Ai(1)-Gatecrasher\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},{\"name\":\"Mountain\",\"manaCost\":\"no cost\",\"type\":\"Basic Land - Mountain\",\"oracleText\":\"({T}: Add {R}.)\",\"tapped\":true,\"controller\":\"Ai(1)-Gatecrasher\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]}],\"graveyard\":[],\"exile\":[],\"command\":[]},{\"identity\":{\"id\":1,\"name\":\"Ai(2)-Air Forces\"},\"life\":20,\"self\":true,\"mana\":{\"white\":0,\"blue\":0,\"black\":0,\"red\":0,\"green\":0,\"colorless\":0,\"total\":0},\"hand\":[{\"name\":\"Abduction\",\"manaCost\":\"{2}{U}{U}\",\"type\":\"Enchantment - Aura\",\"oracleText\":\"Enchant creature\\\\nWhen Abduction enters, untap enchanted creature.\\\\nYou control enchanted creature.\\\\nWhen enchanted creature dies, return that card to the battlefield under its owner's control.\",\"tapped\":false,\"controller\":\"Ai(2)-Air Forces\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},{\"name\":\"Benalish Knight\",\"manaCost\":\"{2}{W}\",\"type\":\"Creature - Human Knight\",\"oracleText\":\"Flash (You may cast this spell any time you could cast an instant.)\\\\nFirst strike (This creature deals combat damage before creatures without first strike.)\",\"tapped\":false,\"controller\":\"Ai(2)-Air Forces\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},{\"name\":\"Disrupt\",\"manaCost\":\"{U}\",\"type\":\"Instant\",\"oracleText\":\"Counter target instant or sorcery spell unless its controller pays {1}.\\\\nDraw a card.\",\"tapped\":false,\"controller\":\"Ai(2)-Air Forces\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},{\"name\":\"Fog Elemental\",\"manaCost\":\"{2}{U}\",\"type\":\"Creature - Elemental\",\"oracleText\":\"Flying (This creature can't be blocked except by creatures with flying or reach.)\\\\nWhen Fog Elemental attacks or blocks, sacrifice it at end of combat.\",\"tapped\":false,\"controller\":\"Ai(2)-Air Forces\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},{\"name\":\"Island\",\"manaCost\":\"no cost\",\"type\":\"Basic Land - Island\",\"oracleText\":\"({T}: Add {U}.)\",\"tapped\":false,\"controller\":\"Ai(2)-Air Forces\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},{\"name\":\"Island\",\"manaCost\":\"no cost\",\"type\":\"Basic Land - Island\",\"oracleText\":\"({T}: Add {U}.)\",\"tapped\":false,\"controller\":\"Ai(2)-Air Forces\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]},{\"name\":\"Vodalian Illusionist\",\"manaCost\":\"{2}{U}\",\"type\":\"Creature - Merfolk Wizard\",\"oracleText\":\"{U}{U}, {T}: Target creature phases out. (While it's phased out, it's treated as though it doesn't exist. It phases in before its controller untaps during their next untap step.)\",\"tapped\":false,\"controller\":\"Ai(2)-Air Forces\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]}],\"battlefield\":[{\"name\":\"Island\",\"manaCost\":\"no cost\",\"type\":\"Basic Land - Island\",\"oracleText\":\"({T}: Add {U}.)\",\"tapped\":false,\"controller\":\"Ai(2)-Air Forces\",\"power\":null,\"toughness\":null,\"markedDamage\":null,\"counters\":[]}],\"graveyard\":[],\"exile\":[],\"command\":[]}]},\"stackItems\":[{\"position\":0,\"sourceName\":\"Rampant Growth\",\"controller\":\"Ai(1)-Gatecrasher\",\"category\":\"ChangeZone\",\"rulesSummary\":\"Search your library for a basic land card, put that card onto the battlefield tapped, then shuffle.\",\"targets\":[]}],\"passAvailable\":true,\"legalActions\":[{\"actionId\":\"OPT_F2566AD308A29CB00ED9C2C5\",\"category\":\"SPELL\",\"sourceName\":\"Disrupt\",\"sourceType\":\"Instant\",\"apiType\":\"Counter\",\"description\":\"Counter target instant or sorcery spell unless its controller pays {1}. Draw a card. \",\"cost\":\"{U}\",\"targets\":[\"Prepared game target\"],\"modes\":[],\"xValue\":null}]}"
+        }
+      ],
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "forge_ai_decision",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "decisionId": {
+                "type": "string"
+              },
+              "stateFingerprint": {
+                "type": "string"
+              },
+              "optionId": {
+                "type": "string",
+                "enum": [
+                  "PASS",
+                  "OPT_F2566AD308A29CB00ED9C2C5"
+                ]
+              }
+            },
+            "required": [
+              "decisionId",
+              "stateFingerprint",
+              "optionId"
+            ]
+          }
+        }
+      }
+    },
+    "baselineSource": "ai-eval\\stage14-2\\20261009-094931\\cohort\\Revised\\Gatecrasher-1401-seat1-External.requests.jsonl"
+  }
+]

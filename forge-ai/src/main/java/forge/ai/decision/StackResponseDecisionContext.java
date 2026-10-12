@@ -9,7 +9,11 @@ import java.util.List;
 public record StackResponseDecisionContext(String decisionId, String stateFingerprint,
         MainPhaseAiState visibleState, List<StackItemView> stackItems,
         List<LegalActionView> legalActions, boolean randomizedOrder,
-        List<StackResponseActionMapping> internalActionMapping) implements AiDecisionContext {
+        List<StackResponseActionMapping> internalActionMapping, StrategicMemorySnapshot memorySnapshot) implements AiDecisionContext {
+    public StackResponseDecisionContext(String id,String fingerprint,MainPhaseAiState state,List<StackItemView> items,
+            List<LegalActionView> actions,boolean randomized,List<StackResponseActionMapping> mapping) {
+        this(id,fingerprint,state,items,actions,randomized,mapping,null);
+    }
     public static final String PASS_OPTION_ID = "PASS";
     public StackResponseDecisionContext(String decisionId, String stateFingerprint,
             MainPhaseAiState visibleState, List<StackItemView> stackItems, List<LegalActionView> legalActions) {
