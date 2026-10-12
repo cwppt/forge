@@ -238,7 +238,12 @@ final class MainPhaseStateProjector {
         List<String> targets = new ArrayList<>();
         for (SpellAbility current = sa; current != null; current = current.getSubAbility()) {
             for (GameObject target : current.getTargets()) {
-                targets.add(targetSummary(perspective, target));
+                boolean condition = ExternalAiAbilitySupport.verifiedPairwiseTemplate(sa);
+                String summary = targetSummary(perspective, target);
+                if (target instanceof Card card && card.getView().canBeShownTo(perspective.getView())) {
+                    summary += (condition ? " [colors=" + card.getColor().getOrderedColors() + "]" : "");
+                }
+                targets.add(summary);
             }
         }
         List<String> modes = new ArrayList<>();

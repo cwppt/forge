@@ -1633,6 +1633,10 @@ public class AiController {
                             == ExternalAiAbilitySupport.Status.VERIFIED_SAFE).toList();
             CombatActionEligibilityAudit.recordSupport(player, saList);
         }
+        List<SpellAbility> recoveredMainPhaseAbilities = List.of();
+        if (externalMainPhaseEnabled && decisionProvider != null && isPairwiseRecoveryWindow()) {
+            recoveredMainPhaseAbilities = saList.stream().filter(sa -> !sa.isSkip() && ExternalAiAbilitySupport.verifiedPairwiseTemplate(sa)).toList();
+        }
         saList.removeIf(spellAbility -> {
             // don't include removedAI cards if somehow the AI can play the ability or gain control of unsupported card
             // TODO allow when experimental profile?
@@ -1646,7 +1650,7 @@ public class AiController {
         useLivingEnd = IterableUtil.any(player.getZone(ZoneType.Library), CardPredicates.nameEquals("Living End"));
 
         PreparedAiAction chosenAction = legacyStackResponse == null
-                ? chooseSpellAbilityToPlayFromList(saList, true, true) : null;
+                ? chooseSpellAbilityToPlayFromList(saList, true, true, recoveredMainPhaseAbilities) : null;
         if (legacyStackResponse == null && chosenAction != null) {
             legacyStackResponse = chosenAction.spellAbility();
         }
@@ -1843,6 +1847,11 @@ public class AiController {
 
     private PreparedAiAction chooseSpellAbilityToPlayFromList(
             final List<SpellAbility> all, boolean skipCounter, boolean allowExternalSelection) {
+        return chooseSpellAbilityToPlayFromList(all, skipCounter, allowExternalSelection, List.of());
+    }
+
+    private PreparedAiAction chooseSpellAbilityToPlayFromList(
+            final List<SpellAbility> all, boolean skipCounter, boolean allowExternalSelection, List<SpellAbility> recovered) {
         if (all == null || all.isEmpty())
             return null;
 
@@ -1856,7 +1865,7 @@ public class AiController {
         }
 
         if (allowExternalSelection && shouldRouteExternalMainPhase()) {
-            PreparedAiAction externalChoice = chooseExternalMainPhaseAction(all, skipCounter);
+            PreparedAiAction externalChoice = chooseExternalMainPhaseAction(all, skipCounter, recovered);
             if (externalChoice != null) {
                 return externalChoice;
             }
@@ -1924,6 +1933,10 @@ public class AiController {
     }
 
     private PreparedAiAction chooseExternalMainPhaseAction(List<SpellAbility> all, boolean skipCounter) {
+        return chooseExternalMainPhaseAction(all, skipCounter, List.of());
+    }
+
+    private PreparedAiAction chooseExternalMainPhaseAction(List<SpellAbility> all, boolean skipCounter, List<SpellAbility> recovered) {
         long totalStarted = System.nanoTime();
         PreparedAiActionSet set;
         try {
@@ -1935,6 +1948,21 @@ public class AiController {
             AiDecisionMetrics.recordMainPhaseEnumerationFailure();
             Logger.debug(e, "External AI candidate enumeration failed");
             return null;
+        }
+        if (!recovered.isEmpty() && !set.actions().isEmpty() && set.actions().size() < externalMainPhaseMaxActions
+                && isPairwiseRecoveryWindow()) {
+            try {
+                PreparedAiActionSet recovery = prepareCandidateActions(recovered, skipCounter, externalMainPhaseMaxActions - set.actions().size());
+                List<PreparedAiAction> combined = new ArrayList<>(set.actions());
+                for (PreparedAiAction action : recovery.actions()) {
+                    if (ExternalAiAbilitySupport.preparedPairwiseAllowed(action.spellAbility()) && revalidatePreparedAction(action)) {
+                        combined.add(new PreparedAiAction("ACTION_" + combined.size(), action.spellAbility(), action.originalAbility(), action.sourceCard(), action.category(), action.originalCandidateIndex(), action.description(), action.forgeHeuristicAccepted()));
+                    }
+                }
+                set = new PreparedAiActionSet(combined, set.rawCandidateCount() + recovery.rawCandidateCount(), set.evaluatedCandidateCount() + recovery.evaluatedCandidateCount(), set.copiedGameCount() + recovery.copiedGameCount(), set.preparationNanos() + recovery.preparationNanos());
+            } catch (RuntimeException e) {
+                Logger.debug(e, "External AI recovery candidate enumeration failed");
+            }
         }
         Logger.debug("External AI candidates raw={} evaluated={} accepted={} copiedGames={} enumerationMs={} bound={}",
                 set.rawCandidateCount(), set.evaluatedCandidateCount(), set.actions().size(), set.copiedGameCount(),
@@ -2001,6 +2029,14 @@ public class AiController {
         return staleOrInvalid ? null : selected;
     }
 
+    private boolean isPairwiseRecoveryWindow() {
+        PhaseType phase = game.getPhaseHandler().getPhase();
+        return game.getPlayers().size() == 2 && (phase == PhaseType.MAIN1 || phase == PhaseType.MAIN2)
+                && game.getPhaseHandler().getPlayerTurn() == player
+                && game.getPhaseHandler().getPriorityPlayer() == player
+                && game.getStack().isEmpty();
+    }
+
     boolean revalidatePreparedAction(PreparedAiAction action) {
         if (action == null || action.spellAbility() == null || action.sourceCard() == null
                 || action.spellAbility().getHostCard() != action.sourceCard()
@@ -2009,6 +2045,9 @@ public class AiController {
             return false;
         }
         SpellAbility sa = action.spellAbility();
+        if ("Dead Ringers".equals(action.sourceCard().getName()) && (!isPairwiseRecoveryWindow() || !ExternalAiAbilitySupport.preparedPairwiseAllowed(sa))) {
+            return false;
+        }
         if (!sa.checkRestrictions(sa.getHostCard(), player) || !sa.canPlay()
                 || !ComputerUtilCost.canPayCost(sa, player, sa.isTrigger())) {
             return false;

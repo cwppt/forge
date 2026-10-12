@@ -5,7 +5,9 @@ import forge.game.ability.ApiType;
 import forge.game.cost.CostPartMana;
 import forge.game.replacement.ReplacementType;
 import forge.game.spellability.SpellAbility;
+import forge.game.zone.ZoneType;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,7 +45,14 @@ final class ExternalAiAbilitySupport {
             new Key("Disallow", ApiType.Counter, AiDecisionType.STACK_RESPONSE), new VerifiedAbility(Map.of(
                     "SP", "Counter", "TargetType", "Spell,Activated,Triggered", "TgtPrompt", "Select target spell or ability",
                     "ValidTgts", "Card,Emblem", "SpellDescription", "Counter target spell, activated ability, or triggered ability."),
-                    "{1}{U}{U}", "1 U U", "Stage 16.3 activated targets only; existing spell path separate"));
+                    "{1}{U}{U}", "1 U U", "Stage 16.3 activated targets only; existing spell path separate"),
+            new Key("Dead Ringers", ApiType.Destroy, AiDecisionType.MAIN_PHASE_ACTION), new VerifiedAbility(Map.ofEntries(
+                    Map.entry("SP", "Destroy"), Map.entry("TargetMin", "2"), Map.entry("TargetMax", "2"), Map.entry("NoRegen", "True"),
+                    Map.entry("ValidTgts", "Creature.nonBlack"), Map.entry("TgtPrompt", "Select target nonblack creatures"),
+                    Map.entry("ConditionNoDifferentColors", "Targeted"), Map.entry("ConditionDefined", "Targeted"),
+                    Map.entry("ConditionPresent", "Card"), Map.entry("ConditionCompare", "EQ2"),
+                    Map.entry("SpellDescription", "Destroy two target nonblack creatures unless either one is a color the other isn't. They can't be regenerated.")),
+                    "{4}{B}", "4 B", "Stage 16.4 destroy two nonblack creatures; color check and no regeneration"));
 
     private ExternalAiAbilitySupport() { }
 
@@ -80,6 +89,10 @@ final class ExternalAiAbilitySupport {
         return matchesVerified(ability, AiDecisionType.STACK_RESPONSE);
     }
 
+    static boolean verifiedPairwiseTemplate(SpellAbility ability) {
+        return ability != null && ability.getApi() == ApiType.Destroy && matchesVerified(ability, AiDecisionType.MAIN_PHASE_ACTION);
+    }
+
     /** Ordinary spell counters keep their existing path. Ability targets require positive proof. */
     static boolean stackResponseAllowed(SpellAbility ability) {
         if (ability == null) return false;
@@ -93,6 +106,27 @@ final class ExternalAiAbilitySupport {
         if (onlySpells) return ability.canTargetSpellAbility(target);
         if (!declaresAbilities && target == null) return true;
         return verifiedCounterTemplate(ability) && verifiedActivatedTarget(ability);
+    }
+
+    static boolean preparedPairwiseAllowed(SpellAbility ability) {
+        if (!verifiedPairwiseTemplate(ability)) return false;
+        if (ability.getTargets().size() != 2) return false;
+        var targets = List.copyOf(ability.getTargets().getTargetCards());
+        if (targets.size() != 2) return false;
+        var player = ability.getActivatingPlayer();
+        if (player == null) return false;
+        var game = ability.getHostCard().getGame();
+        if (game.getPlayers().size() != 2) return false;
+        for (var target : targets) {
+            if (target == null || game.getCardState(target, null) != target || !target.isInZone(ZoneType.Battlefield)
+                    || target.getController() == player || !target.getView().canBeShownTo(player.getView())
+                    || !ability.canTarget(target, true)) return false;
+        }
+        var source = ability.getHostCard();
+        if (source == null || game.getCardState(source, null) != source || !source.isInZone(ZoneType.Hand)
+                || !source.getController().equals(player) || targets.get(0) == targets.get(1)
+                || targets.get(0).getColor().getColor() != targets.get(1).getColor().getColor()) return false;
+        return ability.metConditions();
     }
 
     static boolean verifiedActivatedTarget(SpellAbility ability) {
@@ -122,8 +156,10 @@ final class ExternalAiAbilitySupport {
     private static boolean matchesVerified(SpellAbility ability, AiDecisionType surface) {
         if (ability == null || ability.getHostCard() == null) return false;
         VerifiedAbility verified = VERIFIED.get(new Key(ability.getHostCard().getName(), ability.getApi(), surface));
-        if (verified == null || ability.getApi() != ApiType.Counter && !clusterEligible(ability)
-                || !ability.isSpell() || ability.getRootAbility() != ability || !ability.getHostCard().isInstant()
+        if (verified == null) return false;
+        boolean pairwise = surface == AiDecisionType.MAIN_PHASE_ACTION && ability.getApi() == ApiType.Destroy && ability.getHostCard().getName().equals("Dead Ringers");
+        if (ability.getApi() != ApiType.Counter && !clusterEligible(ability) && !pairwise) return false;
+        if (!ability.isSpell() || ability.getRootAbility() != ability || (pairwise ? !ability.getHostCard().isSorcery() : !ability.getHostCard().isInstant())
                 || ability.getSubAbility() != null || ability.isTrigger() || ability.isReplacementAbility()
                 || ability.getAlternativeCost() != null || ability.getOptionalCosts().iterator().hasNext()
                 || !ability.getOptionalKeywords().isEmpty() || ability.getXManaCostPaid() != null
@@ -134,8 +170,8 @@ final class ExternalAiAbilitySupport {
                 || !verified.manaCost().equals(ability.getPayCosts().getCostMana().getMana().toString())
                 || ability.getPayCosts().getCostParts().stream().anyMatch(p -> !(p instanceof CostPartMana))
                 || ability.getHostCard().getStaticAbilities().stream().anyMatch(st -> "AlternativeCost".equals(st.getParam("Mode")))
-                || !ability.usesTargeting() || ability.getTargetRestrictions().getMinTargets(ability.getHostCard(), ability) != 1
-                || ability.getTargetRestrictions().getMaxTargets(ability.getHostCard(), ability) != 1) return false;
+                || !ability.usesTargeting() || ability.getTargetRestrictions().getMinTargets(ability.getHostCard(), ability) != (pairwise ? 2 : 1)
+                || ability.getTargetRestrictions().getMaxTargets(ability.getHostCard(), ability) != (pairwise ? 2 : 1)) return false;
         Map<String, String> params = ability.getMapParams();
         if (!verified.template().entrySet().stream().allMatch(e -> e.getValue().equals(params.get(e.getKey())))
                 || params.keySet().stream().anyMatch(key -> !key.equals("Cost") && !verified.template().containsKey(key))
