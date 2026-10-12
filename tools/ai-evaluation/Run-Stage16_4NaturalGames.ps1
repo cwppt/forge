@@ -9,6 +9,7 @@ param(
     [ValidateRange(1,300)][int]$TimeoutSeconds = 60,
     [ValidateRange(1,86400)][int]$GameTimeoutSeconds = 600,
     [switch]$RequestDiagnostics,
+    [switch]$FullGame,
     [switch]$DryRun,
     [switch]$PassThru
 )
@@ -24,7 +25,9 @@ if (@($Seeds | Select-Object -Unique).Count -ne $Seeds.Count) { throw 'Seeds mus
 if (@($ExternalSeats | Select-Object -Unique).Count -ne $ExternalSeats.Count) { throw 'Seats must be unique.' }
 $modes = @('Control','External'); if ($Mode -ne 'Both') { $modes = @($Mode) }
 $runId = (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + [Guid]::NewGuid().ToString('N').Substring(0,8)
-$output = Join-Path $repo "ai-eval\stage16_4\natural-$runId"
+$scopePrefix = 'natural'
+if ($FullGame) { $scopePrefix = 'fullgame' }
+$output = Join-Path $repo "ai-eval\stage16_4\$scopePrefix-$runId"
 $classPath = 'target/classes;../forge-ai/target/classes;../forge-gui/target/classes;../forge-game/target/classes;../forge-core/target/classes;target/*'
 foreach ($cohort in $cohorts) { foreach ($deck in $cohort.Decks) {
     if (-not (Test-Path -LiteralPath (Join-Path $repo "forge-gui\res\quest\precons\$deck.dck"))) { throw "Missing deck: $deck" }
@@ -35,7 +38,7 @@ if (-not $DryRun) {
     [ordered]@{RunId=$runId; Model=$Model; Endpoint=$Endpoint; Seeds=$Seeds; Mode=$Mode; ExternalSeats=$ExternalSeats;
         Cohorts=$cohorts; RequestDiagnostics=[bool]$RequestDiagnostics; GameTimeoutSeconds=$GameTimeoutSeconds;
         TimeoutSeconds=$TimeoutSeconds; LegacyCombatOrder=$true; ExperimentalGuards=$false; Kind='TARGETED_NATURAL_PAIRWISE_RECOVERY';
-        MainPhaseOnly=$true; ExpectedGameCount=($cohorts.Count * $Seeds.Count * $ExternalSeats.Count * $modes.Count)} |
+        MainPhaseOnly=(-not [bool]$FullGame); FullGame=[bool]$FullGame; ExpectedGameCount=($cohorts.Count * $Seeds.Count * $ExternalSeats.Count * $modes.Count)} |
         ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $output 'run.json') -Encoding UTF8
 }
 foreach ($cohort in $cohorts) { foreach ($seed in $Seeds) { foreach ($seat in $ExternalSeats) { foreach ($runMode in $modes) {
@@ -54,7 +57,10 @@ foreach ($cohort in $cohorts) { foreach ($seed in $Seeds) { foreach ($seat in $E
         '--external-ai-timeout',"$TimeoutSeconds",'--external-ai-response-format','JSON_SCHEMA',
         '--metrics-csv',"$prefix.csv",'--decision-audit-jsonl',"$prefix.jsonl")
     if ($RequestDiagnostics) { $arguments += '--external-ai-request-diagnostics' }
-    if ($runMode -eq 'External') {
+    if ($runMode -eq 'External' -and $FullGame) {
+        $arguments += @('--external-ai-full-game-enabled','--external-ai-main-phase-max-actions','3',
+            '--external-ai-memory-disabled','--external-ai-seats',"$seat")
+    } elseif ($runMode -eq 'External') {
         $arguments += @('--external-ai-main-phase-enabled','--external-ai-seats',"$seat",
             '--external-ai-main-phase-max-actions',3,
             '--external-ai-full-game-disabled','--external-ai-mulligan-disabled',
