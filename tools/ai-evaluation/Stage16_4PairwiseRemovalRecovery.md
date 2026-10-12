@@ -91,3 +91,35 @@ powershell.exe -NoProfile -File .\tools\ai-evaluation\Run-Stage16_4NaturalGames.
 ```
 
 The next useful coverage investigation, if needed, is a wider predeclared seed sample or temporary read-only observation of no-call recovery opportunities. Do not increase disagreements, relax safeguards or redesign targeting to manufacture positive results.
+
+## Wider natural-game sample (12 October 2026)
+
+The unchanged runner was reused for a predeclared extension: seeds **16421 through 16426**, both existing matchups, external Burial seat 0 only. This adds twelve ordinary games without changing decks, bounds, provider prompts, heuristics or production code. No new local-worker edit was necessary. It is an exposure study, not a matched win-rate comparison.
+
+Evidence: `ai-eval/stage16_4/natural-20261012-163544-74500b1a/`, including `natural-verification-results.json` and all per-game request, audit, metrics and completion records.
+
+All **12 games completed**, with zero crashes, timeouts or draws. They produced **11 accepted main-phase provider calls**, nine Forge agreements and two disagreements. Both disagreements selected the recovered Dead Ringers option. There were **zero fallbacks or stale/revalidation failures**; mean provider latency was **3,267 ms**. All eleven request UTF-8 byte hashes and JSON round-trips, thinking-disabled settings, bounded schema enums, returned request identity/fingerprint/option mapping, audit correlation, external seat and hidden-opponent-hand checks passed. Game summaries confirmed that other external decision surfaces remained inactive.
+
+| Natural offer | Window | Prepared targets | Selected option | Subsequent evidence |
+| --- | --- | --- | --- | --- |
+| Aurochs, seed 16424 | Turn 10 MAIN2 | Woolly Mammoths; Bull Aurochs, both GREEN | ACTION_1, Dead Ringers | Turn 12 projection adds Dead Ringers to own graveyard and both target names to opponent graveyard |
+| Aurochs, seed 16426 | Turn 11 MAIN2 | Aurochs; Bull Aurochs, both GREEN | ACTION_2, Dead Ringers | Turn 13 projection adds Dead Ringers and increases both target-name graveyard counts |
+
+These ordinary-game selections confirm that the recovered option is exposed under both two-option and three-option native bounds. Later public graveyard-count changes corroborate resolution; the earlier smoke and focused tests provide exact prepared target identity, payment and execution verification. The natural request projection is name-based, so this report does not claim a separate engine-incarnation trace from those later snapshots.
+
+Dead Ringers appeared in four captured hands. It was exposed and selected in two; the other two snapshots are consistent with the conservative relational-target guard:
+
+- Seed 16424, turn 12: only Boreal Druid remained as an opposing creature, so two distinct opposing creature targets were unavailable.
+- Seed 16424, turn 14: the opposing creatures were Boreal Druid (G) and Earthen Goo (2R). Their existing card definitions give different colors, so the pair does not satisfy Dead Ringers' equal-color condition. No color-changing effect was identified in that captured battlefield.
+
+Across the twelve new games, aggregate eligibility counted 509 main-phase windows: 258 outside the AI's active turn, 198 with zero safe prepared actions, 42 with one, and eleven with multiple actions. Those eleven requests exposed 25 options in total. No evidence here demonstrates a missed safe prepared recovery action. No instrumentation or implementation fix was added.
+
+Burial lost all twelve extension games. Combined with the first pilot, natural evaluation now covers **16 external games and four Forge controls**, with fourteen accepted provider decisions and two recovered offers/selections. The observed recovery frequency is two of sixteen external games in this particular sample; it is not a general rate estimate. The extension has no new paired controls and cannot establish strategic improvement or explain the losses. Coverage is confirmed, while broader strategic benefit remains unproven.
+
+Repeat the extension from a PowerShell prompt at the repository root:
+
+```powershell
+& .\tools\ai-evaluation\Run-Stage16_4NaturalGames.ps1 -Mode External -Seeds @(16421,16422,16423,16424,16425,16426) -RequestDiagnostics -PassThru
+```
+
+Use an array from a PowerShell prompt or `-Command`; Windows PowerShell's `-File` argument binding does not accept a comma-separated string as this typed seed array. This extension required no software change or test rerun. Report whitespace checks passed; all earlier evidence and implementation remain intact.
