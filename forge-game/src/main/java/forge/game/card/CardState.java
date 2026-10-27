@@ -737,6 +737,20 @@ public class CardState implements GameObject, IHasSVars, ITranslatable {
     public final boolean addStaticAbility(StaticAbility stab) {
         return staticAbilities.add(stab);
     }
+    /** Conservative live-source test. False proves that rebuilding cannot yield this mode. */
+    public boolean mayHaveStaticAbilityMode(StaticAbilityMode mode) {
+        if (card.getClass() != Card.class || !card.getChangedCardTraits().isEmpty()
+                || !card.getChangedCardTraitsByText().isEmpty()
+                || (getStateName().equals(CardStateName.Original)
+                    && (card.hasState(CardStateName.LeftSplit) || card.hasState(CardStateName.RightSplit)))) {
+            return true;
+        }
+        for (StaticAbility ability : staticAbilities) if (ability.checkMode(mode)) return true;
+        for (KeywordInterface keyword : getCachedKeywords())
+            for (StaticAbility ability : keyword.getStaticAbilities()) if (ability.checkMode(mode)) return true;
+        // Land/type trait changes can remove statics, never add a new mode.
+        return false;
+    }
     public final boolean removeStaticAbility(StaticAbility stab) {
         return staticAbilities.remove(stab);
     }

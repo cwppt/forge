@@ -331,13 +331,20 @@ public class CombatUtil {
     }
 
     public static Cost getBlockCost(Game game, Card blocker, Card attacker) {
-        Cost blockCost = new Cost(ManaCost.ZERO, true);
+        BlockCostMetrics.call();
+        Cost blockCost = BlockCostMetrics.FAST_PATH ? null : new Cost(ManaCost.ZERO, true);
         // Sort abilities to apply them in proper order
         boolean noCost = true;
         for (Card card : game.getCardsIn(ZoneType.STATIC_ABILITIES_SOURCE_ZONES)) {
+            if (BlockCostMetrics.FAST_PATH && !card.getCurrentState().mayHaveStaticAbilityMode(
+                    forge.game.staticability.StaticAbilityMode.CantBlockUnless)) {
+                BlockCostMetrics.skip();
+                continue;
+            }
             for (final StaticAbility stAb : card.getStaticAbilities()) {
                 Cost c1 = stAb.getBlockCost(blocker, attacker);
                 if (c1 != null) {
+                    if (blockCost == null) blockCost = new Cost(ManaCost.ZERO, true);
                     blockCost.add(c1);
                     noCost = false;
                 }
@@ -345,6 +352,7 @@ public class CombatUtil {
         }
 
         if (noCost) {
+            if (BlockCostMetrics.FAST_PATH) BlockCostMetrics.emptyCost();
             return null;
         }
         return blockCost;
