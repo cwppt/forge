@@ -84,6 +84,10 @@ def main():
         result['pairedGameLogMatches'].append(dict(seed=seed,
             gameLogIdentical=sha(left/f'commander-seed{seed}.gamelog.jsonl')==sha(right/f'commander-seed{seed}.gamelog.jsonl'),
             roleTrajectoryIdentical=sha(left/f'commander-seed{seed}.roles.jsonl')==sha(right/f'commander-seed{seed}.roles.jsonl')))
+        def gameplay(path):
+            return [json.loads(line) for line in path.read_text(encoding='utf-8-sig').splitlines()
+                    if not (json.loads(line)['type']=='GAME_OUTCOME' and json.loads(line)['message'].startswith('Match Duration '))]
+        result['pairedGameLogMatches'][-1]['gameplayLogIdenticalExcludingDuration']=gameplay(left/f'commander-seed{seed}.gamelog.jsonl')==gameplay(right/f'commander-seed{seed}.gamelog.jsonl')
     result['realTimeoutIntegration']=read(R/'timeout-integration/passed.json')
     result['resumeVerification']=read(R/'resume-verification.json')
     result['smokeRuntimeMs']={label:dist([g['durationMs'] for g in result['smoke'] if g['job'].startswith('smoke-'+label+'-')]) for label in ['baseline','correctness','profile']}
