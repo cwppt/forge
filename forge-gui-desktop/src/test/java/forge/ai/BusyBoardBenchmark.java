@@ -57,15 +57,47 @@ public final class BusyBoardBenchmark extends AITest {
         throw new AssertionError("Unbounded fixture stack");
     }
     long gc(){return ManagementFactory.getGarbageCollectorMXBeans().stream().mapToLong(b->Math.max(0,b.getCollectionTime())).sum();}
+    private String label(Card c) {
+        var p=c.getController();return p.getName()+":"+c.getName()+":"+p.getCreaturesInPlay().indexOf(c);
+    }
+    private Object legal(Game game,Combat combat) {
+        var out=new ArrayList<String>();var p=game.getPlayers().get(0);
+        for(var a:p.getCreaturesInPlay())for(var defender:game.getPlayers())if(defender!=p) {
+            if(forge.game.combat.CombatUtil.canAttack(a,defender))out.add("attack:"+label(a)+":"+defender.getName());
+            for(var b:defender.getCreaturesInPlay())if(forge.game.combat.CombatUtil.canBlock(a,b,combat))out.add("block:"+label(a)+":"+label(b));
+        }
+        return out;
+    }
+    private Object state(Game game,Combat combat) {
+        var out=new LinkedHashMap<String,Object>();var players=new ArrayList<Object>();
+        for(var p:game.getRegisteredPlayers()) {
+            var row=new LinkedHashMap<String,Object>();row.put("player",p.getName());row.put("life",p.getLife());
+            for(var zone:List.of(ZoneType.Battlefield,ZoneType.Graveyard,ZoneType.Hand,ZoneType.Library,ZoneType.Exile)) {
+                var cards=new ArrayList<Object>();for(var c:p.getCardsIn(zone))cards.add(Arrays.asList(c.getName(),c.getType().toString(),c.isToken(),c.isTapped(),c.getNetPower(),c.getNetToughness(),c.getDamage(),c.getCounters().toString(),c.getTriggers().size()));row.put(zone.name(),cards);
+            }
+            players.add(row);
+        }
+        out.put("players",players);out.put("stackSize",game.getStack().size());out.put("gameOver",game.isGameOver());
+        if(game.isGameOver())out.put("draw",game.getOutcome().isDraw());return out;
+    }
+    private Object assignments(Combat combat) {
+        var out=new ArrayList<Object>();for(var a:combat.getAttackers())out.add(Arrays.asList(label(a),String.valueOf(combat.getDefenderByAttacker(a)),combat.getBlockers(a).stream().map(this::label).toList()));return out;
+    }
     @Test public void deterministicWorkloads() {
         var thread=(com.sun.management.ThreadMXBean)ManagementFactory.getThreadMXBean();
-        for(String name:CASES)for(String path:List.of("main","attack","block","triggers"))for(int rep=0;rep<3;rep++) {
+        var selected=Set.of(System.getProperty("forge.bench.cases",String.join(",",CASES)).split(","));
+        var paths=List.of(System.getProperty("forge.bench.paths","main,attack,block,triggers").split(","));
+        int repeats=Integer.getInteger("forge.bench.repeats",3),warmup=Integer.getInteger("forge.bench.warmup",0);
+        boolean verify=Boolean.getBoolean("forge.bench.verify");
+        for(String name:CASES)if(selected.contains(name))for(String path:paths)for(int rep=-warmup;rep<repeats;rep++) {
             Game game=board(name);var p=game.getPlayers().get(0);var opponent=game.getPlayers().get(1);
             if(path.equals("attack") || path.equals("block"))game.getPhaseHandler().devModeSet(
                     path.equals("attack")?PhaseType.COMBAT_DECLARE_ATTACKERS:PhaseType.COMBAT_DECLARE_BLOCKERS,p,50);
             var combat=new Combat(p);
             if(path.equals("block"))for(Card c:p.getCreaturesInPlay())combat.addAttacker(c,opponent);
             if(path.equals("attack") || path.equals("block"))game.getPhaseHandler().setCombat(combat);
+            Object legalBefore=verify?legal(game,combat):null;
+            long[] countsBefore=forge.game.card.BlockCostMetrics.snapshot();
             long alloc=thread.isThreadAllocatedMemorySupported()?thread.getThreadAllocatedBytes(Thread.currentThread().getId()):0;
             long cpu=thread.getCurrentThreadCpuTime(),gc=gc(),start=System.nanoTime();Object result;
             if(path.equals("main")) result=((PlayerControllerAi)p.getController()).getAi().chooseSpellAbilityToPlay();
@@ -78,6 +110,10 @@ public final class BusyBoardBenchmark extends AITest {
             row.put("heapUsed",ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed());
             row.put("permanents",game.getCardsIn(ZoneType.Battlefield).size());
             row.put("tokens",game.getCardsIn(ZoneType.Battlefield).stream().filter(Card::isToken).count());
+            row.put("warmup",rep<0);
+            long[] countsAfter=forge.game.card.BlockCostMetrics.snapshot();row.put("blockCostCalls",countsAfter[0]-countsBefore[0]);row.put("staticCollectionsAvoided",countsAfter[1]-countsBefore[1]);row.put("zeroCostObjectsAvoided",countsAfter[2]-countsBefore[2]);
+            if(verify){row.put("legal",legalBefore);row.put("assignments",assignments(combat));row.put("state",state(game,combat));
+                if(path.equals("attack") || path.equals("block")){combat.orderBlockersForDamageAssignment();combat.orderAttackersForDamageAssignment();combat.fireTriggersForUnblockedAttackers(game);drain(game);combat.assignCombatDamage(true);combat.dealAssignedDamage();drain(game);combat.assignCombatDamage(false);combat.dealAssignedDamage();drain(game);game.getAction().checkStateEffects(true);row.put("afterDamage",state(game,combat));}}
             row.put("result",String.valueOf(result));System.out.println("BUSY_BENCH "+new Gson().toJson(row));
         }
     }
