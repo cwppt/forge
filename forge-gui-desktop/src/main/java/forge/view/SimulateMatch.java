@@ -282,6 +282,9 @@ public class SimulateMatch {
         List<String> resultPaths = params.get("game-results-jsonl");
         Path failurePath = resultPaths == null || resultPaths.isEmpty() ? null
                 : Path.of(resultPaths.get(0) + ".failures.jsonl");
+        SimulationTurnMetrics turnMetrics = Boolean.getBoolean("forge.simulation.profile")
+                && resultPaths != null && !resultPaths.isEmpty()
+                ? SimulationTurnMetrics.begin(g1,Path.of(resultPaths.get(0)+".profile.jsonl")) : null;
         SimulationWorker.run(() -> mc.startGame(g1), mc.getRules().getSimTimeout(),
                 failurePath, gameId, iGame, runSeed);
         sw.stop();
@@ -296,6 +299,7 @@ public class SimulateMatch {
             SimulationWorker.abort("INCOMPLETE", new IllegalStateException("No natural terminal game outcome"),
                     failurePath, gameId, iGame, runSeed);
         }
+        if(turnMetrics!=null)turnMetrics.finish();
         if (roleTelemetry != null) {
             try { roleTelemetry.finish(timedOut, simulationError); }
             catch (IOException e) { throw new java.io.UncheckedIOException(e); }
