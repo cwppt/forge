@@ -119,7 +119,8 @@ public class CardCollection extends FCollection<Card> implements CardCollectionV
     }
 
     public CardCollection(final Stream<Card> cards) {
-        this(cards::iterator);
+        // Preserve encounter order while avoiding the stream-to-iterator adapter.
+        cards.sequential().forEachOrdered(this::add);
     }
 
     /**

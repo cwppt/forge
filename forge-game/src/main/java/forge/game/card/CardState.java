@@ -716,6 +716,15 @@ public class CardState implements GameObject, IHasSVars, ITranslatable {
 
     public final FCollectionView<StaticAbility> getStaticAbilities() {
         FCollection<StaticAbility> result = new FCollection<>(staticAbilities);
+        // Land/type rules only remove static abilities. With no printed, keyword,
+        // split or changed traits there is nothing for the live rebuild to add.
+        // Recheck each call; hypothetical combat can gain traits between scans.
+        if (staticAbilities.isEmpty() && getCachedKeywords().isEmpty()
+                && card.getChangedCardTraits().isEmpty() && card.getChangedCardTraitsByText().isEmpty()
+                && !(getStateName().equals(CardStateName.Original)
+                    && (card.hasState(CardStateName.LeftSplit) || card.hasState(CardStateName.RightSplit)))) {
+            return result;
+        }
         if (getStateName().equals(CardStateName.Original)) {
             if (getCard().hasState(CardStateName.LeftSplit))
                 result.addAll(getCard().getState(CardStateName.LeftSplit).staticAbilities);
@@ -730,6 +739,37 @@ public class CardState implements GameObject, IHasSVars, ITranslatable {
     }
     public final boolean removeStaticAbility(StaticAbility stab) {
         return staticAbilities.remove(stab);
+    }
+
+    /**
+     * Conservative live-state check for scans that only need replacement effects.
+     * Do not cache this: counters, keywords, types and trait changes can change
+     * between two hypothetical combat evaluations.
+     */
+    public boolean hasReplacementEffectSources() {
+        if (!replacementEffects.isEmpty()
+                || !card.getChangedCardTraits().isEmpty()
+                || !card.getChangedCardTraitsByText().isEmpty()
+                || card.getCounters(CounterEnumType.SHIELD) > 0
+                || card.getCounters(CounterEnumType.STUN) > 0
+                || card.getCounters(CounterEnumType.FINALITY) > 0) {
+            return true;
+        }
+        KeywordCollection keywords = getCachedKeywords();
+        if (!keywords.isEmpty()) {
+            for (KeywordInterface keyword : keywords) {
+                if (!keyword.getReplacements().isEmpty()) {
+                    return true;
+                }
+            }
+        }
+        if (getStateName().equals(CardStateName.Original)
+                && (card.hasState(CardStateName.LeftSplit) || card.hasState(CardStateName.RightSplit))) {
+            return true;
+        }
+        CardTypeView changed = getTypeWithChanges();
+        return changed.isPlaneswalker() || changed.isBattle() || changed.isSaga()
+                || type.hasSubtype("Adventure") || type.hasSubtype("Omen");
     }
 
     public FCollectionView<ReplacementEffect> getReplacementEffects() {

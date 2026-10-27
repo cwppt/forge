@@ -1,0 +1,270 @@
+<#[
+.SYNOPSIS
+    Runs Forge Commander comparisons, validates every game, and optionally publishes
+    immutable reports into the private MTG-deck-lists Git repository.
+.EXAMPLE
+    .\Run-Validate-Publish-Commander.ps1 -GamesPerVariant 4 -Seed 2100
+.EXAMPLE
+    .\Run-Validate-Publish-Commander.ps1 -GamesPerVariant 25 -Seed 2200 -Publish
+.NOTES
+    Tested by inspection for Windows PowerShell 5.1 syntax; execute on your own Windows PC.
+    Requires Java, Python, Git, a built Forge desktop JAR, and validated Commander deck files.
+    By design, an engine-failed or timed-out game aborts publishing; this is a fixed-attempt
+    cohort, not the failure-aware valid-game replacement runner.
+#>
+[CmdletBinding()]
+param(
+    [ValidateRange(1, 1000)] [int] $GamesPerVariant = 4,
+    [ValidateRange(1, 2147483647)] [int] $Seed = 2100,
+    [ValidateRange(30, 3600)] [int] $TimeoutSeconds = 180,
+    [switch] $Publish,
+    [switch] $PublishExisting,  # Added
+    [switch] $DryRun,          # Added
+    [string] $HarnessRoot = "",
+    [string] $DeckRepo = ""
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+function Assert-LastExit([string] $Action) {
+    if ($LASTEXITCODE -ne 0) {
+        throw "$Action failed (exit code $LASTEXITCODE)."
+    }
+}
+function Require-File([string] $Path) {
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        throw "Required file not found: $Path"
+    }
+}
+function Quote-ProcessArgument([string] $Value) {
+    # Inputs come from known filenames and Windows file paths; Windows filenames cannot contain '"'.
+    if ($Value.Contains('"')) { throw "Unsupported quotation mark in process argument: $Value" }
+    return '"' + $Value + '"'
+}
+
+if ([string]::IsNullOrWhiteSpace($HarnessRoot)) {
+    # Script may live in tools/ai-evaluation or at the repository root.
+    $here = Split-Path -Parent $MyInvocation.MyCommand.Path
+    if (Test-Path -LiteralPath (Join-Path $here 'forge-gui') -PathType Container) {
+        $HarnessRoot = $here
+    } else {
+        $HarnessRoot = [System.IO.Path]::GetFullPath((Join-Path $here '..\..'))
+    }
+}
+$HarnessRoot = (Resolve-Path -LiteralPath $HarnessRoot).Path
+$forgeGui = Join-Path $HarnessRoot 'forge-gui'
+$jar = Join-Path $HarnessRoot 'forge-gui-desktop\target\forge-gui-desktop-2.0.16-SNAPSHOT-jar-with-dependencies.jar'
+$validator = Join-Path $HarnessRoot 'tools\ai-evaluation\Validate-CommanderTelemetry.py'
+$deckDirectory = Join-Path $HarnessRoot 'work\commander-smoke-decks'
+$resultsRoot = Join-Path $HarnessRoot ("work\commander-comparisons\seed$Seed")
+if ([string]::IsNullOrWhiteSpace($DeckRepo)) {
+    $DeckRepo = Join-Path $HarnessRoot 'work\decklist-source'
+}
+
+foreach ($file in @($jar, $validator)) { Require-File $file }
+foreach ($directory in @($forgeGui, $deckDirectory)) {
+    if (-not (Test-Path -LiteralPath $directory -PathType Container)) {
+        throw "Required directory not found: $directory"
+    }
+}
+if (Test-Path -LiteralPath $resultsRoot) {
+    throw "Output directory already exists; refusing to overwrite results: $resultsRoot. Select a new -Seed."
+}
+$java = (Get-Command java.exe -ErrorAction Stop).Source
+$python = (Get-Command python.exe -ErrorAction Stop).Source
+$utf8 = New-Object System.Text.UTF8Encoding($false)
+
+$candidates = @(
+    @{ Name = 'R2'; File = 'Rivaz-R2.dck' },
+    @{ Name = 'R3'; File = 'Rivaz-R3.dck' },
+    @{ Name = 'R3-38L'; File = 'Rivaz-R3-38L.dck' }
+)
+$opponents = @('Ganax-Far-Traveler-B2.dck', 'Ganax-Acolyte-G1.dck', 'Lathliss-V2.5.dck')
+foreach ($deck in @($candidates | ForEach-Object { $_.File }) + $opponents) {
+    Require-File (Join-Path $deckDirectory $deck)
+}
+
+if ($Publish) {
+    if (-not (Test-Path (Join-Path $DeckRepo '.git'))) {
+        throw "Private deck repo checkout not found at $DeckRepo. Clone it first."
+    }
+    $branch = (& git -C $DeckRepo branch --show-current | Out-String).Trim()
+    Assert-LastExit 'Git branch lookup'
+    if ($branch -ne 'main') { throw "Deck repository is on '$branch', not 'main'. Aborting." }
+    $dirty = (& git -C $DeckRepo status --porcelain | Out-String).Trim()
+    Assert-LastExit 'Git worktree status'
+    if ($dirty) { throw "Deck repository has pending changes. Commit/stash them first (nothing changed):`n$dirty" }
+}
+
+$gitCommit = (& git -C $HarnessRoot rev-parse HEAD | Out-String).Trim()
+Assert-LastExit 'Harness Git revision'
+$gitDirty = [bool]((& git -C $HarnessRoot status --porcelain | Out-String).Trim())
+$jarHash = (Get-FileHash -LiteralPath $jar -Algorithm SHA256).Hash
+$deckHashes = @()
+foreach ($deck in @($candidates | ForEach-Object { $_.File }) + $opponents) {
+    $deckHashes += [pscustomobject]@{
+        file = $deck
+        sha256 = (Get-FileHash -LiteralPath (Join-Path $deckDirectory $deck) -Algorithm SHA256).Hash
+    }
+}
+
+New-Item -ItemType Directory -Force -Path $resultsRoot | Out-Null
+Write-Host "Forge Commander comparison: seed=$Seed gamesPerVariant=$GamesPerVariant" -ForegroundColor Cyan
+Write-Host "Reports: $resultsRoot"
+if ($gitDirty) { Write-Warning 'Harness Git working tree is dirty. The JAR SHA-256 is recorded for tracking.' }
+
+if ($PublishExisting) {
+    # Validate existing results
+    if (-not (Test-Path -LiteralPath $resultsRoot -PathType Container)) {
+        throw "Results directory not found: $resultsRoot. Run simulation first or use -PublishExisting with existing results."
+    }
+
+    foreach ($candidate in $candidates) {
+        $name = $candidate.Name
+        $runDirectory = Join-Path $resultsRoot $name
+        if (-not (Test-Path -LiteralPath $runDirectory -PathType Container)) {
+            throw "Candidate directory not found: $runDirectory"
+        }
+
+        # Run validator to confirm schema
+        $validationOutput = (& $python $validator $runDirectory --games-per-seed ([string]$GamesPerVariant) 2>&1 | Out-String)
+        $validationCode = $LASTEXITCODE
+        if ($validationCode -ne 0) {
+            throw "Validation failed for ${name}: $validationOutput"
+        }
+
+        # Check validation.json
+        $validationJson = Join-Path $runDirectory 'validation.json'
+        if (-not (Test-Path -LiteralPath $validationJson -PathType Leaf)) {
+            throw "validation.json not found in $runDirectory"
+        }
+        $validation = Get-Content -LiteralPath $validationJson -Encoding UTF8 | ConvertFrom-Json
+        if ($validation.validation -ne 'PASS') {
+            throw "Validation failed for ${name}: validation.json reports $($validation.validation)"
+        }
+
+        # Check runs and games
+        foreach ($run in $validation.runs) {
+            if ($run.runtimeStatus -ne 'CLEAN' -or $run.validation -ne 'PASS') {
+                throw "Run validation failed for ${name}: run $($run.runId) has runtimeStatus=$($run.runtimeStatus), validation=$($run.validation)"
+            }
+            $gamesJsonl = Join-Path $runDirectory "games.jsonl"
+            $games = @(Get-Content -LiteralPath $gamesJsonl -Encoding UTF8 | ConvertFrom-Json)
+            if ($games.Count -ne $GamesPerVariant) {
+                throw "Expected $GamesPerVariant games for $name, found $($games.Count)"
+            }
+            foreach ($game in $games) {
+                if (-not $game.valid -or $game.simulationStatus -ne 'VALID' -or $game.timedOut -or $game.simulationError -or $game.engineFailures) {
+                    throw "Invalid game in ${name}: $($game.gameId)"
+                }
+            }
+        }
+    }
+
+    # Dry run handling
+    if ($DryRun) {
+        Write-Host "Dry run: validation passed. No changes made." -ForegroundColor Cyan
+        return
+    }
+
+    # Proceed to publish (same as existing $Publish code)
+    if (-not (Test-Path (Join-Path $DeckRepo '.git'))) {
+        throw "Private deck repo checkout not found at $DeckRepo. Clone it first."
+    }
+    $branch = (& git -C $DeckRepo branch --show-current | Out-String).Trim()
+    Assert-LastExit 'Git branch lookup'
+    if ($branch -ne 'main') { throw "Deck repository is on '$branch', not 'main'. Aborting." }
+    $dirty = (& git -C $DeckRepo status --porcelain | Out-String).Trim()
+    Assert-LastExit 'Git worktree status'
+    if ($dirty) { throw "Deck repository has pending changes. Commit/stash them first (nothing changed):`n$dirty" }
+
+    $relativePath = "rakdos/forge-tests/reports/seed$Seed"
+    $publishedRoot = Join-Path $DeckRepo ("rakdos\forge-tests\reports\seed$Seed")
+    if (Test-Path -LiteralPath $publishedRoot) {
+        throw "Publishing destination exists: $publishedRoot. Manual reconciliation needed."
+    }
+    New-Item -ItemType Directory -Force -Path $publishedRoot | Out-Null
+    foreach ($item in (Get-ChildItem -LiteralPath $resultsRoot -Force)) {
+        Copy-Item -LiteralPath $item.FullName -Destination $publishedRoot -Recurse -Force
+    }
+    & git -C $DeckRepo add -- $relativePath
+    Assert-LastExit 'Git add'
+    & git -C $DeckRepo diff --cached --stat
+    Assert-LastExit 'Staged change review'
+    & git -C $DeckRepo commit -m "Add validated Commander comparison reports seed $Seed"
+    Assert-LastExit 'Git commit'
+    & git -C $DeckRepo push origin main
+    Assert-LastExit 'Git push'
+    Write-Host "Published to private MTG-deck-lists: $relativePath" -ForegroundColor Green
+}
+else {
+    # Existing simulation code
+    $summary = @()
+    foreach ($candidate in $candidates) {
+        $name = $candidate.Name
+        $runDirectory = Join-Path $resultsRoot $name
+        New-Item -ItemType Directory -Force -Path $runDirectory | Out-Null
+
+        $validationOutput = (& $python $validator $runDirectory --games-per-seed ([string]$GamesPerVariant) 2>&1 | Out-String)
+        $validationCode = $LASTEXITCODE
+        if ($validationCode -ne 0) {
+            throw "Validation failed for ${name}: $validationOutput"
+        }
+
+        $validation = Get-Content -LiteralPath (Join-Path $runDirectory 'validation.json') -Encoding UTF8 | ConvertFrom-Json
+        if ($validation.validation -ne 'PASS') {
+            throw "Validation failed for ${name}: validation.json reports $($validation.validation)"
+        }
+
+        $games = @(Get-Content -LiteralPath (Join-Path $runDirectory 'games.jsonl') -Encoding UTF8 | ConvertFrom-Json)
+        if ($games.Count -ne $GamesPerVariant) {
+            throw "Expected $GamesPerVariant games for $name, found $($games.Count)"
+        }
+
+        $summary += [pscustomobject]@{
+            Name = $name
+            Games = $games.Count
+            Valid = $games | Where-Object { $_.valid } | Measure-Object | Select-Object -ExpandProperty Count
+        }
+    }
+
+    # Existing publish code
+    if ($Publish) {
+        $manifest = [ordered]@{
+            gamesPerVariant = $GamesPerVariant
+            runSeed = $Seed
+            results = $summary
+        }
+        [System.IO.File]::WriteAllText((Join-Path $resultsRoot 'manifest.json'), ($manifest | ConvertTo-Json -Depth 8), $utf8)
+
+        if (-not (Test-Path (Join-Path $DeckRepo '.git'))) {
+            throw "Private deck repo checkout not found at $DeckRepo. Clone it first."
+        }
+        $branch = (& git -C $DeckRepo branch --show-current | Out-String).Trim()
+        Assert-LastExit 'Git branch lookup'
+        if ($branch -ne 'main') { throw "Deck repository is on '$branch', not 'main'. Aborting." }
+        $dirty = (& git -C $DeckRepo status --porcelain | Out-String).Trim()
+        Assert-LastExit 'Git worktree status'
+        if ($dirty) { throw "Deck repository has pending changes. Commit/stash them first (nothing changed):`n$dirty" }
+
+        $relativePath = "rakdos/forge-tests/reports/seed$Seed"
+        $publishedRoot = Join-Path $DeckRepo ("rakdos\forge-tests\reports\seed$Seed")
+        if (Test-Path -LiteralPath $publishedRoot) {
+            throw "Publishing destination exists: $publishedRoot. Manual reconciliation needed."
+        }
+        New-Item -ItemType Directory -Force -Path $publishedRoot | Out-Null
+        foreach ($item in (Get-ChildItem -LiteralPath $resultsRoot -Force)) {
+            Copy-Item -LiteralPath $item.FullName -Destination $publishedRoot -Recurse -Force
+        }
+        & git -C $DeckRepo add -- $relativePath
+        Assert-LastExit 'Git add'
+        & git -C $DeckRepo diff --cached --stat
+        Assert-LastExit 'Staged change review'
+        & git -C $DeckRepo commit -m "Add validated Commander comparison reports seed $Seed"
+        Assert-LastExit 'Git commit'
+        & git -C $DeckRepo push origin main
+        Assert-LastExit 'Git push'
+        Write-Host "Published to private MTG-deck-lists: $relativePath" -ForegroundColor Green
+    }
+}

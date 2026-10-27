@@ -556,6 +556,7 @@ public abstract class Trigger extends TriggerReplacementBase {
     }
     public final Trigger copy(Card newHost, boolean lki, boolean keepTextChanges, SpellAbility spellAbility) {
         final Trigger copy = (Trigger) clone();
+        copy.triggerRemembered = Lists.newArrayList(triggerRemembered);
 
         copyHelper(copy, newHost, lki || keepTextChanges);
 

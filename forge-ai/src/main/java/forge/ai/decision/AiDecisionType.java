@@ -4,5 +4,6 @@ public enum AiDecisionType {
     MULLIGAN_KEEP,
     MAIN_PHASE_ACTION,
     STACK_RESPONSE,
+    CARD_CHOICE,
     COMBAT_ATTACKERS
 }

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "name": "R3 versus R4-A",
+  "candidateSet": "R3-R4-A",
+  "aiProfile": "bounded-advisory",
+  "maxParallelGames": 5,
+  "gamesPerVariant": 100,
+  "timeoutSeconds": 300,
+  "candidates": [
+    {
+      "name": "R3",
+      "file": "Rivaz-R3.dck",
+      "sha256": "a85806bda583cb4868d723147c765f12994c4fedfbf02a548c5fe9d580e25f30",
+      "landCount": 37,
+      "validGames": 100
+    },
+    {
+      "name": "R4-A",
+      "file": "Rivaz-R4-A.dck",
+      "sha256": "3866191db5192479dc7b1d5a1122535452c572413fd8afa7791a2db283da1add",
+      "landCount": 37,
+      "validGames": 100
+    }
+  ],
+  "opponents": [
+    {
+      "file": "Ganax-Far-Traveler-B2.dck",
+      "sha256": "741a20ee9d3b3a6c248caf2e70f9b00b863e9621d2ab59c04b1ac9f160b644e5"
+    },
+    {
+      "file": "Ganax-Acolyte-G1.dck",
+      "sha256": "e1c30ebcba1c9f679312483250315dd6edf1d9361b6e84019b557729b22dc665"
+    },
+    {
+      "file": "Lathliss-V2.5.dck",
+      "sha256": "303fbc076c8e6b203202cc3e17ede9477d47866e572208afa73bc0d38acd73fb"
+    }
+  ],
+  "delta": {
+    "base": "R3",
+    "candidate": "R4-A",
+    "remove": {
+      "Reforge the Soul": 1
+    },
+    "add": {
+      "Rakdos Charm": 1
+    }
+  }
+}

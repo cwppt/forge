@@ -25,6 +25,8 @@ import forge.game.spellability.SpellAbility;
 import forge.game.spellability.SpellAbilityStackInstance;
 import forge.game.staticability.StaticAbility;
 import forge.game.trigger.TriggerType;
+import forge.game.trigger.WrappedAbility;
+import forge.game.zone.Zone;
 import forge.game.zone.PlayerZoneBattlefield;
 import forge.game.zone.ZoneType;
 import forge.item.PaperCard;
@@ -32,6 +34,11 @@ import forge.item.PaperCard;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.IdentityHashMap;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class GameCopier {
     private static final ZoneType[] ZONES = new ZoneType[] {
@@ -48,6 +55,9 @@ public class GameCopier {
     private BiMap<Player, Player> playerMap = HashBiMap.create();
     private BiMap<Card, Card> cardMap = HashBiMap.create();
     private CopiedGameObjectMap gameObjectMap;
+    // LKI versions can share a card id with the live zone card.
+    private final Map<Card, Card> referenceCards = new IdentityHashMap<>();
+    private final Map<SpellAbility, SpellAbility> referenceAbilities = new IdentityHashMap<>();
     private GameSnapshot snapshot = null;
     private final boolean forceCopyStack;
 
@@ -92,8 +102,7 @@ public class GameCopier {
         newGame.setNoGUIUser();
         newGame.dangerouslySetTimestamp(origGame.getTimestamp());
 
-        for (int i = 0; i < origGame.getPlayers().size(); i++) {
-            Player origPlayer = origGame.getPlayers().get(i);
+        for (Player origPlayer : origGame.getRegisteredPlayers()) {
             Player newPlayer = newGame.getPlayer(origPlayer.getId());
             newPlayer.setTeam(origPlayer.getTeam());
             newPlayer.setLife(origPlayer.getLife(), null);
@@ -123,6 +132,12 @@ public class GameCopier {
                 newPlayer.getManaPool().addManaNoEvent(m);
             }
             playerMap.put(origPlayer, newPlayer);
+            if (!origGame.getPlayers().contains(origPlayer)) {
+                // Keep historical owners available without reviving eliminated opponents.
+                newPlayer.getStats().setOutcome(origPlayer.getOutcome());
+                newGame.getPlayers().remove(newPlayer);
+                newGame.getLostPlayers().add(newPlayer);
+            }
         }
 
         PhaseHandler origPhaseHandler = origGame.getPhaseHandler();
@@ -135,9 +150,9 @@ public class GameCopier {
 
         copyGameState(newGame, aiPlayer);
 
-        for (Player origPlayer : playerMap.keySet()) {
+        for (Player origPlayer : origGame.getPlayers()) {
             Player newPlayer = playerMap.get(origPlayer);
-            origPlayer.copyCommandersToSnapshot(newPlayer, gameObjectMap::map);
+            origPlayer.copyCommandersToSnapshot(newPlayer, c -> mapCommanderReference(newGame, c));
             origPlayer.copyEffectCardsToSnapshot(newPlayer, gameObjectMap::map);
             ((PlayerZoneBattlefield) newPlayer.getZone(ZoneType.Battlefield)).setTriggers(true);
         }
@@ -148,13 +163,7 @@ public class GameCopier {
             if (origCard.hasRemembered()) {
                 for (Object o : origCard.getRemembered()) {
                     if (o instanceof GameObject) {
-                        // Sometimes, a spell can "remember" a token card that's not in any zone
-                        // (and thus wouldn't have been copied) - for example Swords to Plowshares
-                        // remembering its target for LKI. Skip these to not crash in find().
-                        if (o instanceof Card && ((Card)o).getZone() == null) {
-                           continue;
-                        }
-                        c.addRemembered(find((GameObject) o));
+                        c.addRemembered(mapReference(o));
                     } else {
                         System.err.println(c + " Remembered: " + o + "/" + o.getClass());
                         c.addRemembered(o);
@@ -193,26 +202,136 @@ public class GameCopier {
         return newGame;
     }
 
-    private static void copyStack(Game origGame, Game newGame, IEntityMap map,
-            boolean includeNonSpellAbilities) {
-        for (SpellAbilityStackInstance origEntry : origGame.getStack()) {
-            SpellAbility origSa = origEntry.getSpellAbility();
-            Card origHostCard = origSa.getHostCard();
-            Card newCard = map.map(origHostCard);
-            SpellAbility newSa = null;
-            if (origSa.isSpell() || includeNonSpellAbilities) {
-                newSa = findSAInCard(origSa, newCard);
-            }
-            if (newSa != null) {
-                newSa.setActivatingPlayer(map.map(origSa.getActivatingPlayer()));
-                if (origSa.usesTargeting()) {
-                    for (GameObject o : origSa.getTargets()) {
-                        newSa.getTargets().add(map.map(o));
-                    }
+    private Card mapCommanderReference(Game newGame, Card commander) {
+        Card mapped = cardMap.get(commander);
+        if (mapped != null) {
+            return mapped;
+        }
+        // Damage/cast history can outlive the commander and its owner leaving
+        // the game. Preserve the identity and statistics in a detached copy;
+        // putting this card into a zone would resurrect a removed permanent.
+        if (!commander.isCommander() || origGame.getCardState(commander, null) != null) {
+            return gameObjectMap.map(commander);
+        }
+        mapped = createCardCopy(newGame, playerMap.get(commander.getOwner()), commander, null);
+        mapped.setGameTimestamp(commander.getGameTimestamp());
+        cardMap.put(commander, mapped);
+        return mapped;
+    }
+
+    private Zone mapReferenceZone(Zone zone) {
+        if (zone == null) return null;
+        return zone.getPlayer() == null ? gameObjectMap.getGame().getStackZone()
+                : playerMap.get(zone.getPlayer()).getZone(zone.getZoneType());
+    }
+
+    private Card mapReferenceCard(Card source) {
+        if (source == null) return null;
+        Card live = origGame.getCardState(source, null);
+        if (!source.isLKI() && live != null && source.equalsWithGameTimestamp(live)) {
+            return find(live);
+        }
+        Card result = referenceCards.get(source);
+        if (result != null) return result;
+        // Preserve last-known characteristics, counters and timestamps, but never
+        // insert historical sources/tokens into a live zone. Cache before recursion.
+        result = CardCopyService.getLKICopy(source);
+        referenceCards.put(source, result);
+        result.setOwner(playerMap.get(source.getOwner()));
+        result.dangerouslySetGame(gameObjectMap.getGame());
+        result.setController(playerMap.get(source.getController()), 0);
+        result.setZone(mapReferenceZone(source.getZone()));
+        result.setLastKnownZone(mapReferenceZone(source.getLastKnownZone()));
+        if (source.hasChosenPlayer()) result.setChosenPlayer(playerMap.get(source.getChosenPlayer()));
+        result.clearRemembered();
+        for (Object remembered : source.getRemembered()) result.addRemembered(mapReference(remembered));
+        result.clearImprintedCards();
+        for (Card imprinted : source.getImprintedCards()) result.addImprintedCard(mapReferenceCard(imprinted));
+        if (source.getEffectSource() != null) result.setEffectSource(mapReferenceCard(source.getEffectSource()));
+        if (source.getCopiedPermanent() != null) result.setCopiedPermanent(mapReferenceCard(source.getCopiedPermanent()));
+        return result;
+    }
+
+    private Object mapReference(Object value) {
+        if (value instanceof Card) return mapReferenceCard((Card) value);
+        if (value instanceof Player) return find((Player) value);
+        if (value instanceof SpellAbility) return copyPreparedAbility((SpellAbility) value);
+        if (value instanceof forge.game.card.CardCollectionView) {
+            forge.game.card.CardCollection cards = new forge.game.card.CardCollection();
+            for (Card card : (forge.game.card.CardCollectionView) value) cards.add(mapReferenceCard(card));
+            return cards;
+        }
+        if (value instanceof Map<?, ?>) {
+            Map<Object, Object> mapped = new LinkedHashMap<>();
+            ((Map<?, ?>) value).forEach((key, item) -> mapped.put(mapReference(key), mapReference(item)));
+            return mapped;
+        }
+        if (value instanceof Collection<?>) {
+            Collection<Object> mapped = value instanceof Set<?> ? new LinkedHashSet<>() : new ArrayList<>();
+            for (Object item : (Collection<?>) value) mapped.add(mapReference(item));
+            return mapped;
+        }
+        return value;
+    }
+
+    private SpellAbility copyPreparedAbility(SpellAbility source) {
+        SpellAbility cached = referenceAbilities.get(source);
+        if (cached != null) return cached;
+        Card host = mapReferenceCard(source.getHostCard());
+        SpellAbility result;
+        if (source instanceof WrappedAbility) {
+            WrappedAbility wrapper = (WrappedAbility) source;
+            SpellAbility inner = copyPreparedAbility(wrapper.getWrappedAbility());
+            forge.game.trigger.Trigger trigger = wrapper.getTrigger().copy(host, true, true, inner);
+            List<Object> remembered = trigger.getTriggerRemembered();
+            for (int i = 0; i < remembered.size(); i++) remembered.set(i, mapReference(remembered.get(i)));
+            result = new WrappedAbility(trigger, inner, find(wrapper.getDecider()));
+        } else {
+            result = source.copy(host, find(source.getActivatingPlayer()), true, true);
+        }
+        referenceAbilities.put(source, result);
+        SpellAbility originalNode = source;
+        SpellAbility copiedNode = result;
+        while (originalNode != null && copiedNode != null) {
+            referenceAbilities.put(originalNode, copiedNode);
+            copiedNode.setActivatingPlayer(find(originalNode.getActivatingPlayer()));
+            copiedNode.setTargetingPlayer(find(originalNode.getTargetingPlayer()));
+            if (originalNode.usesTargeting()) {
+                copiedNode.resetTargets();
+                for (GameObject target : originalNode.getTargets()) {
+                    copiedNode.getTargets().add((GameObject) mapReference(target));
                 }
-                newGame.getStack().add(newSa);
             }
-        } 
+            Map<forge.game.ability.AbilityKey, Object> objects = forge.game.ability.AbilityKey.newMap();
+            originalNode.getTriggeringObjects().forEach((key, value) -> objects.put(key, mapReference(value)));
+            copiedNode.setTriggeringObjects(objects);
+            if (originalNode.getLastStateBattlefield() != null) {
+                copiedNode.setLastStateBattlefield((forge.game.card.CardCollection) mapReference(originalNode.getLastStateBattlefield()));
+            }
+            if (originalNode.getLastStateGraveyard() != null) {
+                copiedNode.setLastStateGraveyard((forge.game.card.CardCollection) mapReference(originalNode.getLastStateGraveyard()));
+            }
+            originalNode = originalNode.getSubAbility();
+            copiedNode = copiedNode.getSubAbility();
+        }
+        return result;
+    }
+
+    private void copyStack(Game origGame, Game newGame, IEntityMap map,
+            boolean includeNonSpellAbilities) {
+        for (SpellAbilityStackInstance entry : origGame.getStack()) {
+            SpellAbility ability = entry.getSpellAbility();
+            if (ability.isSpell() || includeNonSpellAbilities) {
+                newGame.getStack().addSnapshotEntry(copyPreparedAbility(ability), entry.getId());
+            }
+        }
+        for (SpellAbility cast : origGame.getStack().getSpellsCastThisTurn()) {
+            newGame.getStack().getSpellsCastThisTurn().add(copyPreparedAbility(cast));
+        }
+        for (SpellAbility activated : origGame.getStack().getAbilityActivatedThisTurn()) {
+            newGame.getStack().getAbilityActivatedThisTurn().add(copyPreparedAbility(activated));
+        }
+        newGame.updateStackForView();
     }
 
     private RegisteredPlayer clonePlayer(RegisteredPlayer p) {

@@ -1,0 +1,11 @@
+{
+  "CommanderBatch.py": "69647f23f491708a3a7db1c91a6344a2439958dd27084fddee62a5755cd24ac8",
+  "ParallelCommanderPool.py": "f5eb80fd7125bfeff2b0d3efb68d18be39b9e753987ade914e4fdc1697477385",
+  "Start-CommanderBatch.ps1": "b4d69f838ab8e07e2ceb30dfe71235d4f2b57b3684d0900c66188e333804dbf5",
+  "Run-ValidCommanderCohort.py": "8642e4f3cd828bf3a9e88f5e792ab1201d02e8878d63e5b804318d863bf30fed",
+  "Validate-CommanderTelemetry.py": "7d949e7aa71cedbccf331c77210a4a021dbd16a24516ae2a27d03734d626e33f",
+  "test_commander_batch.py": "59b22bb4ea6da100d5ea8ae9f5256608306082e3c1123ace592334563908dfbf",
+  "test_valid_commander_cohort.py": "622d52b2514dd24bbf26a9575d40f34cad1426dd2cf9da1ce2d350404b65a6ae",
+  "test_parallel_commander_pool.py": "31700919e2e4aaf6702af313d46b95cef43f389e4b54eff1cf163b5c56837ded",
+  "Test-ParallelStatus.ps1": "68d113e1a7f2460758e9fac0da3a72d8242a5b29c794fb73f47dfcd6564b9a0f"
+}

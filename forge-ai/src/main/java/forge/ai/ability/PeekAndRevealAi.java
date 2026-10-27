@@ -31,10 +31,10 @@ public class PeekAndRevealAi extends SpellAbilityAi {
         }
         // So far this only appears on Triggers, but will expand
         // once things get converted from Dig + NoMove
-        Player opp = AiAttackController.choosePreferredDefenderPlayer(aiPlayer);
         Player libraryOwner = aiPlayer;
 
         if (sa.usesTargeting()) {
+            Player opp = AiAttackController.choosePreferredDefenderPlayer(aiPlayer);
             sa.resetTargets();
             //todo: evaluate valid targets
             if (!sa.canTarget(opp)) {

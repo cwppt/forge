@@ -14,6 +14,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import forge.LobbyPlayer;
 import forge.ai.AiProfileUtil;
 import forge.ai.decision.AiDecisionMetrics;
+import forge.ai.decision.SimulationFailureDiagnostics;
 import forge.deck.Deck;
 import forge.deck.DeckGroup;
 import forge.deck.io.DeckSerializer;
@@ -244,8 +245,10 @@ public class SimulateMatch {
         System.out.println("\t--external-ai-response-format <AUTO|JSON_SCHEMA|JSON_OBJECT> - structured response mode");
         System.out.println("\t--metrics-csv <file> - write mulligan and main-phase AI telemetry as CSV");
         System.out.println("\t--decision-audit-jsonl <file> - write sanitized external-AI decision audits as JSONL");
+        System.out.println("\t--capture-simulation-failures - mark caught AI failures and record evaluated card exposure");
         System.out.println("\t--game-results-jsonl <file> - write one machine-readable game result per line");
         System.out.println("\t--game-log-jsonl <file> - write chronological game-log events as JSONL");
+        System.out.println("\t--commander-role-jsonl <file> - passive omniscient hand/zone/mana-source/AI-opinion diagnostics");
     }
 
     public static GameSimulationResult simulateSingleMatch(final Match mc, int iGame, boolean outputGamelog) {
@@ -259,8 +262,18 @@ public class SimulateMatch {
         sw.start();
 
         final Game g1 = mc.createGame();
+        System.out.printf("Simulation Attempt: gameIndex=%d gameId=%d runSeed=%s%n", iGame, g1.getId(), runSeed);
         AiDecisionMetrics.registerGame(g1.getId(), iGame, runSeed);
         g1.setNoGUIUser();
+        boolean captureFailures = params.containsKey("capture-simulation-failures");
+        SimulationFailureDiagnostics.begin(g1, captureFailures);
+        forge.ai.decision.CommanderRoleTelemetry roleTelemetry = null;
+        List<String> roleOutput = params.get("commander-role-jsonl");
+        if (roleOutput != null && !roleOutput.isEmpty()) {
+            try {
+                roleTelemetry = forge.ai.decision.CommanderRoleTelemetry.begin(g1, iGame, runSeed, Path.of(roleOutput.get(0)));
+            } catch (IOException e) { throw new java.io.UncheckedIOException(e); }
+        }
         boolean timedOut = false;
         String simulationError = null;
         // will run match in the same thread
@@ -270,9 +283,11 @@ public class SimulateMatch {
                 sw.stop();
             }, mc.getRules().getSimTimeout(), TimeUnit.SECONDS);
         } catch (TimeoutException e) {
+            SimulationFailureDiagnostics.capture(e, null, null, "game-timeout");
             timedOut = true;
             System.out.println("Simulation timed out; exporting the game's recorded outcome");
         } catch (Exception | StackOverflowError e) {
+            SimulationFailureDiagnostics.capture(e, null, null, "game-execution");
             simulationError = e.getClass().getName();
             e.printStackTrace();
         } finally {
@@ -280,6 +295,12 @@ public class SimulateMatch {
                 sw.stop();
             }
             g1.setGameOver(GameEndReason.Draw);
+        }
+
+        SimulationFailureDiagnostics.Snapshot diagnostics = SimulationFailureDiagnostics.finish();
+        if (roleTelemetry != null) {
+            try { roleTelemetry.finish(timedOut, simulationError); }
+            catch (IOException e) { throw new java.io.UncheckedIOException(e); }
         }
 
         List<GameLogEntry> log;
@@ -309,7 +330,7 @@ public class SimulateMatch {
                     g1.getPhaseHandler().getTurn());
             System.out.printf("\nGame Result: Game %d ended in a Draw! Took %d ms.%n", 1 + iGame, sw.getTime());
             return new GameSimulationResult(g1.getId(), iGame, runSeed, sw.getTime(),
-                    g1.getPhaseHandler().getTurn(), true, null, timedOut, simulationError);
+                    g1.getPhaseHandler().getTurn(), true, null, timedOut, simulationError, diagnostics);
         } else {
             String winner = g1.getOutcome().getWinningLobbyPlayer().getName();
             AiDecisionMetrics.completeGame(g1.getId(), winner, false, sw.getTime(),
@@ -317,7 +338,7 @@ public class SimulateMatch {
             System.out.printf("\nGame Result: Game %d ended in %d ms. %s has won!\n%n",
                     1 + iGame, sw.getTime(), winner);
             return new GameSimulationResult(g1.getId(), iGame, runSeed, sw.getTime(),
-                    g1.getPhaseHandler().getTurn(), false, winner, timedOut, simulationError);
+                    g1.getPhaseHandler().getTurn(), false, winner, timedOut, simulationError, diagnostics);
         }
     }
 
@@ -330,10 +351,21 @@ public class SimulateMatch {
             boolean draw,
             String winner,
             boolean timedOut,
-            String simulationError) {
+            String simulationError,
+            SimulationFailureDiagnostics.Snapshot diagnostics) {
+        public GameSimulationResult(int gameId, int gameIndex, Long runSeed, long durationMs,
+                int finalTurnCount, boolean draw, String winner, boolean timedOut, String simulationError) {
+            this(gameId, gameIndex, runSeed, durationMs, finalTurnCount, draw, winner, timedOut,
+                    simulationError, SimulationFailureDiagnostics.Snapshot.empty());
+        }
         public GameSimulationResult(int gameId, int gameIndex, Long runSeed, long durationMs,
                 int finalTurnCount, boolean draw, String winner) {
             this(gameId, gameIndex, runSeed, durationMs, finalTurnCount, draw, winner, false, null);
+        }
+
+        public boolean valid() { return !timedOut && simulationError == null && diagnostics.failures().isEmpty(); }
+        public String simulationStatus() {
+            return timedOut ? "TIMEOUT" : valid() ? "VALID" : "ENGINE_FAILED";
         }
     }
 
@@ -383,12 +415,13 @@ public class SimulateMatch {
 
     private static void outputEvaluation(Map<String, List<String>> params, List<GameSimulationResult> results) {
         System.out.println("AI evaluation: " + AiDecisionMetrics.summary(results.size()));
-        long draws = results.stream().filter(GameSimulationResult::draw).count();
-        double averageDuration = results.stream().mapToLong(GameSimulationResult::durationMs).average().orElse(0);
+        List<GameSimulationResult> valid = results.stream().filter(GameSimulationResult::valid).toList();
+        long draws = valid.stream().filter(GameSimulationResult::draw).count();
+        double averageDuration = valid.stream().mapToLong(GameSimulationResult::durationMs).average().orElse(0);
         Map<String, Long> wins = new TreeMap<>();
-        results.stream().filter(r -> !r.draw()).forEach(r -> wins.merge(r.winner(), 1L, Long::sum));
-        System.out.printf(Locale.ROOT, "gameResults games=%d draws=%d avgGameLengthMs=%.2f wins=%s%n",
-                results.size(), draws, averageDuration, wins);
+        valid.stream().filter(r -> !r.draw()).forEach(r -> wins.merge(r.winner(), 1L, Long::sum));
+        System.out.printf(Locale.ROOT, "gameResults attempted=%d valid=%d failed=%d draws=%d avgGameLengthMs=%.2f wins=%s%n",
+                results.size(), valid.size(), results.size() - valid.size(), draws, averageDuration, wins);
         List<String> output = params.get("metrics-csv");
         if (output != null && !output.isEmpty()) {
             try {
@@ -442,13 +475,17 @@ public class SimulateMatch {
             lines.add(String.format(Locale.ROOT,
                     "{\"gameId\":%d,\"gameIndex\":%d,\"runSeed\":%s,\"durationMs\":%d,"
                             + "\"finalTurnCount\":%d,\"draw\":%s,\"winner\":%s,"
-                            + "\"timedOut\":%s,\"simulationError\":%s}",
+                            + "\"timedOut\":%s,\"simulationError\":%s,\"valid\":%s,"
+                            + "\"simulationStatus\":\"%s\",\"engineFailures\":%s,\"candidateExposure\":%s}",
                     result.gameId(), result.gameIndex(),
                     result.runSeed() == null ? "null" : result.runSeed().toString(),
                     result.durationMs(), result.finalTurnCount(), result.draw(),
                     result.winner() == null ? "null" : "\"" + jsonEscape(result.winner()) + "\"",
                     result.timedOut(), result.simulationError() == null ? "null"
-                            : "\"" + jsonEscape(result.simulationError()) + "\""));
+                            : "\"" + jsonEscape(result.simulationError()) + "\"",
+                    result.valid(), result.simulationStatus(),
+                    new com.google.gson.GsonBuilder().serializeNulls().create().toJson(result.diagnostics().failures()),
+                    new com.google.gson.GsonBuilder().serializeNulls().create().toJson(result.diagnostics().candidateExposure())));
         }
         Files.write(path, lines, StandardCharsets.UTF_8);
     }

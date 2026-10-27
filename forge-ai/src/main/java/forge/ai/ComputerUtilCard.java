@@ -841,7 +841,29 @@ public class ComputerUtilCard {
      * @return creature will be attack
      */
     public static boolean doesSpecifiedCreatureAttackAI(final Player ai, final Card card) {
+        // CombatUtil.canAttack rejects every defender in these states. Avoid scoring the
+        // entire multiplayer board before reaching that same guaranteed rejection.
+        if (!card.isCreature() || card.isTapped() || card.isPhasedOut()
+                || ai.getGame().getPhaseHandler().getPhase().isAfter(PhaseType.COMBAT_DECLARE_ATTACKERS)) return false;
+        try (AiEvaluationDiagnostics diagnostics = AiEvaluationDiagnostics.beginIfAbsent(ai, 1, "virtual-attack")) {
+            return AiEvaluationDiagnostics.boundedPrediction(() -> doesSpecifiedCreatureAttackBounded(ai, card), false);
+        }
+    }
+    private static boolean doesSpecifiedCreatureAttackBounded(final Player ai, final Card card) {
+        if (AiEvaluationDiagnostics.prediction("hypotheticalAttack")) return false;
+        // The single-creature controller ultimately rejects this attacker if its chosen
+        // opponent is illegal. When every opponent is illegal, avoid that unused scoring.
+        boolean legalDefender = false;
+        for (Player opponent : ai.getOpponents()) {
+            AiEvaluationDiagnostics.advisoryCheckpoint("virtualAttackLegality");
+            if (CombatUtil.canAttack(card, opponent)) {
+                legalDefender = true;
+                break;
+            }
+        }
+        if (!legalDefender) return false;
         AiAttackController aiAtk = new AiAttackController(ai, card);
+        AiEvaluationDiagnostics.advisoryCheckpoint("virtualAttackSearch");
         Combat combat = new Combat(ai);
         aiAtk.declareAttackers(combat);
         return combat.isAttacking(card);
@@ -1473,6 +1495,9 @@ public class ComputerUtilCard {
     }
     public static boolean shouldPumpCard(final Player ai, final SpellAbility sa, final Card c, final int toughness,
                                          final int power, final List<String> keywords, boolean immediately) {
+        // Stop considering further hypothetical pump targets once this decision's
+        // advisory prediction budget is exhausted. Target legality is unchanged.
+        if (AiEvaluationDiagnostics.prediction("pumpTarget")) return false;
         final Game game = ai.getGame();
         final PhaseHandler phase = game.getPhaseHandler();
         final Combat combat = phase.getCombat();
@@ -1880,7 +1905,11 @@ public class ComputerUtilCard {
         final long timestamp = c.getGame().getNextTimestamp();
         final List<String> kws = Lists.newArrayList();
         final List<String> hiddenKws = Lists.newArrayList();
-        for (String kw : keywords) {
+        final List<String> resolvedKeywords = Lists.newArrayList(keywords);
+        if (!forge.game.ability.effects.PumpEffect.resolveDefinedKeywords(sa, resolvedKeywords)) {
+            resolvedKeywords.clear();
+        }
+        for (String kw : resolvedKeywords) {
             if (kw.startsWith("HIDDEN")) {
                 hiddenKws.add(kw.substring(7));
             } else {

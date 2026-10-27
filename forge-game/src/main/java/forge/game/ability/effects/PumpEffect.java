@@ -28,6 +28,66 @@ import forge.game.zone.ZoneType;
 
 public class PumpEffect extends SpellAbilityEffect {
 
+    /** Resolve keyword placeholders identically for real effects and AI previews. */
+    public static boolean resolveDefinedKeywords(SpellAbility sa, List<String> keywords) {
+        final Card host = sa.getHostCard();
+        if (sa.hasParam("DefinedKW")) {
+            String defined = sa.getParam("DefinedKW");
+            if (defined.equals("ChosenType")) {
+                if (!host.hasChosenType()) {
+                    return false;
+                }
+                String replaced = host.getChosenType();
+                for (int i = 0; i < keywords.size(); i++) {
+                    String s = keywords.get(i);
+                    s = s.replaceAll(defined, replaced);
+                    keywords.set(i, s);
+                }
+            } else if (defined.equals("ChosenPlayer")) {
+                if (!host.hasChosenPlayer()) {
+                    return false;
+                }
+                Player cp = host.getChosenPlayer();
+                for (int i = 0; i < keywords.size(); i++) {
+                    String s = keywords.get(i);
+                    s = s.replaceAll("ChosenPlayerUID", String.valueOf(cp.getId()));
+                    s = s.replaceAll("ChosenPlayerName", cp.getName());
+                    keywords.set(i, s);
+                }
+            } else if (defined.equals("ChosenColor")) {
+                if (!host.hasChosenColor()) {
+                    return false;
+                }
+                for (int i = 0; i < keywords.size(); i++) {
+                    String s = keywords.get(i);
+                    s = s.replaceAll("ChosenColor", StringUtils.capitalize(host.getChosenColor()));
+                    s = s.replaceAll("chosenColor", host.getChosenColor().toLowerCase());
+                    keywords.set(i, s);
+                }
+            } else { // anything else needs to be defined players?
+                PlayerCollection players = AbilityUtils.getDefinedPlayers(host, defined, sa);
+                if (players.isEmpty()) return false;
+                List<String> newKeywords = Lists.newArrayList();
+                keywords.removeIf(input -> {
+                    if (!input.contains("ChosenPlayerUID") && !input.contains("ChosenPlayerName")) {
+                        return false;
+                    }
+                    for (Player p : players) {
+                        String replacedID = String.valueOf(p.getId());
+                        String replacedName = p.getName();
+
+                        String s = input.replaceAll("ChosenPlayerUID", replacedID);
+                        s = s.replaceAll("ChosenPlayerName", replacedName);
+                        newKeywords.add(s);
+                    }
+                    return true;
+                });
+                keywords.addAll(newKeywords);
+            }
+        }
+        return true;
+    }
+
     private static void applyPump(final SpellAbility sa, final Card applyTo,
             final int a, final int d, final List<String> keywords,
             final long timestamp) {
@@ -315,59 +375,8 @@ public class PumpEffect extends SpellAbilityEffect {
             keywords = CardFactoryUtil.sharedKeywords(keywords, restrictions, zones, host, sa);
         }
 
-        if (sa.hasParam("DefinedKW")) {
-            String defined = sa.getParam("DefinedKW");
-            if (defined.equals("ChosenType")) {
-                if (!host.hasChosenType()) {
-                    return;
-                }
-                String replaced = host.getChosenType();
-                for (int i = 0; i < keywords.size(); i++) {
-                    String s = keywords.get(i);
-                    s = s.replaceAll(defined, replaced);
-                    keywords.set(i, s);
-                }
-            } else if (defined.equals("ChosenPlayer")) {
-                if (!host.hasChosenPlayer()) {
-                    return;
-                }
-                Player cp = host.getChosenPlayer();
-                for (int i = 0; i < keywords.size(); i++) {
-                    String s = keywords.get(i);
-                    s = s.replaceAll("ChosenPlayerUID", String.valueOf(cp.getId()));
-                    s = s.replaceAll("ChosenPlayerName", cp.getName());
-                    keywords.set(i, s);
-                }
-            } else if (defined.equals("ChosenColor")) {
-                if (!host.hasChosenColor()) {
-                    return;
-                }
-                for (int i = 0; i < keywords.size(); i++) {
-                    String s = keywords.get(i);
-                    s = s.replaceAll("ChosenColor", StringUtils.capitalize(host.getChosenColor()));
-                    s = s.replaceAll("chosenColor", host.getChosenColor().toLowerCase());
-                    keywords.set(i, s);
-                }
-            } else { // anything else needs to be defined players?
-                PlayerCollection players = AbilityUtils.getDefinedPlayers(host, defined, sa);
-                if (players.isEmpty()) return;
-                List<String> newKeywords = Lists.newArrayList();
-                keywords.removeIf(input -> {
-                    if (!input.contains("ChosenPlayerUID") && !input.contains("ChosenPlayerName")) {
-                        return false;
-                    }
-                    for (Player p : players) {
-                        String replacedID = String.valueOf(p.getId());
-                        String replacedName = p.getName();
-
-                        String s = input.replaceAll("ChosenPlayerUID", replacedID);
-                        s = s.replaceAll("ChosenPlayerName", replacedName);
-                        newKeywords.add(s);
-                    }
-                    return true;
-                });
-                keywords.addAll(newKeywords);
-            }
+        if (!resolveDefinedKeywords(sa, keywords)) {
+            return;
         }
         if (sa.hasParam("DefinedLandwalk")) {
             final String landtype = sa.getParam("DefinedLandwalk");

@@ -124,7 +124,7 @@ public class ComputerUtil {
         game.getStack().freezeStack(sa);
 
         final CostPayment pay = new CostPayment(cost, sa);
-        if (pay.payComputerCosts(new AiCostDecision(ai, sa, false))) {
+        if (pay.payComputerCosts(new AiCostDecision(ai, sa, false).withExternalChoices())) {
             game.getStack().addAndUnfreeze(sa);
             if (sa.getSplicedCards() != null && !sa.getSplicedCards().isEmpty()) {
                 game.getAction().reveal(sa.getSplicedCards(), ai, true, "Computer reveals spliced cards from ");
@@ -243,7 +243,7 @@ public class ComputerUtil {
             return false;
         }
 
-        if (pay.payComputerCosts(new AiCostDecision(ai, sa, false))) {
+        if (pay.payComputerCosts(new AiCostDecision(ai, sa, false).withExternalChoices())) {
             game.getStack().add(sa);
             return true;
         }
@@ -264,7 +264,7 @@ public class ComputerUtil {
 
         final Cost cost = sa.getPayCosts();
         final CostPayment pay = new CostPayment(cost, sa);
-        if (pay.payComputerCosts(new AiCostDecision(ai, sa, effect))) {
+        if (pay.payComputerCosts(new AiCostDecision(ai, sa, effect).withExternalChoices())) {
             AbilityUtils.resolve(sa);
             return true;
         }
@@ -3186,6 +3186,14 @@ public class ComputerUtil {
         return predictNextCombatsRemainingLife(ai, serious, checkDiff, payment, excludedBlockers, ai.getOpponents());
     }
     public static int predictNextCombatsRemainingLife(Player ai, boolean serious, boolean checkDiff, int payment, final CardCollection excludedBlockers, final List<Player> opps) {
+        try (AiEvaluationDiagnostics diagnostics = AiEvaluationDiagnostics.beginIfAbsent(ai, opps.size(), "life-prediction")) {
+            return AiEvaluationDiagnostics.boundedPrediction(
+                    () -> predictNextCombatsRemainingLifeBounded(ai, serious, checkDiff, payment, excludedBlockers, opps),
+                    Integer.MIN_VALUE);
+        }
+    }
+    private static int predictNextCombatsRemainingLifeBounded(Player ai, boolean serious, boolean checkDiff, int payment, final CardCollection excludedBlockers, final List<Player> opps) {
+        if (AiEvaluationDiagnostics.prediction("lifePrediction")) return Integer.MIN_VALUE;
         // life won't change
         int remainingLife = Integer.MAX_VALUE;
 

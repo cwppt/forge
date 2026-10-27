@@ -1228,9 +1228,9 @@ public class SpecialCardAi {
 
             // We want to either be able to attack with the creature, or keep it until our opponent's end of turn as a
             // potential blocker
-            if (ComputerUtilCard.doesSpecifiedCreatureAttackAI(ai, exiledWith)
-                    || (ai.getGame().getPhaseHandler().getPlayerTurn().isOpponentOf(ai) && ai.getGame().getCombat() != null
-                    && !ai.getGame().getCombat().getAttackers().isEmpty())) {
+            if ((ai.getGame().getPhaseHandler().getPlayerTurn().isOpponentOf(ai) && ai.getGame().getCombat() != null
+                    && !ai.getGame().getCombat().getAttackers().isEmpty())
+                    || ComputerUtilCard.doesSpecifiedCreatureAttackAI(ai, exiledWith)) {
                 return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
             } else {
                 return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);

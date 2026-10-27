@@ -982,6 +982,15 @@ public class MagicStack /* extends MyObservable */ implements Iterable<SpellAbil
         return false;
     }
 
+    /** Append an already-prepared snapshot entry in top-to-bottom order, without casting it again. */
+    public void addSnapshotEntry(SpellAbility ability, int id) {
+        if (ability.getHostCard().getGame() != game
+                || (ability.getActivatingPlayer() != null && ability.getActivatingPlayer().getGame() != game)) {
+            throw new IllegalArgumentException("Snapshot stack entry belongs to another game");
+        }
+        stack.addLast(new SpellAbilityStackInstance(ability, id));
+    }
+
     @Override
     public Iterator<SpellAbilityStackInstance> iterator() {
         return stack.iterator();

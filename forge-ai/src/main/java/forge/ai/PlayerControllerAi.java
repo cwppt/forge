@@ -69,6 +69,8 @@ import java.util.stream.Collectors;
 public class PlayerControllerAi extends PlayerController {
     private final AiController brains;
     private final AiDecisionProvider decisionProvider;
+
+    AiDecisionProvider cardChoiceProvider() { return decisionProvider; }
     private final boolean externalMulliganEnabled;
 
     private boolean pilotsNonAggroDeck = false;
@@ -338,7 +340,10 @@ public class PlayerControllerAi extends PlayerController {
 
     @Override
     public CardCollectionView choosePermanentsToSacrifice(SpellAbility sa, int min, int max, CardCollectionView validTargets, String message) {
-        return ComputerUtil.choosePermanentsToSacrifice(player, validTargets, max, sa, false, min == 0);
+        CardCollection fallback = ComputerUtil.choosePermanentsToSacrifice(player, new CardCollection(validTargets), max, sa, false, min == 0);
+        if (min == 1 && max == 1) return ExternalGraveyardChoices.single(player, sa, "Sacrifice one permanent", validTargets,
+                fallback, c -> c.isInZone(ZoneType.Battlefield) && c.getController() == player && c.canBeSacrificedBy(sa, true), false);
+        return fallback;
     }
 
     @Override
@@ -730,7 +735,12 @@ public class PlayerControllerAi extends PlayerController {
     @Override
     public CardCollection chooseCardsToDiscardFrom(Player p, SpellAbility sa, CardCollection validCards, int min, int max, CardCollectionView visibleToChooser) {
         if (p == player) {
-            return brains.getCardsToDiscard(min, max, validCards, sa);
+            CardCollection fallback = brains.getCardsToDiscard(min, max, new CardCollection(validCards), sa);
+            if (min == 1 && max == 1) {
+                return ExternalGraveyardChoices.single(player, sa, "Discard one card", validCards, fallback,
+                        c -> c.isInZone(ZoneType.Hand) && c.getController() == player && c.canBeDiscardedBy(sa, true), false);
+            }
+            return fallback;
         }
 
         boolean isTargetFriendly = !p.isOpponentOf(player);
@@ -985,6 +995,7 @@ public class PlayerControllerAi extends PlayerController {
                 sa.resolve();
             }
         } else {
+            ExternalGraveyardChoices.retarget(player, sa);
             ComputerUtil.handlePlayingSpellAbility(player, sa, getDeferredTargetingPlayerAction(sa));
         }
         return true;
@@ -1442,6 +1453,7 @@ public class PlayerControllerAi extends PlayerController {
         for (final SpellAbility sa : orderSimultaneousSa(activePlayerSAs)) {
             if (sa.isTrigger() && !sa.isCopied()) {
                 if (prepareSingleSa(sa.getHostCard(), sa, true)) {
+                    ExternalGraveyardChoices.retarget(player, sa);
                     ComputerUtil.playStack(sa, player, getGame());
                 }
             } else {
@@ -1521,6 +1533,7 @@ public class PlayerControllerAi extends PlayerController {
     @Override
     public boolean playTrigger(Card host, WrappedAbility wrapperAbility, boolean isMandatory) {
         if (prepareSingleSa(host, wrapperAbility, isMandatory)) {
+            ExternalGraveyardChoices.retarget(player, wrapperAbility.getWrappedAbility());
             return ComputerUtil.playNoStack(wrapperAbility.getActivatingPlayer(), wrapperAbility, getGame(), true);
         }
         return false;
@@ -1721,7 +1734,14 @@ public class PlayerControllerAi extends PlayerController {
         if (delayedReveal != null) {
             reveal(delayedReveal);
         }
-        return brains.chooseCardToHiddenOriginChangeZone(destination, origin, sa, fetchList, player, decider);
+        Card fallback = brains.chooseCardToHiddenOriginChangeZone(destination, origin, sa, new CardCollection(fetchList), player, decider);
+        // A library search authorizes only the explicit engine-supplied search pool, not the rest of the library.
+        if (decider != null && decider != player) return fallback;
+        if (!origin.contains(ZoneType.Library) || fetchList.stream().anyMatch(c -> c.getOwner() != player)) return fallback;
+        CardCollection selected = ExternalGraveyardChoices.single(player, sa, "Search library: move a card to " + destination,
+                fetchList, fallback == null ? CardCollection.EMPTY : new CardCollection(fallback),
+                c -> c.isInZone(ZoneType.Library) && c.getOwner() == player, true);
+        return selected == null || selected.isEmpty() ? null : selected.get(0);
     }
 
     @Override

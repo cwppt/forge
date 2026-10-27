@@ -28,6 +28,10 @@ import static forge.ai.ComputerUtilCard.getWorstCreatureAI;
 
 public class AiCostDecision extends CostDecisionMakerBase {
     private final CardCollection discarded;
+    private boolean externalChoices;
+
+    /** Enable only at execution, never during cost desirability previews. */
+    public AiCostDecision withExternalChoices() { externalChoices = true; return this; }
     private final CardCollection tapped;
 
     public AiCostDecision(Player ai0, SpellAbility sa, final boolean effect) {
@@ -144,6 +148,12 @@ public class AiCostDecision extends CostDecisionMakerBase {
         final AiController aic = ((PlayerControllerAi)player.getController()).getAi();
 
         CardCollection result = aic.getCardsToDiscard(c, type.split(";"), ability, discarded);
+        if (externalChoices && c == 1 && result != null) {
+            CardCollection valid = CardLists.getValidCards(hand, type.split(";"), player, source, ability);
+            valid.removeAll(discarded);
+            result = ExternalGraveyardChoices.single(player, ability, "Discard one card to pay for " + source.getName(), valid,
+                    result, card -> card.isInZone(ZoneType.Hand) && card.canBeDiscardedBy(ability, isEffect()), false);
+        }
         if (result != null) {
             discarded.addAll(result);
         }

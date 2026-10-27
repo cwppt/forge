@@ -198,7 +198,13 @@ public class AiAttackController {
         if (opponents.size() < 2) {
             return Iterables.getFirst(opponents, null);
         }
-
+        // Trigger handling can reach this advisory search outside the bounded decision worker.
+        // All opponents share one budget; nested predictions must not acquire fresh budgets.
+        try (AiEvaluationDiagnostics diagnostics = AiEvaluationDiagnostics.beginIfAbsent(ai, opponents.size(), "defender-selection")) {
+            return choosePreferredDefenderPlayerBounded(ai, forCombatDmg, opponents);
+        }
+    }
+    private static Player choosePreferredDefenderPlayerBounded(Player ai, boolean forCombatDmg, PlayerCollection opponents) {
         Map<Player, Integer> threatScores = Maps.newHashMap();
         for (Player opp : opponents) {
             final int life = opp.getLife();

@@ -133,6 +133,11 @@ public class ReplacementHandler {
                 }
             }
 
+            // Most library/hand cards have no source of replacement effects.
+            // Check the current state rather than rebuilding an empty trait list.
+            if (!c.getCurrentState().hasReplacementEffectSources()) {
+                return true;
+            }
             for (final ReplacementEffect replacementEffect : c.getReplacementEffects()) {
                 if (!replacementEffect.hasRun() && !hasRun.contains(replacementEffect)
                         && (layer == null || replacementEffect.getLayer() == layer)

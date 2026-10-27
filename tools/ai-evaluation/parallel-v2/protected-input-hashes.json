@@ -1,0 +1,5 @@
+{
+  "tools\\ai-evaluation\\CommanderBatch.py": "684c96d825260d0c789484f95aa5c9a0719985c01c6775608d495e0184d38762",
+  "tools\\ai-evaluation\\Run-ValidCommanderCohort.py": "8642e4f3cd828bf3a9e88f5e792ab1201d02e8878d63e5b804318d863bf30fed",
+  "tools\\ai-evaluation\\Validate-CommanderTelemetry.py": "7d949e7aa71cedbccf331c77210a4a021dbd16a24516ae2a27d03734d626e33f"
+}

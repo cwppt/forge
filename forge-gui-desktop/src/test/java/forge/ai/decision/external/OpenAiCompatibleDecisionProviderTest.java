@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import forge.ai.decision.CardChoiceDecisionContext;
 import forge.ai.decision.AiDecision;
 import forge.ai.decision.AiOptionView;
 import forge.ai.decision.AiPlayerView;
@@ -368,6 +369,44 @@ public class OpenAiCompatibleDecisionProviderTest {
         OpenAiCompatibleProviderConfig config = new OpenAiCompatibleProviderConfig(
                 enabled, endpoint(), "test-model", apiKey, timeout, responseFormatMode);
         return new OpenAiCompatibleDecisionProvider(config);
+    }
+
+    private static CardChoiceDecisionContext cardChoiceContext() {
+        return new CardChoiceDecisionContext("choice-decision", "choice-fp", mainPhaseContext().state(), "Chainer, Nightmare Adept",
+                "Discard one card", List.of(new CardChoiceDecisionContext.Option("CHOICE_0", "Mountain"),
+                new CardChoiceDecisionContext.Option("CHOICE_1", "Shivan Dragon")));
+    }
+
+    @Test public void acceptsCardChoiceWithStrictCandidateSchemaAndSeparateThinking() throws IOException {
+        var c = cardChoiceContext();
+        var response = JsonParser.parseString(completion(c.decisionId(), c.stateFingerprint(), "CHOICE_1")).getAsJsonObject();
+        response.getAsJsonArray("choices").get(0).getAsJsonObject().getAsJsonObject("message").addProperty("reasoning", "Untrusted reasoning is not a decision");
+        startServer(200, response.toString(), 0);
+        Assert.assertEquals(provider(true, null, Duration.ofSeconds(2)).choose(c).orElseThrow().optionId(), "CHOICE_1");
+        var request = JsonParser.parseString(requestBody.get()).getAsJsonObject(); assertDecisionSchema(request, List.of("CHOICE_0", "CHOICE_1"));
+        Assert.assertFalse(requestBody.get().contains("forge.game"));
+    }
+
+    @Test public void cardChoiceRejectsMissingFingerprint() throws IOException {
+        var c = cardChoiceContext();
+        var response = JsonParser.parseString(completion(c.decisionId(), c.stateFingerprint(), "CHOICE_1")).getAsJsonObject();
+        var message = response.getAsJsonArray("choices").get(0).getAsJsonObject().getAsJsonObject("message");
+        var decision = JsonParser.parseString(message.get("content").getAsString()).getAsJsonObject(); decision.remove("stateFingerprint");
+        message.addProperty("content", decision.toString()); startServer(200, response.toString(), 0);
+        Assert.assertTrue(provider(true, null, Duration.ofSeconds(2)).choose(c).isEmpty());
+    }
+
+    @Test public void cardChoiceRejectsThinkingInsideContent() throws IOException {
+        var c = cardChoiceContext();
+        var response = JsonParser.parseString(completion(c.decisionId(), c.stateFingerprint(), "CHOICE_1")).getAsJsonObject();
+        var message = response.getAsJsonArray("choices").get(0).getAsJsonObject().getAsJsonObject("message");
+        message.addProperty("content", "<think>choose a card</think>" + message.get("content").getAsString());
+        startServer(200, response.toString(), 0); Assert.assertTrue(provider(true, null, Duration.ofSeconds(2)).choose(c).isEmpty());
+    }
+
+    @Test public void cardChoiceRejectsInventedOption() throws IOException {
+        var c = cardChoiceContext(); startServer(200, completion(c.decisionId(), c.stateFingerprint(), "CAST_FREE_DRAGON"), 0);
+        Assert.assertTrue(provider(true, null, Duration.ofSeconds(2)).choose(c).isEmpty());
     }
 
     private void startServer(int status, String response, long delayMillis) throws IOException {

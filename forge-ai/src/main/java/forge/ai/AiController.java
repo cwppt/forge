@@ -1678,6 +1678,7 @@ public class AiController {
             set = prepareStackResponseActions(candidates, externalStackResponseMaxActions);
         } catch (RuntimeException ex) {
             Logger.debug(ex, "External AI stack-response enumeration failed");
+            forge.ai.decision.SimulationFailureDiagnostics.capture(ex, player, null, "stack-enumeration");
             return new StackResponseChoice(false, legacyResponse);
         }
         if (set.actions().isEmpty()) {
@@ -1809,8 +1810,15 @@ public class AiController {
             }
         }
 
-        FutureTask<List<PreparedAiAction>> future = new FutureTask<>(() ->
-                prepareSpellAbilityActions(all, skipCounter));
+        FutureTask<List<PreparedAiAction>> future = new FutureTask<>(() -> {
+            try (var evaluation = AiEvaluationDiagnostics.begin(player, all.size())) {
+                List<PreparedAiAction> prepared = prepareSpellAbilityActions(all, skipCounter);
+                if (AiEvaluationDiagnostics.usedFallback() && !prepared.isEmpty()
+                        && !revalidatePreparedAction(prepared.get(0))) prepared = List.of();
+                if (evaluation != null) evaluation.result(prepared.isEmpty() ? "PASS" : "PREPARED_ACTION");
+                return prepared;
+            }
+        });
         Thread t = new Thread(future, "Game AI Eval");
         t.setDaemon(true);
         t.start();
@@ -1818,6 +1826,7 @@ public class AiController {
             List<PreparedAiAction> prepared = future.get(game.getAITimeout(), TimeUnit.SECONDS);
             return prepared.isEmpty() ? null : prepared.get(0);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            forge.ai.decision.SimulationFailureDiagnostics.capture(e, player, null, "legacy-ai-evaluation");
             e.printStackTrace();
             if (e instanceof TimeoutException) {
                 // log where the eval thread currently is - each timeout doubles as a
@@ -1831,21 +1840,7 @@ public class AiController {
             }
             // ask the eval thread to exit at the next SpellAbility check first: a brutal
             // Thread.stop() mid-evaluation can leave partially mutated shared state behind
-            future.cancel(true);
-            try {
-                t.join(2000); //2 seconds wait
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-            }
-            if (t.isAlive()) {
-                // last resort, see #8302: the eval thread may be stuck inside a single
-                // evaluation or an infinite loop and never reach the cooperative exit
-                try {
-                    t.stop();
-                } catch (UnsupportedOperationException | NoSuchMethodError ex) {
-                    // Stop support: dropped by Android and Java 20 / 26 removed it completely - so sadly thread will keep running
-                }
-            }
+            AiEvaluationDiagnostics.cancelAndAwait(future,t,2000,e);
             // TODO mark some as skipped to increase chance to find something playable next priority
             return null;
         }
@@ -1880,6 +1875,7 @@ public class AiController {
                     : prepareCandidateActions(all, skipCounter, externalMainPhaseMaxActions);
         } catch (RuntimeException e) {
             AiDecisionMetrics.recordMainPhaseEnumerationFailure();
+            forge.ai.decision.SimulationFailureDiagnostics.capture(e, player, null, "main-phase-enumeration");
             Logger.debug(e, "External AI candidate enumeration failed");
             return null;
         }
@@ -2033,6 +2029,11 @@ public class AiController {
                 // keeping the common path isolated.
                 sa = original;
             }
+            if (sa != original && sa.getRootAbility().isActivatedAbility()) {
+                // Preparation isolates choices, not activation history. ActivationTable keys usage
+                // by the original ability; a fresh copy ID would otherwise reset once-only limits.
+                sa.getRootAbility().setOriginalAbility(original.getRootAbility());
+            }
             final String sourceName = visibleSourceName(sa);
             final String apiName = sa.getApi() == null ? "none" : sa.getApi().name();
 
@@ -2100,8 +2101,19 @@ public class AiController {
                     sa.setLastStateGraveyard(game.getLastStateGraveyard());
                 }
                 //override decision for living end player
-                AiPlayDecision opinion = useLivingEnd && AiPlayDecision.WillPlay.equals(aiPlayDecision) ? aiPlayDecision : canPlayAndPayFor(sa);
+                forge.ai.decision.SimulationFailureDiagnostics.observe(player, sa);
+                AiPlayDecision opinion;
+                AiEvaluationDiagnostics.candidateStarted(sa);
+                try {
+                    opinion = useLivingEnd && AiPlayDecision.WillPlay.equals(aiPlayDecision)
+                            ? aiPlayDecision : canPlayAndPayFor(sa);
+                } catch (RuntimeException | StackOverflowError ex) {
+                    forge.ai.decision.SimulationFailureDiagnostics.capture(ex, player, sa, "ability-evaluation");
+                    throw ex;
+                }
 
+                AiEvaluationDiagnostics.candidateFinished(opinion.name());
+                forge.ai.decision.CommanderRoleTelemetry.observeCandidate(player, sa, opinion.name());
                 // reset LastStateBattlefield
                 sa.clearLastState();
                 // PhaseHandler ph = game.getPhaseHandler();
@@ -2188,6 +2200,7 @@ public class AiController {
                 }
             } catch (RuntimeException ex) {
                 Logger.debug(ex, "AI counter-response preparation failed position={}", index);
+                forge.ai.decision.SimulationFailureDiagnostics.capture(ex, player, original, "counter-preparation");
             }
         }
         if (actions.size() < maxActions) {
@@ -2237,6 +2250,7 @@ public class AiController {
                 copied++;
             } catch (RuntimeException ex) {
                 Logger.debug(ex, "AI candidate copy failed position={}", index);
+                forge.ai.decision.SimulationFailureDiagnostics.capture(ex, player, liveExpanded.get(index), "candidate-copy");
                 continue;
             }
             Player copiedPlayer = copier.find(player);
@@ -2247,6 +2261,7 @@ public class AiController {
             boolean mappingFailed = false;
             for (SpellAbility ability : all) {
                 SpellAbility mapped = copier.findSpellAbility(ability);
+                if (mapped == null) mapped = ExternalGraveyardChoices.mapPermissionAbility(copier, ability);
                 if (mapped == null) {
                     mappingFailed = true;
                     break;
@@ -2279,6 +2294,7 @@ public class AiController {
                 SpellAbilityChoiceCopier.copyTargets(copiedPrepared, livePrepared, copier::reverseFind);
             } catch (RuntimeException ex) {
                 Logger.debug(ex, "AI candidate target mapping failed position={}", index);
+                forge.ai.decision.SimulationFailureDiagnostics.capture(ex, player, liveExpanded.get(index), "candidate-target-mapping");
                 continue;
             }
             String actionId = "ACTION_" + result.size();
@@ -2327,6 +2343,7 @@ public class AiController {
             boolean mappingFailed = false;
             for (SpellAbility ability : all) {
                 SpellAbility mapped = copier.findSpellAbility(ability);
+                if (mapped == null) mapped = ExternalGraveyardChoices.mapPermissionAbility(copier, ability);
                 if (mapped == null) {
                     mappingFailed = true;
                     break;
@@ -2378,6 +2395,9 @@ public class AiController {
         SpellAbility sa = original.copy(player);
         if (sa == null || (skipCounter && sa.getApi() == ApiType.Counter)) {
             return null;
+        }
+        if (sa != original && sa.getRootAbility().isActivatedAbility()) {
+            sa.getRootAbility().setOriginalAbility(original.getRootAbility());
         }
         sa.setActivatingPlayer(player);
         SpellAbility root = sa.getRootAbility();

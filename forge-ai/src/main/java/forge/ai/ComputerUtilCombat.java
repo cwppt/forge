@@ -73,6 +73,7 @@ public class ComputerUtilCombat {
      * @return a boolean.
      */
     public static boolean canAttackNextTurn(final Card attacker) {
+        AiEvaluationDiagnostics.advisoryCheckpoint("nextTurnDefenders");
         final Iterable<GameEntity> defenders = CombatUtil.getAllPossibleDefenders(attacker.getController());
         return IterableUtil.any(defenders, input -> canAttackNextTurn(attacker, input));
     }
@@ -89,6 +90,7 @@ public class ComputerUtilCombat {
      * @return a boolean.
      */
     public static boolean canAttackNextTurn(final Card attacker, final GameEntity defender) {
+        AiEvaluationDiagnostics.advisoryCheckpoint("nextTurnAttacker");
         if (!attacker.isCreature()) {
             return false;
         }
@@ -873,6 +875,7 @@ public class ComputerUtilCombat {
      * @return a int.
      */
     public static int predictPowerBonusOfBlocker(final Card attacker, final Card blocker, boolean withoutAbilities) {
+        if (AiEvaluationDiagnostics.prediction("blockerPower")) return 0;
         int power = 0;
 
         // Serene Master switches power with attacker
@@ -1014,6 +1017,7 @@ public class ComputerUtilCombat {
      * @return a int.
      */
     public static int predictToughnessBonusOfBlocker(final Card attacker, final Card blocker, boolean withoutAbilities) {
+        if (AiEvaluationDiagnostics.prediction("blockerToughness")) return 0;
         int toughness = 0;
 
         if (blocker.getName().equals("Shape Stealer")) {
@@ -1146,6 +1150,7 @@ public class ComputerUtilCombat {
         return predictPowerBonusOfAttacker(attacker, blocker, combat, withoutAbilities, false);
     }
     public static int predictPowerBonusOfAttacker(final Card attacker, final Card blocker, final Combat combat, boolean withoutAbilities, boolean withoutCombatStaticAbilities) {
+        if (AiEvaluationDiagnostics.prediction("attackerPower")) return 0;
         int power = 0;
 
         // Serene Master switches power with attacker
@@ -1349,6 +1354,7 @@ public class ComputerUtilCombat {
     }
     public static int predictToughnessBonusOfAttacker(final Card attacker, final Card blocker, final Combat combat
             , boolean withoutAbilities, boolean withoutCombatStaticAbilities) {
+        if (AiEvaluationDiagnostics.prediction("attackerToughness")) return 0;
         int toughness = 0;
 
         if (blocker != null && attacker.getName().equals("Shape Stealer")) {
@@ -1650,6 +1656,7 @@ public class ComputerUtilCombat {
     }
     public static boolean canDestroyAttacker(Player ai, Card attacker, Card blocker, final Combat combat,
             final boolean withoutAbilities, final boolean withoutAttackerStaticAbilities) {
+        if (AiEvaluationDiagnostics.prediction("destroyAttacker")) return false;
         // Can activate transform ability
         if (!withoutAbilities) {
             attacker = canTransform(attacker);
@@ -1880,6 +1887,7 @@ public class ComputerUtilCombat {
     }
     public static boolean canDestroyBlocker(Player ai, Card blocker, Card attacker, final Combat combat,
             final boolean withoutAbilities, final boolean withoutAttackerStaticAbilities) {
+        if (AiEvaluationDiagnostics.prediction("destroyBlocker")) return false;
         // Can activate transform ability
         if (!withoutAbilities) {
             attacker = canTransform(attacker);
@@ -2349,6 +2357,7 @@ public class ComputerUtilCombat {
     }
 
     public static boolean isCombatDamagePrevented(final Card attacker, final GameEntity target, final int damage) {
+        AiEvaluationDiagnostics.advisoryCheckpoint("combatDamagePrevention");
         if (!attacker.canDamagePrevented(true)) {
             return false;
         }

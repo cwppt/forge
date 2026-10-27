@@ -29,6 +29,11 @@ public class CopySpellAbilityAi extends SpellAbilityAi {
         }
 
         final SpellAbility top = game.getStack().peekAbility();
+        // Face-down spells can be non-API abilities. The API dispatcher cannot
+        // evaluate them; decline the optional copy without changing stack state.
+        if (top == null || top.getApi() == null) {
+            return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
+        }
         if (top != null
                 && top.getPayCosts().getCostMana() != null
                 && sa.getPayCosts().getCostMana() != null

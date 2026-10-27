@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import forge.ai.decision.CardChoiceDecisionContext;
 import forge.ai.decision.AiDecision;
 import forge.ai.decision.AiDecisionContext;
 import forge.ai.decision.AiDecisionFailureReason;
@@ -72,7 +73,7 @@ public final class OpenAiCompatibleDecisionProvider implements AiDecisionProvide
             Logger.debug("External AI provider disabled; using Forge fallback");
             return failure(AiDecisionFailureReason.DISABLED, started);
         }
-        if (!(context instanceof MulliganDecisionContext) && !(context instanceof MainPhaseDecisionContext)
+        if (!(context instanceof CardChoiceDecisionContext) && !(context instanceof MulliganDecisionContext) && !(context instanceof MainPhaseDecisionContext)
                 && !(context instanceof StackResponseDecisionContext) && !(context instanceof CombatAttackersDecisionContext)) {
             return reject(AiDecisionFailureReason.PROVIDER_EXCEPTION, "unsupported decision type", started);
         }
@@ -102,6 +103,7 @@ public final class OpenAiCompatibleDecisionProvider implements AiDecisionProvide
                 return reject(AiDecisionFailureReason.HTTP_ERROR,
                         "HTTP status " + response.statusCode(), started);
             }
+            capture("response", context, response.body());
             AiDecisionResult result = parseResponse(response.body(), context, started);
             if (result.decision().isPresent()) {
                 Logger.info("External AI response accepted for decisionId={} model={}",
@@ -146,7 +148,7 @@ public final class OpenAiCompatibleDecisionProvider implements AiDecisionProvide
             String expectedFingerprint = fingerprint(context);
             String fingerprint = decision.has("stateFingerprint")
                     ? requiredString(decision, "stateFingerprint") : null;
-            if ((context instanceof MainPhaseDecisionContext || context instanceof StackResponseDecisionContext
+            if ((context instanceof CardChoiceDecisionContext || context instanceof MainPhaseDecisionContext || context instanceof StackResponseDecisionContext
                     || context instanceof CombatAttackersDecisionContext) && fingerprint == null) {
                 return reject(AiDecisionFailureReason.FINGERPRINT_MISMATCH,
                         "missing state fingerprint", started);
@@ -173,9 +175,17 @@ public final class OpenAiCompatibleDecisionProvider implements AiDecisionProvide
         request.addProperty("model", config.model());
         request.addProperty("stream", false);
         request.addProperty("temperature", 0);
+        // Explicit opt-in; compatibility must be established against the installed Ollama/template.
+        if (Boolean.getBoolean("forge.ai.ollama.noThinking")) {
+            request.addProperty("reasoning_effort", "none");
+            request.addProperty("max_tokens", 512);
+        }
 
         JsonArray messages = new JsonArray();
-        messages.add(message("system", context instanceof CombatAttackersDecisionContext ? COMBAT_SYSTEM_PROMPT
+        messages.add(message("system", context instanceof CardChoiceDecisionContext ?
+                "Choose exactly one supplied optionId for this Magic decision. Forge is authoritative. Use only supplied information. "
+                + "Copy decisionId and stateFingerprint exactly. Return only the required JSON, without reasoning or Markdown."
+                : context instanceof CombatAttackersDecisionContext ? COMBAT_SYSTEM_PROMPT
                 : context instanceof StackResponseDecisionContext ? STACK_SYSTEM_PROMPT
                 : context instanceof MainPhaseDecisionContext ? ACTION_SYSTEM_PROMPT : MULLIGAN_SYSTEM_PROMPT));
         messages.add(message("user", decisionPayload(context).toString()));
@@ -184,6 +194,7 @@ public final class OpenAiCompatibleDecisionProvider implements AiDecisionProvide
         JsonObject responseFormat = effectiveResponseFormatMode() == OpenAiResponseFormatMode.JSON_SCHEMA
                 ? jsonSchemaResponseFormat(context) : jsonObjectResponseFormat();
         request.add("response_format", responseFormat);
+        capture("request", context, request.toString());
         return request.toString();
     }
 
@@ -236,6 +247,7 @@ public final class OpenAiCompatibleDecisionProvider implements AiDecisionProvide
     }
 
     private static java.util.List<String> allowedOptions(AiDecisionContext context) {
+        if (context instanceof CardChoiceDecisionContext choice) return choice.options().stream().map(CardChoiceDecisionContext.Option::optionId).toList();
         if (context instanceof CombatAttackersDecisionContext combat) return combat.options().stream()
                 .map(option -> option.optionId()).toList();
         if (context instanceof MulliganDecisionContext mulligan) {
@@ -250,6 +262,11 @@ public final class OpenAiCompatibleDecisionProvider implements AiDecisionProvide
     }
 
     private static JsonObject decisionPayload(AiDecisionContext context) {
+        if (context instanceof CardChoiceDecisionContext choice) {
+            JsonObject payload = new com.google.gson.Gson().toJsonTree(choice).getAsJsonObject();
+            payload.addProperty("decisionType", choice.type().name());
+            return payload;
+        }
         if (context instanceof CombatAttackersDecisionContext combat) {
             JsonObject payload = new JsonObject();
             payload.addProperty("decisionId", combat.decisionId());
@@ -392,6 +409,7 @@ public final class OpenAiCompatibleDecisionProvider implements AiDecisionProvide
     }
 
     private static String fingerprint(AiDecisionContext context) {
+        if (context instanceof CardChoiceDecisionContext choice) return choice.stateFingerprint();
         if (context instanceof CombatAttackersDecisionContext combat) return combat.stateFingerprint();
         if (context instanceof MulliganDecisionContext mulligan) {
             return mulligan.state().fingerprint();
@@ -401,6 +419,7 @@ public final class OpenAiCompatibleDecisionProvider implements AiDecisionProvide
     }
 
     private static boolean validOption(AiDecisionContext context, String optionId) {
+        if (context instanceof CardChoiceDecisionContext choice) return allowedOptions(choice).contains(optionId);
         if (context instanceof CombatAttackersDecisionContext combat) return combat.options().stream()
                 .anyMatch(option -> option.optionId().equals(optionId));
         if (context instanceof MulliganDecisionContext) {
@@ -522,6 +541,20 @@ public final class OpenAiCompatibleDecisionProvider implements AiDecisionProvide
     private AiDecisionResult failure(AiDecisionFailureReason reason, long started) {
         return AiDecisionResult.failed(reason, "openai-compatible", config.model(),
                 AiDecisionResult.elapsedMillis(started));
+    }
+
+    private void capture(String kind, AiDecisionContext context, String body) {
+        String path = System.getProperty("forge.ai.externalRequestCapture");
+        if (path == null || path.isBlank()) return;
+        try {
+            JsonObject row = new JsonObject();
+            row.addProperty("kind", kind); row.addProperty("decisionId", context.decisionId());
+            row.addProperty("configuration", config.toString()); row.addProperty("body", body);
+            synchronized (OpenAiCompatibleDecisionProvider.class) {
+                java.nio.file.Files.writeString(java.nio.file.Path.of(path), row + "\n", java.nio.charset.StandardCharsets.UTF_8,
+                        java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+            }
+        } catch (Exception e) { Logger.warn("External request capture failed: {}", e.getClass().getSimpleName()); }
     }
 
     private static String safeEndpoint(URI endpoint) {
