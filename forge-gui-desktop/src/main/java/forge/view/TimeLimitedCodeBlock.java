@@ -24,16 +24,23 @@ public class TimeLimitedCodeBlock {
         final ExecutorService executor = Executors.newSingleThreadExecutor();
         final Future<T> future = executor.submit(callable);
         executor.shutdown(); // This does not cancel the already-scheduled task.
+        Throwable failure = null;
         try {
             return future.get(timeout, timeUnit);
         }
         catch (TimeoutException e) {
-            //remove this if you do not want to cancel the job in progress
-            //or set the argument to 'false' if you do not want to interrupt the thread
+            failure = e;
             future.cancel(true);
             throw e;
         }
+        catch (InterruptedException e) {
+            failure = e;
+            future.cancel(true);
+            Thread.currentThread().interrupt();
+            throw e;
+        }
         catch (ExecutionException e) {
+            failure = e.getCause();
             //unwrap the root cause
             Throwable t = e.getCause();
             if (t instanceof Error) {
@@ -43,7 +50,28 @@ public class TimeLimitedCodeBlock {
             } else {
                 throw new IllegalStateException(t);
             }
+        } finally {
+            // Future completion/cancellation is not proof that its thread has exited.
+            // A failed simulation caller must terminate its isolated process if this fails.
+            boolean interrupted = Thread.interrupted();
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+            try {
+                while (!executor.isTerminated()) {
+                    long remaining = deadline - System.nanoTime();
+                    if (remaining <= 0) {
+                        throw new UnstoppedTaskException(failure);
+                    }
+                    try { executor.awaitTermination(remaining, TimeUnit.NANOSECONDS); }
+                    catch (InterruptedException e) { interrupted = true; future.cancel(true); }
+                }
+            } finally {
+                if (interrupted) Thread.currentThread().interrupt();
+            }
         }
+    }
+
+    public static final class UnstoppedTaskException extends Exception {
+        UnstoppedTaskException(Throwable cause) { super("Simulation task remained alive after cancellation; process isolation required", cause); }
     }
 
 }

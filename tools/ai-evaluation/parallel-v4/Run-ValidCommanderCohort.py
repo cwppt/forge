@@ -110,6 +110,13 @@ def telemetry_errors(game, logs, metrics, audits, require_audits):
     if not turns or max(turns) != game['finalTurnCount'] or turns != sorted(turns): errors.append('final-turn-log')
     if any(e['runSeed'] != game['runSeed'] for e in events): errors.append('log-seed')
     outcomes = [e['message'] for e in events if e['type'] == 'GAME_OUTCOME']
+    if not outcomes: errors.append('missing-game-outcome')
+    if type(game.get('draw')) is not bool or game.get('valid') is not True:
+        errors.append('invalid-outcome-schema')
+    if game.get('simulationStatus', 'VALID') != 'VALID' or game.get('simulationError') or game.get('timedOut'):
+        errors.append('recorded-simulation-failure')
+    if not game.get('draw') and (not isinstance(game.get('winner'), str) or not game['winner'].strip()):
+        errors.append('missing-winner')
     winners = [message.split(' has won', 1)[0] for message in outcomes if ' has won' in message]
     if winners != ([] if game['draw'] else [game['winner']]): errors.append('logged-winner')
     if (game['winner'] is None) != game['draw']: errors.append('winner-draw')
@@ -138,6 +145,21 @@ def telemetry_errors(game, logs, metrics, audits, require_audits):
 
 def classify_batch(directory, seed, requested, require_audits, exit_code=0, require_roles=False):
     prefix = directory / f'commander-seed{seed}'
+    failure_path = Path(str(prefix)+'.games.jsonl.failures.jsonl')
+    if failure_path.exists():
+        try:
+            failures = load_jsonl(failure_path)
+            if not failures: raise ValueError('Empty failure journal')
+            return [dict(runSeed=seed, gameIndex=f.get('gameIndex',0), gameId=f.get('gameId'),
+                valid=False, simulationStatus=f.get('simulationStatus','ENGINE_FAILED'),
+                winner=None, draw=None, finalTurnCount=None, recordedOutcome=None,
+                failures=[f], telemetryErrors=['worker-failure-journal'], processExitCode=exit_code,
+                candidateExposure=[]) for f in failures]
+        except (ValueError, OSError, AttributeError, TypeError):
+            return [dict(runSeed=seed, gameIndex=0, gameId=None, valid=False,
+                simulationStatus='TELEMETRY_FAILED', winner=None, draw=None, finalTurnCount=None,
+                recordedOutcome=None, failures=[], telemetryErrors=['malformed-worker-failure-journal'],
+                processExitCode=exit_code, candidateExposure=[])]
     text = prefix.with_suffix('.log').read_text(encoding='utf-8-sig') if prefix.with_suffix('.log').exists() else ''
     caught = console_failures(text)
     console = {int(m[1])-1: (int(m[2]), m[3].rstrip('\r')) for m in re.finditer(

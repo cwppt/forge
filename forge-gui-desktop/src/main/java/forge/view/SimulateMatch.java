@@ -276,28 +276,26 @@ public class SimulateMatch {
         }
         boolean timedOut = false;
         String simulationError = null;
-        // will run match in the same thread
-        try {
-            TimeLimitedCodeBlock.runWithTimeout(() -> {
-                mc.startGame(g1);
-                sw.stop();
-            }, mc.getRules().getSimTimeout(), TimeUnit.SECONDS);
-        } catch (TimeoutException e) {
-            SimulationFailureDiagnostics.capture(e, null, null, "game-timeout");
-            timedOut = true;
-            System.out.println("Simulation timed out; exporting the game's recorded outcome");
-        } catch (Exception | StackOverflowError e) {
-            SimulationFailureDiagnostics.capture(e, null, null, "game-execution");
-            simulationError = e.getClass().getName();
-            e.printStackTrace();
-        } finally {
-            if (sw.isStarted()) {
-                sw.stop();
-            }
-            g1.setGameOver(GameEndReason.Draw);
-        }
+        // Failed workers terminate their isolated process without touching the live Game again.
+        // Save all evidence identifiers before starting the worker; never synthesize a draw.
+        final int gameId = g1.getId();
+        List<String> resultPaths = params.get("game-results-jsonl");
+        Path failurePath = resultPaths == null || resultPaths.isEmpty() ? null
+                : Path.of(resultPaths.get(0) + ".failures.jsonl");
+        SimulationWorker.run(() -> mc.startGame(g1), mc.getRules().getSimTimeout(),
+                failurePath, gameId, iGame, runSeed);
+        sw.stop();
 
         SimulationFailureDiagnostics.Snapshot diagnostics = SimulationFailureDiagnostics.finish();
+        if (!diagnostics.failures().isEmpty()) {
+            SimulationWorker.abort("ENGINE_FAILED", new IllegalStateException(
+                    new com.google.gson.Gson().toJson(diagnostics.failures())), failurePath, gameId, iGame, runSeed);
+        }
+        if (!g1.isGameOver() || g1.getOutcome() == null
+                || (!g1.getOutcome().isDraw() && g1.getOutcome().getWinningLobbyPlayer() == null)) {
+            SimulationWorker.abort("INCOMPLETE", new IllegalStateException("No natural terminal game outcome"),
+                    failurePath, gameId, iGame, runSeed);
+        }
         if (roleTelemetry != null) {
             try { roleTelemetry.finish(timedOut, simulationError); }
             catch (IOException e) { throw new java.io.UncheckedIOException(e); }
@@ -363,7 +361,8 @@ public class SimulateMatch {
             this(gameId, gameIndex, runSeed, durationMs, finalTurnCount, draw, winner, false, null);
         }
 
-        public boolean valid() { return !timedOut && simulationError == null && diagnostics.failures().isEmpty(); }
+        public boolean valid() { return !timedOut && simulationError == null && diagnostics.failures().isEmpty()
+                && (draw ? winner == null : winner != null && !winner.isBlank()); }
         public String simulationStatus() {
             return timedOut ? "TIMEOUT" : valid() ? "VALID" : "ENGINE_FAILED";
         }

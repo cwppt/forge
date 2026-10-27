@@ -9,6 +9,13 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class SimulationGameResultsJsonlTest {
+    @Test public void naturalDrawAndWinAreDistinctFromIncompleteOutcomes() {
+        Assert.assertTrue(new SimulateMatch.GameSimulationResult(1,0,1L,1,1,true,null).valid());
+        Assert.assertTrue(new SimulateMatch.GameSimulationResult(1,0,1L,1,1,false,"Winner").valid());
+        Assert.assertFalse(new SimulateMatch.GameSimulationResult(1,0,1L,1,1,false,null).valid());
+        Assert.assertFalse(new SimulateMatch.GameSimulationResult(1,0,1L,1,1,false,"").valid());
+        Assert.assertFalse(new SimulateMatch.GameSimulationResult(1,0,1L,1,1,true,"Winner").valid());
+    }
     @Test
     public void caughtEngineFailureIsNotAValidWin() throws Exception {
         var failure = new forge.ai.decision.SimulationFailureDiagnostics.Failure(
