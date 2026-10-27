@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "20261026-native-r-rebuild-ab50": {
+    "Lathliss_R_Control": "R-Control",
+    "Lathliss_R_Rebuild_A": "R-Rebuild A with Shared Animosity",
+    "Lathliss_R_Rebuild_B_Door": "R-Rebuild B with Door of Destinies"
+  },
+  "20261026-native-r-throne50": {
+    "Lathliss_R_Control": "R-Control",
+    "Lathliss_R_Rebuild_B_Door": "R-Rebuild B with Molten Echoes",
+    "Lathliss_R_Rebuild_V2_Throne": "R-Rebuild V2 with Roaming Throne"
+  }
+}
