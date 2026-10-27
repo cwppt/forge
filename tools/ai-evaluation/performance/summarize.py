@@ -72,15 +72,23 @@ def main():
             profiles=list(d.glob('*.profile.jsonl'));turns=[json.loads(s) for s in profiles[0].read_text().splitlines()] if profiles else []
             valid.append(dict(job=group.name,seed=game['runSeed'],durationMs=game['durationMs'],winner=game['winner'],draw=game['draw'],
                 rawTurns=game['finalTurnCount'],providerAttempts=providers,profileRows=len(turns),
-                turnDurationMs=dist([r['elapsedMs'] for r in turns]),gcMs=sum(r['gcMs'] for r in turns),
+                turnDurationMs=dist([r['elapsedMs'] for r in turns]),gcMs=sum(r['gcMs'] for r in turns) if turns else None,
                 logBytes={p.name.split('.',1)[1]:p.stat().st_size for p in d.glob('commander-seed*') if p.is_file()},
                 resultSHA256=sha(g),validationSHA256=sha(d/'validation.json')))
         assert len(valid)==1,'Missing or duplicate valid smoke game'
         result['smoke']+=valid
     assert len(result['smoke'])==5
+    result['pairedGameLogMatches']=[]
+    for seed in [571900,571901]:
+        left=R/f'smoke-baseline-{seed}/attempt-00';right=R/f'smoke-correctness-{seed}/attempt-00'
+        result['pairedGameLogMatches'].append(dict(seed=seed,
+            gameLogIdentical=sha(left/f'commander-seed{seed}.gamelog.jsonl')==sha(right/f'commander-seed{seed}.gamelog.jsonl'),
+            roleTrajectoryIdentical=sha(left/f'commander-seed{seed}.roles.jsonl')==sha(right/f'commander-seed{seed}.roles.jsonl')))
+    result['realTimeoutIntegration']=read(R/'timeout-integration/passed.json')
+    result['resumeVerification']=read(R/'resume-verification.json')
     result['smokeRuntimeMs']={label:dist([g['durationMs'] for g in result['smoke'] if g['job'].startswith('smoke-'+label+'-')]) for label in ['baseline','correctness','profile']}
     root=ET.parse(R/'java-correctness/results/testng-results.xml').getroot()
-    result['tests']=dict(java={k:root.attrib.get(k) for k in ['total','passed','failed','skipped']},pythonIntegrityMethods=6,legacyValidatorMethods=18,
+    result['tests']=dict(java={k:root.attrib.get(k) for k in ['total','passed','failed','skipped']},pythonIntegrityMethods=7,legacyValidatorMethods=18,
                          workerProcessModes=7,reportGamesIndependentlyChecked=300,completedBenchmarkOperations=240,validFullGames=5)
     result['sourceHead']=subprocess.check_output(['git','rev-parse','HEAD'],cwd=SOURCE,text=True).strip()
     (public/'measurements.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')

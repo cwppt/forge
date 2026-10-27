@@ -36,6 +36,11 @@ Resume verifies engine/deck hashes, reclassifies terminal evidence, checks saved
 
 ## Report integrity
 
+After the completed smoke gate, a real CLI timeout can be checked separately with
+`validate.py <same-output-directory> --timeout-probe`. It uses a one-second game
+limit, requires exit 124 and a durable TIMEOUT journal, and rejects any final game
+outcome export. This negative test is excluded from all scored-game counts.
+
 `variant-labels.json` is an explicit versioned mapping keyed by immutable run ID and variant ID. `report_integrity.py` checks manifest arms, frozen deck hashes, actual invocation decks and seeds, terminal outcomes, aggregate counts and comparison directions for all 150 games in either Lathliss experiment. It rejects duplicate JSON keys/arms, missing or wrong labels and mismatched statistics. Do not run Python with optimisation enabled.
 
 The correction command writes into a new directory, preserving the original report, provenance hashes and original numerical intervals. It changes labels and comparison keys, without resampling or altering outcomes:

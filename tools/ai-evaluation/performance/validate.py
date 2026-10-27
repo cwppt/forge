@@ -29,6 +29,23 @@ def runtime(d):
 def launch(d,command,cwd,env,limit=330):
     admission(R,d);code=e.launch(d,list(map(str,command)),cwd,env,limit=limit)
     if code:raise RuntimeError(f'Child failed ({code}); evidence: {d.name}')
+def timeout_probe():
+    """Real CLI game forced through SimulateMatch's timeout path; never a scored game."""
+    d=R/'timeout-integration';d.mkdir();cwd,env,home,temp=runtime(d)
+    jar=R/'correctness.jar';manifest=json.loads((R/'engine-manifest.json').read_text())
+    assert sha(jar)==manifest['correctnessSHA256'],'Engine changed'
+    q=json.loads((EX/'lathliss-r-throne-20261026/request.json').read_text());decks=R/'decks';seed=571902
+    prefix=d/f'commander-seed{seed}'
+    cmd=[str(e.JAVA),*FLAGS,*e.opts(home,temp),'-jar',str(jar),'sim','-d','Lathliss_R_Rebuild_V2_Throne.dck',*q['pod'],'-D',str(decks),'-n','1','-s',str(seed),'-f','Commander','-c','1','-q','--capture-simulation-failures',
+         '--game-results-jsonl',str(prefix)+'.games.jsonl','--game-log-jsonl',str(prefix)+'.gamelog.jsonl','--commander-role-jsonl',str(prefix)+'.roles.jsonl']
+    admission(R,d);code=e.launch(d,cmd,cwd,env,limit=120)
+    failure=Path(str(prefix)+'.games.jsonl.failures.jsonl')
+    record=json.loads(failure.read_text(encoding='utf-8-sig'))
+    assert code==124 and record['simulationStatus']=='TIMEOUT' and record['valid'] is False
+    assert record['winner'] is None and record['draw'] is None
+    assert not Path(str(prefix)+'.games.jsonl').exists(),'Failed game exported final outcome'
+    assert 'Game Result:' not in (d/'execution.log').read_text(encoding='utf-8-sig'),'Failed game printed final outcome'
+    write(d/'passed.json',dict(passed=True,exitCode=code,failureSHA256=sha(failure),noFinalOutcomeExported=True))
 def smoke():
     status('native-full-game-smoke')
     base=R/'baseline.jar';patched=R/'correctness.jar'
@@ -89,6 +106,9 @@ def main():
             _fields_=[('length',ctypes.c_ulong),('load',ctypes.c_ulong)]+[(s,ctypes.c_ulonglong) for s in ['totalPhys','availPhys','totalPage','availPage','totalVirtual','availVirtual','availExtended']]
         m=Mem();m.length=ctypes.sizeof(m);assert ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(m))
         assert m.availPhys>=7*1024**3,'Insufficient memory for one safely admitted worker'
+        if '--timeout-probe' in sys.argv:
+            assert json.loads((R/'correctness-gate.json').read_text())['passed'],'Correctness gate required'
+            timeout_probe();return
         if '--resume-smoke' in sys.argv:
             assert json.loads((R/'correctness-gate.json').read_text())['passed'],'Correctness gate required'
             for label in ['baseline','correctness']:

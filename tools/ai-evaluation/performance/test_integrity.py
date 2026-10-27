@@ -18,6 +18,7 @@ class OutcomeTests(unittest.TestCase):
         for change in [dict(simulationStatus='TIMEOUT'),dict(ownedWorkerAbsent=False)]:
             with self.assertRaises(ValueError):plan(jobs,[done,{**interrupted,**change}])
         with self.assertRaises(ValueError):plan(jobs,[done,done])
+        with self.assertRaises(ValueError):plan(jobs,[done,*[{**interrupted,'attemptIndex':i} for i in range(3)]])
     def test_failure_journal_wins_over_exit_zero_and_claimed_result(self):
         with tempfile.TemporaryDirectory() as tmp:
             d=Path(tmp)
@@ -39,6 +40,10 @@ class OutcomeTests(unittest.TestCase):
         self.assertIn('winner-draw',cohort.telemetry_errors(game,[],[],[],False))
 
 class ReportTests(unittest.TestCase):
+    def test_duplicate_json_keys_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/'bad.json';path.write_text('{"variants":{},"variants":{}}')
+            with self.assertRaises(ValueError):load(path)
     def setUp(self):
         self.experiments=Path(os.environ['FORGE_EXPERIMENTS'])
         self.labels=load(Path(__file__).with_name('variant-labels.json'))
