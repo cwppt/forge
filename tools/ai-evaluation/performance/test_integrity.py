@@ -88,7 +88,7 @@ class WorkerProcessTests(unittest.TestCase):
             if mode in ['normal','draw']:
                 self.assertEqual(p.returncode,0,(d/'console.log').read_text()[-1500:]);self.assertTrue((d/'final-outcome').exists())
             else:
-                self.assertIn(p.returncode,[124,130],(d/'console.log').read_text()[-1500:])
+                self.assertEqual(p.returncode,130 if mode=='interrupted' else 70 if mode=='engine' else 124,(d/'console.log').read_text()[-1500:])
                 self.assertFalse((d/'final-outcome').exists())
                 failure=load(d/'failure.jsonl');self.assertFalse(failure['valid']);self.assertIsNone(failure['winner']);self.assertIsNone(failure['draw'])
                 self.assertEqual(failure['simulationStatus'],'INTERRUPTED' if mode=='interrupted' else 'ENGINE_FAILED' if mode=='engine' else 'TIMEOUT')

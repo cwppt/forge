@@ -53,7 +53,7 @@ public final class SimulationWorker {
         System.out.flush();
         System.err.flush();
         // Exit hooks/finalizers must not race with an uncooperative game or evaluation thread.
-        Runtime.getRuntime().halt(status.equals("INTERRUPTED") ? 130 : 124);
+        Runtime.getRuntime().halt(status.equals("INTERRUPTED") ? 130 : status.equals("TIMEOUT") ? 124 : 70);
         throw new AssertionError("Runtime.halt returned");
     }
 
