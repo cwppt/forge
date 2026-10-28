@@ -116,7 +116,8 @@ public final class BusyBoardBenchmark extends AITest {
             Object legalBefore=verify?legal(game,combat):null;
             boolean searchProbe=Boolean.getBoolean("forge.search.probe");
             if(searchProbe)try {Class.forName("forge.perf.SearchProbe").getMethod("beginWindow",String.class,String.class,int.class).invoke(null,name,path,rep);} catch(Exception error){throw new RuntimeException(error);}
-            long[] countsBefore=forge.game.combat.RequirementSnapshotMetrics.snapshot();
+            boolean metrics=Boolean.getBoolean("forge.blocker.snapshotMetrics");
+            long[] countsBefore=BenchmarkOptionalMetrics.read("forge.game.combat.RequirementSnapshotMetrics",metrics);
             long alloc=thread.isThreadAllocatedMemorySupported()?thread.getThreadAllocatedBytes(Thread.currentThread().getId()):0;
             long cpu=thread.getCurrentThreadCpuTime(),gc=gc(),start=System.nanoTime();Object result;
             if(path.equals("main")) result=((PlayerControllerAi)p.getController()).getAi().chooseSpellAbilityToPlay();
@@ -131,8 +132,9 @@ public final class BusyBoardBenchmark extends AITest {
             row.put("permanents",game.getCardsIn(ZoneType.Battlefield).size());
             row.put("tokens",game.getCardsIn(ZoneType.Battlefield).stream().filter(Card::isToken).count());
             row.put("warmup",rep<0);
-            long[] countsAfter=forge.game.combat.RequirementSnapshotMetrics.snapshot();
-            row.put("requirementSnapshotQueries",countsAfter[0]-countsBefore[0]);row.put("requirementSnapshotsAvoided",countsAfter[1]-countsBefore[1]);
+            long[] countsAfter=BenchmarkOptionalMetrics.read("forge.game.combat.RequirementSnapshotMetrics",metrics);
+            if ((countsBefore==null)!=(countsAfter==null)) throw new IllegalStateException("Optional benchmark counter capability changed within workload");
+            row.put("requirementSnapshotQueries",countsBefore==null?null:countsAfter[0]-countsBefore[0]);row.put("requirementSnapshotsAvoided",countsBefore==null?null:countsAfter[1]-countsBefore[1]);
             if(verify){row.put("legal",legalBefore);row.put("assignments",assignments(combat));row.put("state",state(game,combat));
                 if(path.equals("attack") || path.equals("block")){combat.orderBlockersForDamageAssignment();combat.orderAttackersForDamageAssignment();combat.fireTriggersForUnblockedAttackers(game);drain(game);game.getPhaseHandler().devModeSet(PhaseType.COMBAT_FIRST_STRIKE_DAMAGE,p,50);combat.assignCombatDamage(true);combat.dealAssignedDamage();drain(game);game.getPhaseHandler().devModeSet(PhaseType.COMBAT_DAMAGE,p,50);combat.assignCombatDamage(false);combat.dealAssignedDamage();drain(game);game.getAction().checkStateEffects(true);row.put("afterDamage",state(game,combat));}}
             if(verify && traceDir!=null) {try {forge.game.CombatParityTrace.finish(game);} catch(java.io.IOException error){throw new java.io.UncheckedIOException(error);} finally {System.clearProperty("forge.parity.trace");}}

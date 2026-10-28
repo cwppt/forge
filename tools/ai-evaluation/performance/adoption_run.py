@@ -67,7 +67,7 @@ def prepare_tests():
                 assert file.resolve().is_relative_to((R/'test-classes').resolve());shadows.append(dict(path=relative,sha256=c.sha(file)));file.unlink()
     write(R/'removed-shadow-class-provenance.json',shadows)
     src=S/'forge-gui-desktop/src/test/java/forge/ai'
-    files=[src/name for name in ['CostSourceRegressionTest.java','BlockCostSourceRegressionTest.java','CombinedFeatureTest.java']]
+    files=[src/name for name in ['CostSourceRegressionTest.java','BlockCostSourceRegressionTest.java','CombinedFeatureTest.java','BusyBoardBenchmark.java','BenchmarkOptionalMetrics.java','BenchmarkMetricsCompatibilityTest.java']]
     p=a.java([e.JAVA.with_name('javac.exe'),'--release','17','-cp',';'.join(map(str,[R/'test-classes',R/'combined.jar',a.NG,a.JC])),'-d',R/'test-classes',*files]);(R/'test-compile.log').write_text(p.stdout+p.stderr);assert p.returncode==0,p.stderr
     print('Combined tests compiled; engine-shadow classes removed from isolated test classpath')
 
