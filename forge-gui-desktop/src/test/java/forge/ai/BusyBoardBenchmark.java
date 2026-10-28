@@ -114,6 +114,8 @@ public final class BusyBoardBenchmark extends AITest {
                 try {forge.game.CombatParityTrace.begin(game);} catch(java.io.IOException error){throw new java.io.UncheckedIOException(error);}
             }
             Object legalBefore=verify?legal(game,combat):null;
+            boolean searchProbe=Boolean.getBoolean("forge.search.probe");
+            if(searchProbe)try {Class.forName("forge.perf.SearchProbe").getMethod("beginWindow",String.class,String.class,int.class).invoke(null,name,path,rep);} catch(Exception error){throw new RuntimeException(error);}
             long[] countsBefore=forge.game.combat.BlockerSearchMetrics.snapshot();
             long alloc=thread.isThreadAllocatedMemorySupported()?thread.getThreadAllocatedBytes(Thread.currentThread().getId()):0;
             long cpu=thread.getCurrentThreadCpuTime(),gc=gc(),start=System.nanoTime();Object result;
@@ -124,6 +126,7 @@ public final class BusyBoardBenchmark extends AITest {
             var row=new LinkedHashMap<String,Object>();row.put("case",name);row.put("path",path);row.put("rep",rep);
             row.put("wallMs",(System.nanoTime()-start)/1e6);row.put("cpuMs",(thread.getCurrentThreadCpuTime()-cpu)/1e6);
             row.put("gcMs",gc()-gc);row.put("allocatedBytesCurrentThread",thread.isThreadAllocatedMemorySupported()?thread.getThreadAllocatedBytes(Thread.currentThread().getId())-alloc:null);
+            if(searchProbe)try {Class.forName("forge.perf.SearchProbe").getMethod("endWindow").invoke(null);} catch(Exception error){throw new RuntimeException(error);}
             row.put("heapUsed",ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed());
             row.put("permanents",game.getCardsIn(ZoneType.Battlefield).size());
             row.put("tokens",game.getCardsIn(ZoneType.Battlefield).stream().filter(Card::isToken).count());
