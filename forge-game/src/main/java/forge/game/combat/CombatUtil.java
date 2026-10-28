@@ -331,13 +331,20 @@ public class CombatUtil {
     }
 
     public static Cost getBlockCost(Game game, Card blocker, Card attacker) {
-        Cost blockCost = new Cost(ManaCost.ZERO, true);
+        BlockCostMetrics.call();
+        Cost blockCost = BlockCostMetrics.FAST_PATH ? null : new Cost(ManaCost.ZERO, true);
         // Sort abilities to apply them in proper order
         boolean noCost = true;
         for (Card card : game.getCardsIn(ZoneType.STATIC_ABILITIES_SOURCE_ZONES)) {
+            if (BlockCostMetrics.FAST_PATH && !card.getCurrentState().mayHaveStaticAbilityMode(
+                    forge.game.staticability.StaticAbilityMode.CantBlockUnless)) {
+                BlockCostMetrics.skip();
+                continue;
+            }
             for (final StaticAbility stAb : card.getStaticAbilities()) {
                 Cost c1 = stAb.getBlockCost(blocker, attacker);
                 if (c1 != null) {
+                    if (blockCost == null) blockCost = new Cost(ManaCost.ZERO, true);
                     blockCost.add(c1);
                     noCost = false;
                 }
@@ -345,6 +352,7 @@ public class CombatUtil {
         }
 
         if (noCost) {
+            if (BlockCostMetrics.FAST_PATH) BlockCostMetrics.emptyCost();
             return null;
         }
         return blockCost;
@@ -749,10 +757,15 @@ public class CombatUtil {
 
         final CardCollectionView attackers = combat.getAttackers();
 
+        BlockerSearchMetrics.count(3);
+        final boolean checkCosts = !BlockerSearchMetrics.FAST || hasBlockingCostSource(blocker.getGame());
+
         final CardCollection requirementCards = new CardCollection();
         final Player defender = blocker.getController();
         for (final Card attacker : attackers) {
-            if (getBlockCost(blocker.getGame(), blocker, attacker) != null) {
+            BlockerSearchMetrics.count(4);
+            if (!checkCosts) BlockerSearchMetrics.count(13);
+            if (checkCosts && getBlockCost(blocker.getGame(), blocker, attacker) != null) {
                 continue;
             }
 
@@ -836,6 +849,16 @@ public class CombatUtil {
             return CardCollection.EMPTY;
         }
         return combat.getBlockers(attacker);
+    }
+
+    private static boolean hasBlockingCostSource(final Game game) {
+        for (Card source : game.getCardsIn(ZoneType.STATIC_ABILITIES_SOURCE_ZONES)) {
+            BlockerSearchMetrics.count(5);
+            for (StaticAbility ability : source.getStaticAbilities()) {
+                if (ability.checkMode(forge.game.staticability.StaticAbilityMode.CantBlockUnless)) return true;
+            }
+        }
+        return false;
     }
 
     private static boolean attackerLureSatisfied(final Card attacker, final Card blocker, final CardCollectionView blockers) {

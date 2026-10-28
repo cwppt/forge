@@ -35,6 +35,7 @@ import java.util.function.Predicate;
 public class CostAdjustment {
 
     public static Cost adjust(final Cost cost, final SpellAbility sa, boolean effect) {
+        CostSourceMetrics.call();
         if (sa.isTrigger() || cost == null || effect) {
             sa.setMaxWaterbend(cost);
             return cost;
@@ -72,6 +73,10 @@ public class CostAdjustment {
 
         // Sort abilities to apply them in proper order
         for (Card c : cardsOnBattlefield) {
+            if (CostSourceMetrics.FAST_PATH && !c.getCurrentState().mayHaveStaticAbilityMode(StaticAbilityMode.RaiseCost)) {
+                CostSourceMetrics.skip();
+                continue;
+            }
             for (final StaticAbility stAb : c.getStaticAbilities()) {
                 if (stAb.checkMode(StaticAbilityMode.RaiseCost)) {
                     raiseAbilities.add(stAb);
@@ -171,6 +176,7 @@ public class CostAdjustment {
     // If cardsToDelveOut is null, will immediately exile the delved cards and remember them on the host card.
     // Otherwise, will return them in cardsToDelveOut and the caller is responsible for doing the above.
     public static boolean adjust(ManaCostBeingPaid cost, final SpellAbility sa, final Player payer, CardCollection cardsToDelveOut, boolean test, boolean effect) {
+        CostSourceMetrics.call();
         if (effect) {
             adjustCostByWaterbend(cost, sa, payer, test);
         }
@@ -200,6 +206,12 @@ public class CostAdjustment {
 
         // Sort abilities to apply them in proper order
         for (Card c : cardsOnBattlefield) {
+            if (CostSourceMetrics.FAST_PATH
+                    && !c.getCurrentState().mayHaveStaticAbilityMode(StaticAbilityMode.ReduceCost)
+                    && !c.getCurrentState().mayHaveStaticAbilityMode(StaticAbilityMode.SetCost)) {
+                CostSourceMetrics.skip();
+                continue;
+            }
             for (final StaticAbility stAb : c.getStaticAbilities()) {
                 if (stAb.checkMode(StaticAbilityMode.ReduceCost) && checkRequirement(sa, stAb)) {
                     reduceAbilities.add(stAb);
@@ -227,10 +239,14 @@ public class CostAdjustment {
             cost.subtractManaCost(host.getManaCost());
         }
 
+        LamiaObservation.start(sa, test);
         while (!reduceAbilities.isEmpty()) {
             StaticAbility choice = activator.getController().chooseSingleStaticAbility(reduceAbilities);
             reduceAbilities.remove(choice);
-            sumGeneric += applyReduceCostAbility(choice, sa, cost, sumGeneric);
+            int beforeGeneric = cost.getUnpaidShards(ManaCostShard.GENERIC);
+            int reduction = applyReduceCostAbility(choice, sa, cost, sumGeneric);
+            LamiaObservation.record(sa, choice, test, beforeGeneric, sumGeneric, reduction, !setAbilities.isEmpty());
+            sumGeneric += reduction;
         }
         // need to reduce generic extra because of 2 hybrid mana
         cost.decreaseGenericMana(sumGeneric);
