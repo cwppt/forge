@@ -25,7 +25,7 @@ public final class CardPropertyRulesTest extends AITest {
     }
     @Test public void characteristicAndChosenColorChangesRemainLive() {
         var g=initAndCreateGame();var p=g.getPlayers().get(0);var c=addCard("Runeclaw Bear",p);
-        Assert.assertTrue(c.isValid("Creature.Green",p,c,null));c.setType(CardType.parse("Artifact"));Assert.assertFalse(c.isValid("Creature.Green",p,c,null));
+        Assert.assertTrue(c.isValid("Creature.Green",p,c,null));c.setType(CardType.parse("Artifact",false));Assert.assertFalse(c.isValid("Creature.Green",p,c,null));
         c.setChosenColors(List.of("Green"));Assert.assertTrue(c.hasProperty("ChosenColor",p,c,null));
         c.setChosenColors(List.of("Blue"));Assert.assertFalse(c.hasProperty("ChosenColor",p,c,null));
     }

@@ -68,12 +68,20 @@ marker, preserves the 7 GiB available-memory admission and 3 GiB free-space
 reserve, and publishes independently. An interrupted supervisor requires manual
 checkpoint/child review; the one-shot marker prevents blindly replaying stages.
 
-Current storage blocker: preparation stopped at admission before copying engines
+Initial storage blocker: preparation stopped at admission before copying engines
 or launching native tests. C: had about 2 GiB free, below the required 3 GiB.
 The original harness and other workspaces were not moved or cleaned. No source
 engine overlay was built. Offline Python analysis, bytecode-parser and acceptance
 tests can run; native correctness and performance remain pending until space is
-available. `--publish-blocked` publishes that honest partial state without
+available. That blocker was subsequently resolved by moving the inactive
+`chainer-foundation-native50-20261026` archive intact to
+`D:\ForgeData\archived-harness-work`, retaining its original path as a junction.
+All 4,715 regular-file hashes and 548 link targets were verified. Both arms then
+passed 38 focused Java methods and initial structured combat parity. The test
+fixture's `CardType.parse` call was corrected to supply the required `incomplete`
+argument; the original compiler log remains preserved.
+
+`--publish-blocked` publishes an honest partial state without
 claiming a running supervisor or frozen native-execution request. Publication
 ownership records are preserved so the eventual supervisor can update the same
 report after validated preparation.

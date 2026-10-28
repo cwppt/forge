@@ -120,7 +120,7 @@ def freeze():
         pod=read(V6/'run-request.json')['pod'],deckHashes=read(V6/'run-request.json')['deckHashes'],sourceHashes=hashes,
         compiledHashes={p.relative_to(R).as_posix():c.sha(p) for p in (R/'test-classes').rglob('*.class')},
         helperHashes=read(V6/'run-request.json')['helperHashes'],phase6Hashes={p:c.sha(V6/p) for p in historic},
-        heapGiB=3,processors=2,maximumGameWorkers=1,freeSpaceReserveGiB=3,
+        heapGiB=3,processors=2,maximumGameWorkers=1,freeSpaceReserveGiB=3,storageRecovery=read(R/'storage-recovery.json') if (R/'storage-recovery.json').exists() else None,
         candidateScope='JVM compiler policy only: disabling default DontCompileHugeMethods permits ALL huge methods to compile, not only CardProperty. No engine entry or AI setting changes. Separate compiler logs establish actual compilation; parity guards wall-clock-budget effects.',
         cumulativeRule='Direct raw-functional/candidate ratios reported only for targeted microbenchmark. No raw-functional whole-game cohort, therefore cumulative whole-game improvement unknown. Historical flags remain disabled.'))
     verify();print('Acceptance gates and all inputs frozen')
