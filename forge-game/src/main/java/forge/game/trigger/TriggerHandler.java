@@ -519,7 +519,9 @@ public class TriggerHandler {
         //wrapperAbility.setDescription(wrapperAbility.getStackDescription());
         //wrapperAbility.setDescription(wrapperAbility.toUnsuppressedString());
 
+        forge.game.CombatParityTrace.trigger(game, regtrig, sa);
         if (regtrig.isStatic()) {
+            forge.game.CombatParityTrace.staticDispatch(game, wrapperAbility, true);
             if (wrapperAbility.getActivatingPlayer().getController().playTrigger(host, wrapperAbility, isMandatory)) {
                 final Map<AbilityKey, Object> staticParams = AbilityKey.mapFromCard(host);
                 staticParams.put(AbilityKey.SpellAbility, sa);
@@ -530,6 +532,7 @@ public class TriggerHandler {
             game.getTriggerHandler().runTrigger(TriggerType.AbilityTriggered, TriggerAbilityTriggered.getRunParams(regtrig, wrapperAbility, runParams), false);
         }
 
+        if (regtrig.isStatic()) forge.game.CombatParityTrace.staticDispatch(game, wrapperAbility, false);
         regtrig.triggerRun();
 
         boolean removeBoon = host.isBoon();

@@ -2695,6 +2695,7 @@ public class GameAction {
 
     public void dealDamage(final boolean isCombat, final CardDamageTable damageMap, final CardDamageTable preventMap,
                            final GameEntityCounterTable counterTable, final SpellAbility cause) {
+        CombatParityTrace.beginDamage(game, isCombat, damageMap, cause);
         // Clear assigned damage if is combat
         if (isCombat) {
             for (Map.Entry<GameEntity, Map<Card, Integer>> et : damageMap.columnMap().entrySet()) {
@@ -2707,6 +2708,7 @@ public class GameAction {
 
         // Run replacement effect for each entity dealt damage
         game.getReplacementHandler().runReplaceDamage(isCombat, damageMap, preventMap, counterTable, cause);
+        CombatParityTrace.replacedDamage(game, damageMap);
 
         Map<Card, Integer> lethalDamage = Maps.newHashMap();
         Map<Integer, Card> lkiCache = Maps.newHashMap();
@@ -2778,6 +2780,7 @@ public class GameAction {
 
         counterTable.replaceCounterEffect(game, cause);
         counterTable.clear();
+        CombatParityTrace.endDamage(game);
     }
 
     public void completeDungeon(Player player, Card dungeon) {
