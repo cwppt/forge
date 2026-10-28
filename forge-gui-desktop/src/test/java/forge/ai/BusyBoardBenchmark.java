@@ -98,6 +98,7 @@ public final class BusyBoardBenchmark extends AITest {
             if(path.equals("attack") || path.equals("block"))game.getPhaseHandler().setCombat(combat);
             Object legalBefore=verify?legal(game,combat):null;
             long[] countsBefore=forge.game.card.BlockCostMetrics.snapshot();
+            long[] costBefore=forge.game.cost.CostSourceMetrics.snapshot();
             long alloc=thread.isThreadAllocatedMemorySupported()?thread.getThreadAllocatedBytes(Thread.currentThread().getId()):0;
             long cpu=thread.getCurrentThreadCpuTime(),gc=gc(),start=System.nanoTime();Object result;
             if(path.equals("main")) result=((PlayerControllerAi)p.getController()).getAi().chooseSpellAbilityToPlay();
@@ -112,6 +113,7 @@ public final class BusyBoardBenchmark extends AITest {
             row.put("tokens",game.getCardsIn(ZoneType.Battlefield).stream().filter(Card::isToken).count());
             row.put("warmup",rep<0);
             long[] countsAfter=forge.game.card.BlockCostMetrics.snapshot();row.put("blockCostCalls",countsAfter[0]-countsBefore[0]);row.put("staticCollectionsAvoided",countsAfter[1]-countsBefore[1]);row.put("zeroCostObjectsAvoided",countsAfter[2]-countsBefore[2]);
+            long[] costAfter=forge.game.cost.CostSourceMetrics.snapshot();row.put("costAdjustmentCalls",costAfter[0]-costBefore[0]);row.put("costStaticCollectionsAvoided",costAfter[1]-costBefore[1]);
             if(verify){row.put("legal",legalBefore);row.put("assignments",assignments(combat));row.put("state",state(game,combat));
                 if(path.equals("attack") || path.equals("block")){combat.orderBlockersForDamageAssignment();combat.orderAttackersForDamageAssignment();combat.fireTriggersForUnblockedAttackers(game);drain(game);combat.assignCombatDamage(true);combat.dealAssignedDamage();drain(game);combat.assignCombatDamage(false);combat.dealAssignedDamage();drain(game);game.getAction().checkStateEffects(true);row.put("afterDamage",state(game,combat));}}
             row.put("result",String.valueOf(result));System.out.println("BUSY_BENCH "+new Gson().toJson(row));

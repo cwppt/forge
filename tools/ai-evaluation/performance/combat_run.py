@@ -4,11 +4,11 @@ import base64,collections,ctypes,csv,datetime,hashlib,importlib.util,json,math,o
 sys.dont_write_bytecode=True
 import combat_performance as api
 R=api.R;SOURCE=api.SOURCE;H=api.H;EX=api.EX;e=api.e;core=api.core
-RUN='20261027-native-combat-performance-v1';DEST='forge-performance/reports/'+RUN
+RUN=getattr(api,'RUN','20261027-native-combat-performance-v1');DEST='forge-performance/reports/'+RUN
 REPO='cwppt/MTG-deck-lists';URL='https://github.com/'+REPO+'/tree/main/'+DEST
 STOP=threading.Event();ACTIVE={};PUBLIC=R/'public'
 ENV=os.environ.copy();ENV.update(GH_PROMPT_DISABLED='1',GIT_TERMINAL_PROMPT='0',GCM_INTERACTIVE='Never')
-DATA=dict(runId=RUN,state='pending',optimisation='Live block-tax mode prefilter and lazy zero-cost construction; no cached game-state results',
+DATA=dict(runId=RUN,state='pending',optimisation=getattr(api,'DESCRIPTION','Live block-tax mode prefilter and lazy zero-cost construction; no cached game-state results'),
     performanceImprovementDemonstrated=False,readyForLargerCohorts=False,benchmarks={},smoke=[],regressions={},differences=[])
 def now():return datetime.datetime.now(datetime.timezone.utc).isoformat()
 def write(p,obj):return core.write(p,obj)
@@ -35,13 +35,13 @@ def verify():
 def freeze():
     assert not (R/'run-request.json').exists(),'Request already frozen'
     paths=subprocess.check_output(['git','-C',str(SOURCE),'ls-files'],text=True).splitlines()
-    relevant=[p for p in paths if p.startswith('tools/ai-evaluation/performance/') or p.startswith('tools/ai-evaluation/parallel-v4/') or p in [
+    relevant=[p for p in paths if p in getattr(api,'EXTRA_SOURCES',[]) or p.startswith('tools/ai-evaluation/performance/') or p.startswith('tools/ai-evaluation/parallel-v4/') or p in [
         'forge-game/src/main/java/forge/game/card/CardState.java','forge-game/src/main/java/forge/game/card/BlockCostMetrics.java',
         'forge-game/src/main/java/forge/game/combat/CombatUtil.java'] or p.startswith('forge-gui-desktop/src/test/java/forge/')]
     helpers=[H/'work/lathliss-v27-20261017/experiment.py',H/'work/lathliss-v27-20261017/scripts/ParallelCommanderPool.py']
     helpers+=list((H/'work/lathliss-v27-20261017/preferences-snapshot').rglob('*'))
     q=dict(runId=RUN,sourceHead=subprocess.check_output(['git','-C',str(SOURCE),'rev-parse','HEAD'],text=True).strip(),
-        sourceBranch='codex/commander-combat-performance-v1',sourceBaseline='418dac868f3f48349ff0b5d35e9197c65008d6e6',
+        sourceBranch=getattr(api,'BRANCH','codex/commander-combat-performance-v1'),sourceBaseline='418dac868f3f48349ff0b5d35e9197c65008d6e6',
         baselineSHA256=core.sha(R/'baseline.jar'),treatmentSHA256=core.sha(R/'optimized.jar'),flags=api.FLAGS,
         sourceHashes={p:core.sha(SOURCE/p) for p in relevant},helperHashes={p.relative_to(H).as_posix():core.sha(p) for p in helpers if p.is_file()},
         inputHashes={p.relative_to(R).as_posix():core.sha(p) for p in (R/'test-classes').rglob('*.class')},
@@ -73,16 +73,15 @@ def gh(path,method='GET',payload=None):
 def publish():
     PUBLIC.mkdir(exist_ok=True);q=json.loads((R/'run-request.json').read_text())
     write(PUBLIC/'measurements.json',DATA);write(PUBLIC/'manifest.json',q)
-    text='# Native Commander combat performance v1\n\nState: **'+DATA['state']+'**. No speedup is claimed until all gates and repeated measurements finish.\n\n'
-    text+='## Change and baseline\n\nThe candidate removes static-ability list rebuilds only when live printed and keyword sources prove that no CantBlockUnless mode exists. Changed/text traits, split states and custom Card implementations retain the original rebuild. Real costs retain original ordering/conditions. Empty Cost objects are created lazily. No cache, search/budget change, trigger shortcut or fallback policy. Enable only with `-Dforge.combat.blockCostFastPath=true`.\n\n'
-    text+='The earlier empty-trigger collection candidate passed initial correctness but showed no cold timing gain; it was preserved and reverted in isolation. This is the second and final candidate.\n\n'
-    text+='Validated correctness baseline SHA256: `'+q['baselineSHA256']+'`. Candidate SHA256: `'+q['treatmentSHA256']+'`. Source baseline `418dac868f3f48349ff0b5d35e9197c65008d6e6`; source HEAD `'+q['sourceHead']+'`. [Source branch](https://github.com/cwppt/forge/tree/codex/commander-combat-performance-v1). Neither original workspace nor any historical engine/deck was changed. No automatic merge.\n\n'
-    text+='## Gates and evidence\n\nInitial tests: 26 Java methods passed on each engine, plus matching large-board legal attacker/blocker pair sets, selected assignments, state, actual combat damage and stack results. Extended regression, full ten-case parity, timeout journals, draws, uncooperative workers, report/validator integrity and matched real games are recorded below. Pair sets are not an exhaustive enumeration of all multi-block combinations; dedicated blocking regressions and full-game trajectories supplement them.\n\n```json\n'+json.dumps(DATA['regressions'],indent=2)+'\n```\n\n'
+    text='# '+getattr(api,'TITLE','Native Commander combat performance v1')+'\n\nState: **'+DATA['state']+'**. No speedup is claimed until all gates and repeated measurements finish.\n\n'
+    text+='## Change and baseline\n\n'+getattr(api,'CHANGE',DATA['optimisation'])+'\n\n'+getattr(api,'HISTORY','No performance claim until the gates pass.')+'\n\n'
+    text+='Validated correctness baseline SHA256: `'+q['baselineSHA256']+'`. Candidate SHA256: `'+q['treatmentSHA256']+'`. Source baseline `418dac868f3f48349ff0b5d35e9197c65008d6e6`; source HEAD `'+q['sourceHead']+'`. [Source branch](https://github.com/cwppt/forge/tree/'+q.get('sourceBranch','codex/commander-combat-performance-v1')+'). Neither original workspace nor any historical engine/deck was changed. No automatic merge.\n\n'
+    text+='## Gates and evidence\n\nInitial Java regression counts for each engine are recorded below, plus matching large-board legal attacker/blocker pair sets, selected assignments, state, actual combat damage and stack results. Extended regression, full ten-case parity, timeout journals, draws, uncooperative workers, report/validator integrity and matched real games are recorded below. Pair sets are not an exhaustive enumeration of all multi-block combinations; dedicated blocking regressions and full-game trajectories supplement them.\n\n```json\n'+json.dumps(DATA['regressions'],indent=2)+'\n```\n\n'
     text+='All timed workloads retain 500 ms / 2,000 checkpoints, 3 GiB heap, two advertised CPUs, identical diagnostics and frozen native flags. Two warm-ups per workload are excluded from the focused measurements. Three separate JVM rounds alternate engine order; four measured repetitions per workload per round give 12 observations. Full suite and separate aggregate-counter/JFR passes are additional evidence. Counts/JFR instrumentation are not enabled in the primary timing runs.\n\n'
     for name,entry in DATA['benchmarks'].items():
         if name.startswith('allocation-profile-'):
             text+='### '+name+'\n\n'
-            text+='Aggregate measured calls: '+str(sum(r.get('blockCostCalls',0) for r in entry['rows']))+'; static-list rebuilds avoided: '+str(sum(r.get('staticCollectionsAvoided',0) for r in entry['rows']))+'; empty Cost constructions avoided: '+str(sum(r.get('zeroCostObjectsAvoided',0) for r in entry['rows']))+'.\n\n'
+            text+='Aggregate measured calls: '+str(sum(r.get(getattr(api,'CALL_FIELD','blockCostCalls'),0) for r in entry['rows']))+'; static-list rebuilds avoided: '+str(sum(r.get(getattr(api,'SKIP_FIELD','staticCollectionsAvoided'),0) for r in entry['rows']))+'; empty Cost constructions avoided: '+str(sum(r.get('zeroCostObjectsAvoided',0) for r in entry['rows']))+'.\n\n'
             if entry.get('jfr'):text+='Nearest Forge CPU frames on sampled native evaluation stacks: `'+json.dumps(entry['jfr']['nearestForgeCpuFrames'][:5])+'`. Allocation weights and caller evidence are in measurements.json; JFR sampling is not an exact per-operation allocation census.\n\n'
     if DATA.get('comparison'):
         text+='## Before / after\n\n| Workload | Baseline median ms | Candidate median ms | Baseline p95 ms | Candidate p95 ms | Median change |\n|---|---:|---:|---:|---:|---:|\n'
@@ -93,7 +92,7 @@ def publish():
     text+='## Result and limitations\n\nDemonstrated improvement: **'+str(DATA['performanceImprovementDemonstrated'])+'**. Ready for larger cohorts: **'+str(DATA['readyForLargerCohorts'])+'**. '+DATA.get('conclusion','Extended gates/measurements are pending; the candidate is not approved for production use.')+'\n\n'
     if DATA.get('failure'):text+='Stopped reason: '+DATA['failure']+'\n\n'
     text+='Raw logs, JFR recordings, bytecode parity evidence, process records and checkpoints remain local under this run. Game-state-copy counts are not instrumented; collection rebuild skips and empty Cost allocations are counted in the separate diagnostic pass. Synthetic fixtures use the previous suite\u2019s high life totals/Dragon libraries and are not historical replays or scored deck comparisons. No decklist, rule, evaluation budget or timeout-correctness implementation was changed.\n\n'
-    text+='Reproduce with `combat_performance.py <fresh-run-directory> prepare`, then `initial`, then `combat_run.py <same-run-directory>`. Use normal Windows access for isolated resource junctions. The supervisor is finite, owns the existing global worker lock, checks C: and actual output volumes for the 3 GiB reserve, admits one worker with the existing memory allowance, and writes local heartbeats every five seconds. Existing run-request/source hashes must match. Duplicate supervisor launches are refused. Interrupted/ambiguous children require review; valid completed evidence is not overwritten or replayed. No external LLM/provider calls or paid fallback.\n'
+    text+='Reproduce with `'+Path(api.__file__).name+' <fresh-run-directory> prepare`, then `initial`, then `'+getattr(api,'RUNNER','combat_run.py')+' <same-run-directory> --freeze` followed by the same command without --freeze. Use normal Windows access for isolated resource junctions. The supervisor is finite, owns the existing global worker lock, checks C: and actual output volumes for the 3 GiB reserve, admits one worker with the existing memory allowance, and writes local heartbeats every five seconds. Existing run-request/source hashes must match. Duplicate supervisor launches are refused. Interrupted/ambiguous children require review; valid completed evidence is not overwritten or replayed. No external LLM/provider calls or paid fallback.\n'
     (PUBLIC/'REPORT.md').write_text(text,encoding='utf-8')
     owned=json.loads((R/'published-blobs.json').read_text()) if (R/'published-blobs.json').exists() else {}
     for name in ['REPORT.md','measurements.json','manifest.json']:
@@ -105,6 +104,7 @@ def publish():
             assert remote['sha']==owned[name]['sha'],'Report changed externally; refuse overwrite'
             payload['sha']=remote['sha']
         else:assert '404' in prior.stderr or 'Not Found' in prior.stderr,'GitHub preflight failed: '+prior.stderr[-300:]
+        payload['message']=getattr(api,'TITLE','Commander native combat v1')+' checkpoint: '+DATA['state']
         result=gh(endpoint,'PUT',payload);assert result.returncode==0,'GitHub publication failed: '+result.stderr[-600:]
         data=json.loads(result.stdout);owned[name]=dict(sha=data['content']['sha'],commit=data['commit']['sha']);write(R/'published-blobs.json',owned)
     write(R/'publication.json',dict(url=URL,utc=now(),state=DATA['state'],files=owned))
@@ -121,6 +121,7 @@ def python_regressions():
     DATA['regressions']['legacy-validator']=dict(passed=True,methods=18)
 def smoke():
     q=json.loads((EX/'lathliss-r-throne-20261026/request.json').read_text());decks=R/'decks';shutil.copytree(EX/'lathliss-r-throne-20261026/decks',decks)
+    assert q['deckHashes']==verify()['deckHashes'],'Original deck manifest changed after freezing'
     for name,h in q['deckHashes'].items():assert core.sha(decks/name)==h
     spec=importlib.util.spec_from_file_location('classifier',SOURCE/'tools/ai-evaluation/parallel-v4/Run-ValidCommanderCohort.py');classifier=importlib.util.module_from_spec(spec);spec.loader.exec_module(classifier)
     def trajectory(d,seed):
@@ -194,7 +195,7 @@ def run():
                 checkpoint('correctness-gates-passed')
                 focus='large-four-player,dragon-tokens,large-combat,late-100'
                 for mode in ['off','optimized']:
-                    d=testng('allocation-profile-'+mode,mode,['-Dforge.combat.blockCostMetrics=true','-Dforge.bench.cases='+focus,'-Dforge.bench.paths=block','-Dforge.bench.warmup=1','-Dforge.bench.repeats=2'],jfr=True);collect(d,mode)
+                    d=testng('allocation-profile-'+mode,mode,['-D'+getattr(api,'METRICS_FLAG','forge.combat.blockCostMetrics')+'=true','-Dforge.bench.cases='+focus,'-Dforge.bench.paths=block','-Dforge.bench.warmup=1','-Dforge.bench.repeats=2'],jfr=True);collect(d,mode)
                     from summarize import jfr_summary
                     DATA['benchmarks'][d.name]['jfr']=jfr_summary(d)
                 checkpoint('profiling-completed')
