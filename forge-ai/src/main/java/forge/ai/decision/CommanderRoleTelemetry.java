@@ -33,6 +33,7 @@ public final class CommanderRoleTelemetry implements AutoCloseable {
     }
     public static CommanderRoleTelemetry begin(Game game, int index, Long seed, Path path) throws IOException {
         CommanderRoleTelemetry observer=new CommanderRoleTelemetry(game,index,seed,path);
+        forge.game.CombatParityTrace.begin(game);
         CURRENT.set(observer);
         game.subscribeToEvents(observer);
         JsonObject start=new JsonObject(); JsonArray players=new JsonArray();
@@ -176,6 +177,8 @@ public final class CommanderRoleTelemetry implements AutoCloseable {
         emit("END",row); close();
     }
     @Override public synchronized void close() throws IOException {
-        if(closed) return; closed=true; writer.close(); if(CURRENT.get()==this) CURRENT.remove();
+        if(closed) return;
+        try { forge.game.CombatParityTrace.finish(game); }
+        finally { closed=true; writer.close(); if(CURRENT.get()==this) CURRENT.remove(); }
     }
 }

@@ -574,6 +574,7 @@ public class MagicStack /* extends MyObservable */ implements Iterable<SpellAbil
         // The SpellAbility isn't removed from the Stack until it finishes resolving
         // temporarily reverted removing SAs after resolution
         final SpellAbility sa = peekAbility();
+        forge.game.CombatParityTrace.resolving(game, sa);
 
         // abilities already on stack won't get changed text from host
         if (sa.isSpell()) {
