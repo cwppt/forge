@@ -331,10 +331,12 @@ public class CombatUtil {
     }
 
     public static Cost getBlockCost(Game game, Card blocker, Card attacker) {
+        BlockerSearchMetrics.count(6);
         Cost blockCost = new Cost(ManaCost.ZERO, true);
         // Sort abilities to apply them in proper order
         boolean noCost = true;
         for (Card card : game.getCardsIn(ZoneType.STATIC_ABILITIES_SOURCE_ZONES)) {
+            BlockerSearchMetrics.count(7);
             for (final StaticAbility stAb : card.getStaticAbilities()) {
                 Cost c1 = stAb.getBlockCost(blocker, attacker);
                 if (c1 != null) {
@@ -749,10 +751,17 @@ public class CombatUtil {
 
         final CardCollectionView attackers = combat.getAttackers();
 
+        BlockerSearchMetrics.count(3);
+        // Lifetime: this invocation only. No game actions run inside this legality query.
+        // If even an inactive tax source exists, retain every original cost evaluation.
+        final boolean checkCosts = !BlockerSearchMetrics.FAST || hasBlockingCostSource(blocker.getGame());
+
         final CardCollection requirementCards = new CardCollection();
         final Player defender = blocker.getController();
         for (final Card attacker : attackers) {
-            if (getBlockCost(blocker.getGame(), blocker, attacker) != null) {
+            BlockerSearchMetrics.count(4);
+            if (!checkCosts) BlockerSearchMetrics.count(13);
+            if (checkCosts && getBlockCost(blocker.getGame(), blocker, attacker) != null) {
                 continue;
             }
 
@@ -823,6 +832,16 @@ public class CombatUtil {
         }
 
         return Collections.disjoint(combat.getAttackersBlockedBy(blocker), requirementCards);
+    }
+
+    private static boolean hasBlockingCostSource(final Game game) {
+        for (Card source : game.getCardsIn(ZoneType.STATIC_ABILITIES_SOURCE_ZONES)) {
+            BlockerSearchMetrics.count(5);
+            for (StaticAbility ability : source.getStaticAbilities()) {
+                if (ability.checkMode(forge.game.staticability.StaticAbilityMode.CantBlockUnless)) return true;
+            }
+        }
+        return false;
     }
 
     private static boolean attackerLureSatisfied(final Card attacker, final Card blocker, final CardCollection blockers) {
@@ -903,6 +922,13 @@ public class CombatUtil {
      * @return a boolean.
      */
     public static boolean canBlock(final Card attacker, final Card blocker, final Combat combat) {
+        if (!BlockerSearchMetrics.ENABLED) return canBlockInCombat(attacker, blocker, combat);
+        long start=BlockerSearchMetrics.start();boolean result=canBlockInCombat(attacker, blocker, combat);
+        BlockerSearchMetrics.query(attacker==null?-1:attacker.getId(),blocker==null?-1:blocker.getId(),result,start);
+        return result;
+    }
+
+    private static boolean canBlockInCombat(final Card attacker, final Card blocker, final Combat combat) {
         if (attacker == null || blocker == null) {
             return false;
         }
