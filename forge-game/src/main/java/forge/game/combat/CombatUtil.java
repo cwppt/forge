@@ -756,7 +756,7 @@ public class CombatUtil {
                 continue;
             }
 
-            if (attackerLureSatisfied(attacker, blocker, combat.getBlockers(attacker))) {
+            if (attackerLureSatisfied(attacker, blocker, blockersForLure(attacker, combat))) {
                 continue;
             }
 
@@ -825,7 +825,20 @@ public class CombatUtil {
         return Collections.disjoint(combat.getAttackersBlockedBy(blocker), requirementCards);
     }
 
-    private static boolean attackerLureSatisfied(final Card attacker, final Card blocker, final CardCollection blockers) {
+    private static CardCollectionView blockersForLure(final Card attacker, final Combat combat) {
+        RequirementSnapshotMetrics.query();
+        // The unchanged helper only reads its list for these keyword families.
+        // Recheck live keywords every call, including hidden/dynamically gained keywords.
+        if (RequirementSnapshotMetrics.FAST
+                && !attacker.hasStartOfKeyword("CARDNAME must be blocked")
+                && !attacker.hasStartOfKeyword("MustBeBlockedBy")) {
+            RequirementSnapshotMetrics.avoid();
+            return CardCollection.EMPTY;
+        }
+        return combat.getBlockers(attacker);
+    }
+
+    private static boolean attackerLureSatisfied(final Card attacker, final Card blocker, final CardCollectionView blockers) {
         if (attacker.hasStartOfKeyword("All creatures able to block CARDNAME do so.")
                 || (attacker.hasStartOfKeyword("CARDNAME must be blocked if able.")
                         && blockers.isEmpty())
