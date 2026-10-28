@@ -1,10 +1,20 @@
-import copy,json,unittest
+import copy,json,tempfile,unittest
+from pathlib import Path
 from unittest.mock import patch
 import incremental_run as r
 h=r.host
 
 class ProgrammeTests(unittest.TestCase):
-    def setUp(self):self.previous=copy.deepcopy(h.DATA)
+    def setUp(self):
+        self.previous=copy.deepcopy(h.DATA)
+        # Unit fixtures must not depend on argv or a real experiment's engine.
+        self.directory=tempfile.TemporaryDirectory()
+        root=Path(self.directory.name)
+        (root/'optimized.jar').write_bytes(b'unit-test candidate provenance')
+        self.root_patch=patch.object(r,'R',root)
+        self.root_patch.start()
+        self.addCleanup(self.directory.cleanup)
+        self.addCleanup(self.root_patch.stop)
     def tearDown(self):h.DATA.clear();h.DATA.update(self.previous)
     def samples(self,ratios,allocation=1):
         h.DATA['benchmarks']={};h.DATA['regressions']={}

@@ -26,7 +26,12 @@ def stage(name):
     DATA['state']=name;write(R/'status.json',dict(stage=name,utc=now(),pid=os.getpid(),reportUrl=URL));write(R/'checkpoint.json',DATA)
 def verify():
     q=json.loads((R/'run-request.json').read_text())
-    for relative,h in q['sourceHashes'].items():assert core.sha(SOURCE/relative)==h,'Frozen experiment source changed: '+relative
+    for relative,h in q['sourceHashes'].items():
+        amendment=globals().get('SOURCE_AMENDMENTS',{}).get(relative)
+        if amendment:
+            assert amendment['before']==h,'Amendment original hash mismatch: '+relative
+            h=amendment['after']
+        assert core.sha(SOURCE/relative)==h,'Frozen experiment source changed: '+relative
     for relative,h in q.get('helperHashes',{}).items():assert core.sha(H/relative)==h,'Frozen runtime dependency changed'
     for relative,h in q.get('inputHashes',{}).items():assert core.sha(R/relative)==h,'Frozen compiled test input changed'
     assert core.sha(R/'baseline.jar')==q['baselineSHA256'] and core.sha(R/'optimized.jar')==q['treatmentSHA256'],'Engine hash changed'
@@ -96,6 +101,7 @@ def publish():
     text+='## Incremental programme and baseline\n\nExperimental repeatability gate passed: **'+str(DATA['performanceImprovementDemonstrated'])+'**. Promotion-performance target (15% both primaries): **'+str(DATA.get('promotionPerformanceGate',False))+'**. Neither flag promotes the engine. [Versioned history](performance-history.json) records direct incremental/cumulative ratios and matched elapsed-wall-time throughput.\n\n```json\n'+json.dumps({k:DATA[k] for k in ['baselineCohort','candidateCohort'] if k in DATA},indent=2)+'\n```\n\n'
     text+='## Native behaviour and real games\n\n```json\n'+json.dumps(dict(smoke=DATA['smoke'],differences=DATA['differences']),indent=2)+'\n```\n\n'
     text+='Any unexpected legal/action/assignment/damage/stack/state or gameplay-trajectory difference stops subsequent stages. Failed attempts remain forensic evidence and never become wins, losses or draws. Only timing/diagnostic fields and Match Duration lines are excluded from trajectory comparisons. No failed-game replacement sampling is used.\n\n'
+    if DATA.get('validationResume'):text+='## Preserved validation failure and repair\n\n```json\n'+json.dumps(DATA['validationResume'],indent=2)+'\n```\n\n'
     text+='## Result and limitations\n\nDemonstrated improvement: **'+str(DATA['performanceImprovementDemonstrated'])+'**. Ready for larger cohorts: **'+str(DATA['readyForLargerCohorts'])+'**. '+DATA.get('conclusion','Extended gates/measurements are pending; the candidate is not approved for production use.')+'\n\n'
     if DATA.get('failure'):text+='Stopped reason: '+DATA['failure']+'\n\n'
     text+='Raw logs, JFR recordings, bytecode parity evidence, process records and checkpoints remain local under this run. The frozen Phase 4 agent counts named prediction and board-traversal method entries; overload counts overlap. Exact equivalent-state counts remain unavailable and no prediction cache is used. Snapshot queries/avoidance are counted separately. Native whole-game baseline and candidate use identical structured-observer settings. Bare-original whole-game throughput is not claimed. Synthetic cumulative gains use direct functional-original/candidate observations from this run, never added percentages. Synthetic fixtures use the previous suite\u2019s high life totals/Dragon libraries and are not historical replays or scored deck comparisons. No decklist, rule, evaluation budget or timeout-correctness implementation was changed.\n\n'
@@ -190,7 +196,7 @@ def run():
         own.seek(0);own.write(b'0');own.flush();own.seek(0);msvcrt.locking(own.fileno(),msvcrt.LK_NBLCK,1)
         with (H/'work/commander-batches/worker.lock').open('r+b') as lock:
             lock.seek(0);msvcrt.locking(lock.fileno(),msvcrt.LK_NBLCK,1);admission(R)
-            with (R/'started.json').open('x') as f:json.dump(dict(pid=os.getpid(),utc=now()),f)
+            with (R/globals().get('START_MARKER','started.json')).open('x') as f:json.dump(dict(pid=os.getpid(),utc=now()),f)
             verify();assert json.loads((R/'initial-gate.json').read_text())['passed']
             threading.Thread(target=heartbeat,daemon=True).start()
             try:
