@@ -29,7 +29,8 @@ def prepare():
     # Every frozen source remains unchanged; only new continuation tooling is added.
     for name,digest in q['sourceHashes'].items():assert c.sha(S/name)==digest
     assert p.head()!=q['sourceHead']
-    h.admission(PRIOR,a.H)
+    # Admission checks the configured output root too; create its empty directory first.
+    R.mkdir();h.admission(PRIOR,a.H)
     saved={}
     for name in ['run-request.json','checkpoint.json','failure-run.json','status.json','heartbeat.json','publication.json','published-blobs.json']:
         saved[name]=c.sha(PRIOR/name)
@@ -49,7 +50,6 @@ def prepare():
         assert h.xmlcounts(d)==dict(total=1,passed=1,failed=0,skipped=0) and len(a.rows(d))==64
         if arm!='A':a.equal(PRIOR/'corrected-full-parity-A',d)
         saved.update(evidence(d))
-    R.mkdir()
     # Copy evidence and binaries, without copying per-child runtime installations.
     for name in ['combined.jar','composition.json','build-provenance.json','initial-gate.json','historical-review.json','rng-final-assessment.json','storage-recovery.json','corrected-control.json','adapter-tests.json','test-class-delta.json','recovery-cause.json']:
         shutil.copy2(PRIOR/name,R/name)
