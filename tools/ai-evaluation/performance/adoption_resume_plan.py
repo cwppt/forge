@@ -11,3 +11,7 @@ def remaining(state):
     for label,arm,block in plan[:len(done)]:
         row=state['benchmarks'][label];assert row['arm']==arm and row['block']==block and row['rows']
     return plan[len(done):]
+
+def validate_rows(rows):
+    expected={(case,path,rep,rep<0) for case in ['large-four-player','dragon-tokens','large-combat','late-100'] for path in ['block','attack'] for rep in [-1,0,1,2]}
+    assert len(rows)==len(expected) and {(r['case'],r['path'],r['rep'],r['warmup']) for r in rows}==expected,'Incomplete warmup/measurement matrix'

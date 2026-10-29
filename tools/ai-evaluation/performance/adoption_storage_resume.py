@@ -7,7 +7,7 @@ p=r.p;a=r.a;c=r.c;h=r.h;R=r.R;S=r.S;n=r.n;D=r.D
 PRIOR=R.parent/'recovery-01'
 ID='20261028-native-performance-adoption-v7c-recovery-02'
 FILES=['tools/ai-evaluation/performance/adoption_storage_resume.py','tools/ai-evaluation/performance/adoption_resume_plan.py','tools/ai-evaluation/performance/test_adoption_resume_plan.py']
-from adoption_resume_plan import schedule,remaining
+from adoption_resume_plan import schedule,remaining,validate_rows
 
 def evidence(directory):
     return {f.relative_to(PRIOR).as_posix():c.sha(f) for f in directory.rglob('*') if f.is_file() and 'runtime' not in f.relative_to(directory).parts}
@@ -21,7 +21,7 @@ def verify():
 p.verify=verify;h.verify=verify
 
 def prepare():
-    assert not R.exists(),'Never overwrite a continuation'
+    assert not R.exists() or not any(R.iterdir()),'Never overwrite a continuation'
     q=r.read(PRIOR/'run-request.json');state=r.read(PRIOR/'checkpoint.json')
     pending=remaining(state)
     assert len(state['benchmarks'])==11 and len(pending)==5
@@ -30,14 +30,15 @@ def prepare():
     for name,digest in q['sourceHashes'].items():assert c.sha(S/name)==digest
     assert p.head()!=q['sourceHead']
     # Admission checks the configured output root too; create its empty directory first.
-    R.mkdir();h.admission(PRIOR,a.H)
+    R.mkdir(exist_ok=True);h.admission(PRIOR,a.H)
     saved={}
     for name in ['run-request.json','checkpoint.json','failure-run.json','status.json','heartbeat.json','publication.json','published-blobs.json']:
         saved[name]=c.sha(PRIOR/name)
     for label,entry in state['benchmarks'].items():
         d=PRIOR/label
         assert r.read(d/'execution.json')['exitCode']==0 and h.xmlcounts(d)==dict(total=1,passed=1,failed=0,skipped=0)
-        assert a.rows(d)==entry['rows'] and len(entry['rows'])==24,'Incomplete or altered measured rows'
+        assert a.rows(d)==entry['rows'],'Altered measured rows'
+        validate_rows(entry['rows'])
         command=r.read(d/'command.json')
         assert all(flag in command for flag in p.flags(entry['arm']))
         for prop in ['-Dforge.bench.cases=large-four-player,dragon-tokens,large-combat,late-100','-Dforge.bench.paths=block,attack','-Dforge.bench.warmup=1','-Dforge.bench.repeats=3']:assert prop in command
