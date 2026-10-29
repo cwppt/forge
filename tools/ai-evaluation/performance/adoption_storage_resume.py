@@ -10,7 +10,12 @@ FILES=['tools/ai-evaluation/performance/adoption_storage_resume.py','tools/ai-ev
 from adoption_resume_plan import schedule,remaining,validate_rows
 
 def evidence(directory):
-    return {f.relative_to(PRIOR).as_posix():c.sha(f) for f in directory.rglob('*') if f.is_file() and 'runtime' not in f.relative_to(directory).parts}
+    result={}
+    for base,dirs,files in os.walk(directory):
+        dirs[:]=[name for name in dirs if name!='runtime']
+        for name in files:
+            f=Path(base)/name;result[f.relative_to(PRIOR).as_posix()]=c.sha(f)
+    return result
 
 base_verify=r.verify
 
